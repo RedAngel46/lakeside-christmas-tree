@@ -136,6 +136,8 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #mpAsk.show{display:flex;opacity:1;transform:translate(-50%,0)}#mpAsk p{margin:0;font-weight:600}#mpAsk div{display:flex;gap:8px}#mpAsk button,#mpHold button{font:600 14px -apple-system,system-ui,sans-serif;border:0;border-radius:999px;padding:8px 16px;cursor:pointer;color:#fff;background:rgba(255,255,255,.14)}#mpAsk button.ok{color:#1a1208;background:linear-gradient(#e8c66e,#b8862a)}#mpAsk i,#mpHold i{font:700 11px ui-monospace,Menlo,monospace;font-style:normal;padding:0 5px;margin-left:4px;border-radius:5px;background:rgba(0,0,0,.18)}
 #mpHold{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:44;display:none;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:999px;color:#fff;font:600 14px -apple-system,system-ui,sans-serif;background:rgba(20,26,40,.8);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}#mpHold.show{display:flex}#mpHold button{padding:6px 12px}
 @media (pointer:coarse){#mpAsk i,#mpHold i{display:none}}
+#mpBoat{position:fixed;left:50%;top:54px;transform:translateX(-50%);z-index:44;display:none;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:999px;color:#fff;font:600 14px -apple-system,system-ui,sans-serif;background:rgba(14,30,52,.85);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(0,0,0,.35);white-space:nowrap;max-width:calc(100% - 20px)}#mpBoat.show{display:flex}#mpBoat:not(.town){top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 150px)}#mpBoat span{overflow:hidden;text-overflow:ellipsis}
+#mpBoat button{font:600 14px -apple-system,system-ui,sans-serif;border:0;border-radius:999px;padding:6px 14px;cursor:pointer;color:#1a1208;background:linear-gradient(#e8c66e,#b8862a)}#mpBoat i{font:700 11px ui-monospace,Menlo,monospace;font-style:normal;padding:0 5px;margin-left:4px;border-radius:5px;background:rgba(0,0,0,.18)}#mpBoat:not(.town) i{display:none}@media (pointer:coarse){#mpBoat i{display:none}}
 .mpTag{position:absolute;left:0;top:0;pointer-events:none;text-align:center;white-space:nowrap;transform-origin:50% 100%;z-index:2}
 .mpTag b{display:inline-block;font:600 13px -apple-system,system-ui,sans-serif;color:#fff;background:rgba(14,18,28,.72);padding:3px 9px;border-radius:999px;border:1.5px solid #999;text-shadow:0 1px 2px #000}
 .mpTag span{display:block;max-width:240px;margin:0 auto 6px;white-space:normal;font:500 13px/1.35 -apple-system,system-ui,sans-serif;color:#1c140c;background:rgba(255,250,240,.95);padding:6px 10px;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,.35);order:-1}
@@ -2265,7 +2267,7 @@ function tourPick(){const G=TOUR.grp,n=10+Math.floor(Math.random()*21);for(const
   const sh=G.slice().sort(()=>Math.random()-.5);let c=0,tables=0;for(const g of sh){if(c>=n)break;if(g.kind==='table'){if(tables>=6)continue;tables++;g.t.busy=true;const two=Math.random()<.85;g.ps[0].g.visible=true;g.ps[1].g.visible=two;c+=two?2:1}else{g.ps.forEach(p=>p.g.visible=true);c+=g.ps.length}}
   for(const t of TOUR.B.TABLES){t.act.lab=t.busy?'💬 Say hello to the table':'🍽️ Take a seat at this table'}TOUR.count=c}
 function tourBoard(){if(TOUR.st!=='dock'&&TOUR.st!=='boarding'){v3Msg('🛥️ The Lakeside Belle is out on the lake — she’ll be back at this dock soon');return}
-  tourFade(()=>{V3.boat=true;V3.lv=0;V3.bl={x:-15.3,z:-1.0};V3.seat=null;const w=tourW(-15.3,-1.0);V3.pos.set(w[0],0,w[1]);const th=TOUR.B.RB.rotation.y;V3.yaw=Math.atan2(-Math.cos(th),Math.sin(th));V3.pitch=-.02;V3.tgt=null;V3.pend=null;V3.gy=TOUR.B.RB.position.y+1.3;
+  tourFade(()=>{if(typeof mpBoatSpot==='function'){mpPlaceAboard(mpBoatSpot(mpBoatMate()));if(MP.my){if(MP.my.k==='lead')mpLetGo(true,true);else if(MP.my.k==='follow')mpLetGo(true);MP.my=null}}else{V3.boat=true;V3.lv=0;V3.bl={x:-15.3,z:-1.0};V3.seat=null;const w=tourW(-15.3,-1.0);V3.pos.set(w[0],0,w[1]);const th=TOUR.B.RB.rotation.y;V3.yaw=Math.atan2(-Math.cos(th),Math.sin(th));V3.pitch=-.02;V3.tgt=null;V3.pend=null;V3.gy=TOUR.B.RB.position.y+1.3}
     if(TOUR.st!=='boarding'){TOUR.st='boarding';TOUR.dep=V3T+15;TOUR.ann=0}v3Msg('🛥️ Welcome aboard the Lakeside Belle'+N()+'! '+TOUR.count+' other guests tonight · we cast off in '+Math.max(1,Math.round(TOUR.dep-V3T))+' seconds',5200);vChime([67,72,76]);if(typeof mpTourSend==='function')mpTourSend(true)},'Stepping aboard…')}
 function tourLeave(){if(TOUR.st==='cruise'){v3Msg('We’re still out on the lake — ask the captain if you’d like to head back');return}
   tourFade(()=>{V3.boat=false;V3.seat=null;V3.lv=undefined;if(V3.dinner){V3.dinner.g.parent&&V3.dinner.g.parent.remove(V3.dinner.g);V3.dinner=null}V3.pos.set(-45.6,0,-90);V3.yaw=-Math.PI/2;V3.pitch=-.03;V3.gy=-.12;TOUR.st='dock';TOUR.s=0;tourHud(null);tourPick();v3Msg('👋 Thanks for cruising with us — merry Christmas!',3600)},'')}
@@ -2595,7 +2597,7 @@ function lbEl(){let el=document.getElementById('lob');if(el)return el;el=documen
   el.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.target===el)lbToggle(false)});for(const ev of['pointerup','click','wheel','touchstart'])el.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'});
   el.querySelector('#lbCp').onclick=async()=>{const u=lbInvite();try{await navigator.clipboard.writeText(u);lbNote('Invite link copied')}catch(_){prompt('Copy this link and send it to a friend:',u)}};return el}
 function lbShow(mode){LB.mode=mode;const el=lbEl();el.querySelector('.lbMe').innerHTML='';el.querySelector('.lbL').innerHTML='';lbToggle(true)}
-function lbPick(){if(!V3.on)return;lbShow('pick')}
+function lbPick(){if(!V3.on)return;if(typeof MP!=='undefined'&&MP.skipPick&&LB.on){MP.skipPick=0;return}lbShow('pick')}
 function lbToggle(on){if(on==null)on=!LB.open;LB.open=on;const el=lbEl();el.classList.toggle('show',on);if(on){if(document.pointerLockElement)try{document.exitPointerLock()}catch(_){}V3LK.free=true;V3LK.edge=0;v3Cur();lbDraw();lbFetch()}else{if(LB.mode==='look'){lkKill();el.querySelector('.lbL').innerHTML=''}LB.mode='room';LB.edit=false;el.querySelector('.lbMe').innerHTML=''}}
 setInterval(()=>{if(document.hidden)return;const t=Date.now();if(LB.on&&who&&(t-LB.bt>20e3||lbPlace()!==LB.pl))lbBeat().then(()=>{if(LB.open)lbFetch()});if(t-LB.ft>(LB.open?5e3:30e3))lbFetch()},1500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(LB.on)lbBeat();lbFetch()}});
@@ -2697,7 +2699,7 @@ function mpOn(ev,p){if(!p||!p.id||p.id===LB.id)return;
   if(ev==='tour'){mpTourOn(p);return}
   if(ev==='emo'){mpEmoOn(p);return}
   if(ev==='ask'){mpAskOn(p);return}if(ev==='ans'){mpAnsOn(p);return}
-  if(ev==='pend'){if(MP.my&&MP.my.w===p.id){const o=MP.peers.get(p.id);MP.my=null;mpHold();v3Msg('🤝 '+(o?o.n:'They')+' let go',1800)}const q=MP.peers.get(p.id);if(q&&q.pz){const w=q.pz.w;q.pz=null;const o=MP.peers.get(w);if(o&&o.pz&&o.pz.w===p.id)o.pz=null}return}
+  if(ev==='pend'){if(MP.my&&MP.my.w===p.id){const o=MP.peers.get(p.id),fol=MP.my.k==='follow';MP.my=null;mpHold();if(p.boat&&fol&&V3.on&&!V3.boat){v3Msg('🛥️ '+(o?o.n:'They')+' is taking you aboard…',1800);setTimeout(()=>mpBoatJoin(p.id),350)}else v3Msg('🤝 '+(o?o.n:'They')+' let go',1800)}const q=MP.peers.get(p.id);if(q&&q.pz){const w=q.pz.w;q.pz=null;const o=MP.peers.get(w);if(o&&o.pz&&o.pz.w===p.id)o.pz=null}return}
   if(ev==='bye'){mpDrop(p.id);return}
   if(ev==='pos'){let q=MP.peers.get(p.id);const nw=!q;if(!q){q={id:p.id,x:p.x,z:p.z,y:p.y,rx:p.x,rz:p.z,ry:p.y||0};MP.peers.set(p.id,q)}
     if(p.lk&&typeof p.lk==='object'){const L=lkClean(p.lk),js=JSON.stringify(L);if(js!==q.lks){q.lks=js;q.lk=L;if(q.av){if(q.av.g.parent)q.av.g.parent.remove(q.av.g);q.av=null}}}q.n=String(p.n||'Player').slice(0,24);q.c=/^#[0-9a-f]{6}$/i.test(p.c||'')?p.c:'#999999';q.pl=p.pl;q.last=performance.now();
@@ -2798,7 +2800,7 @@ function mpAnsOn(p){if(!MP_PK[p.k])return;if(p.ok){if(p.to===LB.id){MP.out=null;
   if(p.to===LB.id&&MP.out){MP.out=null;clearTimeout(MP.outT);v3Msg(p.busy?String(p.n||'They').slice(0,24)+' is busy right now':String(p.n||'They').slice(0,24)+' said no thanks',2200)}}
 function mpUnpair(id){const q=id===LB.id?null:MP.peers.get(id),pz=id===LB.id?MP.my:q&&q.pz;if(!pz)return;if(q)q.pz=null;else{MP.my=null;mpHold()}
   if(pz.w){const o=pz.w===LB.id?null:MP.peers.get(pz.w);if(pz.w===LB.id){if(MP.my&&MP.my.w===id){MP.my=null;mpHold();v3Msg('🤝 You let go of each other',1800)}}else if(o&&o.pz&&o.pz.w===id)o.pz=null}}
-function mpLetGo(send){if(!MP.my||(MP.my.k!=='lead'&&MP.my.k!=='follow'))return;if(send)mpSend('pend',{id:LB.id});const o=MP.peers.get(MP.my.w);mpUnpair(LB.id);if(o&&o.pz&&o.pz.w===LB.id)o.pz=null;v3Msg('🤝 You let go'+(o?' of '+o.n:''),1800)}
+function mpLetGo(send,boat){if(!MP.my||(MP.my.k!=='lead'&&MP.my.k!=='follow'))return;if(send)mpSend('pend',boat?{id:LB.id,boat:1}:{id:LB.id});const o=MP.peers.get(MP.my.w);mpUnpair(LB.id);if(o&&o.pz&&o.pz.w===LB.id)o.pz=null;v3Msg('🤝 You let go'+(o?' of '+o.n:''),1800)}
 function mpHold(){let el=document.getElementById('mpHold');const h=MP.my&&(MP.my.k==='lead'||MP.my.k==='follow');if(!el){if(!h)return;el=document.createElement('div');el.id='mpHold';el.innerHTML='<span></span><button type="button">Let go <i>J</i></button>';document.body.appendChild(el);for(const ev of['pointerdown','pointerup','click','touchstart'])el.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'});el.querySelector('button').onclick=()=>mpLetGo(true)}
   el.classList.toggle('show',!!(h&&V3.on));if(h){const o=MP.peers.get(MP.my.w);el.querySelector('span').textContent='🤝 '+(MP.my.k==='lead'?(o?o.n:'Your friend')+' is walking with you':'Walking with '+(o?o.n:'your friend'))}}
 /* before smoothing: where a paired peer should stand */
@@ -2815,7 +2817,7 @@ function mpPose(a,k,dt,u){if(!a)return;const A=a.arms,El=a.elbows,f=Math.min(1,d
   else if(k==='follow'){L(A[1].rotation,'z',.3);A[1].rotation.x*=.5;L(El[1].rotation,'x',-.12)}}
 /* my own side: move into place, show my avatar and a side camera for hugs and kisses, follow the leader when holding hands */
 function mpPairLocal(dt,T){const z=MP.my,S=S3,now=performance.now();if(!z){if(MP.me)MP.me.g.visible=false;return}
-  if(!V3.on||V3.boat||V3.mode!=='walk'){if(z.k==='lead'||z.k==='follow')mpLetGo(true);else MP.my=null;if(MP.me)MP.me.g.visible=false;return}
+  if(!V3.on||V3.boat||V3.mode!=='walk'){if(z.k==='lead'||z.k==='follow')mpLetGo(true,z.k==='lead'&&V3.boat);else MP.my=null;if(MP.me)MP.me.g.visible=false;return}
   const P=V3.pos,f=Math.min(1,dt*6);
   if(z.k==='hug'||z.k==='kiss'){if(now>z.until){MP.my=null;if(MP.me)MP.me.g.visible=false;V3.yaw=z.ty;V3.pitch=0;return}V3.keys={};V3.tgt=null;
     P.x+=(z.tx-P.x)*f;P.z+=(z.tz-P.z)*f;let dy=((z.ty-V3.yaw+Math.PI*3)%(Math.PI*2))-Math.PI;V3.yaw+=dy*f;
@@ -2825,9 +2827,29 @@ function mpPairLocal(dt,T){const z=MP.my,S=S3,now=performance.now();if(!z){if(MP
     const u=(now-z.t0)/1000,c=Math.min(1,u/.6,Math.max(0,(z.until-now)/600));const e=c*c*(3-2*c);
     const tp=new THREE.Vector3(mx+px*2.3+dx/d*.6,1.45+(V3.gy||0),mz+pz*2.3+dz/d*.6);S.cam.position.lerp(tp,e);const q0=S.cam.quaternion.clone();S.cam.lookAt(mx,1.2+(V3.gy||0),mz);const q1=S.cam.quaternion.clone();S.cam.quaternion.slerpQuaternions(q0,q1,e);return}
   if(MP.me)MP.me.g.visible=false;
-  if(z.k==='follow'){const L=MP.peers.get(z.lead);if(!L||L.pl!=='town'||L.rx==null){mpLetGo(true);return}V3.keys={};V3.tgt=null;const tx=L.rx+Math.cos(L.ry)*.62,tz=L.rz-Math.sin(L.ry)*.62;
+  if(z.k==='follow'){const L=MP.peers.get(z.lead);if(L&&L.pl==='boat'){MP.my=null;mpHold();mpBoatJoin(L.id);return}if(!L||L.pl!=='town'||L.rx==null){mpLetGo(true);return}V3.keys={};V3.tgt=null;const tx=L.rx+Math.cos(L.ry)*.62,tz=L.rz-Math.sin(L.ry)*.62;
     if(Math.hypot(tx-P.x,tz-P.z)>6){P.x=tx;P.z=tz}else{P.x+=(tx-P.x)*Math.min(1,dt*7);P.z+=(tz-P.z)*Math.min(1,dt*7)}}
   if(z.k==='lead'){const o=MP.peers.get(z.w);if(!o){mpUnpair(LB.id);v3Msg('🤝 You let go',1600)}}}
+/* ---------- boat: board next to lobby mates, join them from town or home ---------- */
+function mpBoatMate(){if(!LB.on)return null;let b=null;for(const q of MP.peers.values())if(q.pl==='boat'&&q.x!=null&&(!b||q.last>b.last))b=q;return b}
+function mpBoatSpot(q){const UY=TOUR.B.UY,ok=(x,z,l)=>trLv(x,z,l)===l,taken=(x,z)=>{for(const p of MP.peers.values())if(p.pl==='boat'&&p.x!=null&&Math.hypot(p.x-x,p.z-z)<.8)return true;return false};
+  if(q){const lv=(q.h||1.3)>(1.3+UY)/2-.3?1:0;for(const r of[1.25,1.0,1.6,.85])for(let i=0;i<8;i++){const a=i*Math.PI/4+(i%2?0:Math.PI/8),x=q.x+Math.cos(a)*r,z=q.z+Math.sin(a)*r;if(ok(x,z,lv)&&!taken(x,z))return{x,z,lv,face:q}}}
+  for(const [x,z] of[[-15.3,-1.0],[-15.3,1.2],[-17.2,-1.0],[-17.2,1.2],[-14.0,2.6],[-17.4,3.0],[-8,0],[-5.4,0],[-2.8,0]])if(ok(x,z,0)&&!taken(x,z))return{x,z,lv:0};return{x:-15.3,z:-1.0,lv:0}}
+function mpPlaceAboard(sp){V3.boat=true;V3.seat=null;V3.lv=sp.lv;V3.bl={x:sp.x,z:sp.z};const w=tourW(sp.x,sp.z);V3.pos.set(w[0],0,w[1]);V3.pitch=-.02;V3.tgt=null;V3.pend=null;V3.floor=sp.lv===1?TOUR.B.UY:1.3;V3.gy=TOUR.B.RB.position.y+V3.floor;
+  if(sp.face){const f=tourW(sp.face.x,sp.face.z);V3.yaw=yawTo(w[0],w[1],f[0],f[1])}else{const th=TOUR.B.RB.rotation.y;V3.yaw=Math.atan2(-Math.cos(th),Math.sin(th))}}
+function mpBoatJoin(id,tries){tries=tries||0;const again=()=>{if(tries<16)setTimeout(()=>mpBoatJoin(id,tries+1),250);else v3Msg('Couldn’t reach the boat just now, try again in a moment',2400)};
+  if(!V3.on||!TOUR.B){again();return}if(V3.boat)return;const q=MP.peers.get(id);if(!q||q.pl!=='boat'||q.x==null){again();return}
+  if(TOUR.st==='dock'){if(tries%4===0)mpSend('tq',{id:LB.id});if(tries<12){again();return}}
+  if(V3.mode!=='walk'){v3Msg('Finish this ride first, then hop aboard',2200);return}
+  if(MP.my){if(MP.my.k==='lead'||MP.my.k==='follow')mpLetGo(true);MP.my=null}
+  tourFade(()=>{const sp=mpBoatSpot(q);mpPlaceAboard(sp);if(TOUR.st==='dock'){TOUR.st='boarding';TOUR.dep=V3T+15;TOUR.ann=0}mpPos(true);v3Msg('🛥️ You’re aboard the Lakeside Belle with '+q.n+(sp.face?'':' · '+(((q.h||1.3)>2.4)?'they’re on the upper deck':'look around for them')),3600);vChime([67,72,76])},'Joining '+q.n+' on the boat…')}
+function mpJoinBoat(){const q=mpBoatMate();if(!q)return;if(!V3.on){MP.skipPick=1;v3Open();mpBoatJoin(q.id);return}mpBoatJoin(q.id)}
+function mpBoatUi(){let el=document.getElementById('mpBoat');const q=mpBoatMate(),show=!!(q&&!(V3.on&&V3.boat)&&!LB.open&&!(MP.my&&(MP.my.k==='lead'||MP.my.k==='follow'))&&(!V3.on||V3.mode==='walk'));
+  if(!el){if(!show)return;el=document.createElement('div');el.id='mpBoat';el.innerHTML='<span></span><button type="button">Join <i>B</i></button>';document.body.appendChild(el);for(const ev of['pointerdown','pointerup','click','touchstart'])el.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'});el.querySelector('button').onclick=()=>mpJoinBoat()}
+  el.classList.toggle('show',show);el.classList.toggle('town',!!V3.on);if(show){const n=[...MP.peers.values()].filter(p=>p.pl==='boat').length,t='🛥️ '+q.n+(n>1?' and '+(n-1)+' more are':' is')+' on the boat tour';const s=el.querySelector('span');if(s.textContent!==t)s.textContent=t}}
+setInterval(mpBoatUi,400);
+addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.repeat)return;const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable))return;if(LB.open||(VM&&VM.on)||MP.open)return;
+  if((e.key==='b'||e.key==='B')&&V3.on&&!V3.boat){const el=document.getElementById('mpBoat');if(el&&el.classList.contains('show')){e.preventDefault();e.stopImmediatePropagation();mpJoinBoat()}}},true);
 addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable))return;if(LB.open||(VM&&VM.on))return;
   if(MP.inc&&/^[yn]$/i.test(e.key)){e.preventDefault();e.stopImmediatePropagation();mpAnswer(/y/i.test(e.key));return}
   if(V3.on&&LB.on&&/^j$/i.test(e.key)&&!e.repeat){e.preventDefault();e.stopImmediatePropagation();if(MP.my&&(MP.my.k==='lead'||MP.my.k==='follow'))mpLetGo(true);else mpAsk('hand');return}
