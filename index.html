@@ -136,6 +136,12 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #mpChat .mpBtn{pointer-events:auto;font:600 14px -apple-system,system-ui,sans-serif;border:0;border-radius:999px;padding:7px 12px;color:#fff;background:rgba(20,26,40,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 #mpChat .mpK{font:700 11px ui-monospace,Menlo,monospace;padding:0 5px;border-radius:5px;background:rgba(255,255,255,.18)}#mpChat.open .mpBtn{display:none}
 @media (pointer:coarse){#mpChat .mpK{display:none}}
+#mpChat .mpBar{display:flex;gap:6px}#mpChat.open .mpBar{display:none}#mpChat.open .mpBtn{display:inline-flex}
+#mpEmo{display:none;gap:6px;flex-wrap:wrap;margin-bottom:6px;pointer-events:auto}#mpEmo.show{display:flex}
+#mpEmo button{display:flex;align-items:center;gap:6px;font:600 13px -apple-system,system-ui,sans-serif;border:0;border-radius:999px;padding:7px 11px;color:#fff;background:rgba(20,26,40,.78);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer}#mpEmo button:hover{background:rgba(201,154,46,.8)}#mpEmo span{font-size:17px}#mpEmo i{font:700 11px ui-monospace,Menlo,monospace;font-style:normal;padding:0 5px;border-radius:5px;background:rgba(255,255,255,.18)}
+@media (pointer:coarse){#mpEmo i{display:none}}
+.mpTag span.emo{font-size:30px;line-height:1;background:none;box-shadow:none;padding:0 0 4px;animation:mpPop .35s}
+@keyframes mpPop{from{transform:scale(.4);opacity:0}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="title">Lakeside living room · Lake Oswego</div>
@@ -2238,9 +2244,9 @@ function tourHud(t){let h=document.getElementById('vTour');if(!h){h=document.cre
 function tourPick(){const G=TOUR.grp,n=10+Math.floor(Math.random()*21);for(const g of G)for(const p of g.ps)p.g.visible=false;for(const t of TOUR.B.TABLES)t.busy=false;
   const sh=G.slice().sort(()=>Math.random()-.5);let c=0,tables=0;for(const g of sh){if(c>=n)break;if(g.kind==='table'){if(tables>=6)continue;tables++;g.t.busy=true;const two=Math.random()<.85;g.ps[0].g.visible=true;g.ps[1].g.visible=two;c+=two?2:1}else{g.ps.forEach(p=>p.g.visible=true);c+=g.ps.length}}
   for(const t of TOUR.B.TABLES){t.act.lab=t.busy?'💬 Say hello to the table':'🍽️ Take a seat at this table'}TOUR.count=c}
-function tourBoard(){if(TOUR.st!=='dock'){v3Msg('🛥️ The Lakeside Belle is out on the lake — she’ll be back at this dock soon');return}
+function tourBoard(){if(TOUR.st!=='dock'&&TOUR.st!=='boarding'){v3Msg('🛥️ The Lakeside Belle is out on the lake — she’ll be back at this dock soon');return}
   tourFade(()=>{V3.boat=true;V3.lv=0;V3.bl={x:-15.3,z:-1.0};V3.seat=null;const w=tourW(-15.3,-1.0);V3.pos.set(w[0],0,w[1]);const th=TOUR.B.RB.rotation.y;V3.yaw=Math.atan2(-Math.cos(th),Math.sin(th));V3.pitch=-.02;V3.tgt=null;V3.pend=null;V3.gy=TOUR.B.RB.position.y+1.3;
-    TOUR.st='boarding';TOUR.dep=V3T+15;TOUR.ann=0;v3Msg('🛥️ Welcome aboard the Lakeside Belle'+N()+'! '+TOUR.count+' other guests tonight · we cast off in 15 seconds',5200);vChime([67,72,76])},'Stepping aboard…')}
+    if(TOUR.st!=='boarding'){TOUR.st='boarding';TOUR.dep=V3T+15;TOUR.ann=0}v3Msg('🛥️ Welcome aboard the Lakeside Belle'+N()+'! '+TOUR.count+' other guests tonight · we cast off in '+Math.max(1,Math.round(TOUR.dep-V3T))+' seconds',5200);vChime([67,72,76]);if(typeof mpTourSend==='function')mpTourSend(true)},'Stepping aboard…')}
 function tourLeave(){if(TOUR.st==='cruise'){v3Msg('We’re still out on the lake — ask the captain if you’d like to head back');return}
   tourFade(()=>{V3.boat=false;V3.seat=null;V3.lv=undefined;if(V3.dinner){V3.dinner.g.parent&&V3.dinner.g.parent.remove(V3.dinner.g);V3.dinner=null}V3.pos.set(-45.6,0,-90);V3.yaw=-Math.PI/2;V3.pitch=-.03;V3.gy=-.12;TOUR.st='dock';TOUR.s=0;tourHud(null);tourPick();v3Msg('👋 Thanks for cruising with us — merry Christmas!',3600)},'')}
 function tourHorn(){if(!AC||AC.state!=='running')return;const t=AC.currentTime;for(const f of[110,138.6]){const o=AC.createOscillator(),g=AC.createGain(),fl=AC.createBiquadFilter();o.type='sawtooth';o.frequency.value=f;fl.type='lowpass';fl.frequency.value=700;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.06,t+.15);g.gain.setValueAtTime(.06,t+1.5);g.gain.linearRampToValueAtTime(0,t+2.1);o.connect(fl).connect(g).connect(master);o.start(t);o.stop(t+2.2)}}
@@ -2251,7 +2257,7 @@ function tourBar(a){const v=TOUR.bt;tourConv(a,v,()=>{vAct.innerHTML='';let n=1;
 function tourCap(a){const v=TOUR.cap;tourConv(a,v,()=>{vAct.innerHTML='';let n=1;
     vBtn('💬 “How long is the cruise?”',String(n++),()=>v3Say(v,'About thirty minutes — out through the narrows, down to the west end and back.',4),1);
     vBtn('💬 “Tell me about the lake”',String(n++),()=>v3Say(v,pick3(['It’s a private lake — normally only residents can take a boat out. Tonight’s a special holiday cruise.','The main lake runs nearly three miles. In summer it’s all wakeboards and paddleboards.','See the little bay we came from? That’s Lakewood Bay — the narrows connect it to the main lake.']),5),1);
-    if(TOUR.st==='cruise')vBtn('⏩ “Could we head back to the dock?”',String(n++),()=>{v3Say(v,'Of course — I’ll take us home.',2.5);v3End();vAct.innerHTML='';setTimeout(()=>tourFade(()=>{TOUR.s=Math.max(TOUR.s,TOUR.tp.L-240);TOUR.v=Math.min(TOUR.v,TOUR.vc);TOUR.ann=TOUR.marks.length-1},'A little later…'),900)});
+    if(TOUR.st==='cruise')vBtn('⏩ “Could we head back to the dock?”',String(n++),()=>{v3Say(v,'Of course — I’ll take us home.',2.5);v3End();vAct.innerHTML='';setTimeout(()=>tourFade(()=>{TOUR.s=Math.max(TOUR.s,TOUR.tp.L-240);TOUR.v=Math.min(TOUR.v,TOUR.vc);TOUR.ann=TOUR.marks.length-1;if(typeof mpTourSend==='function')setTimeout(()=>mpTourSend(true),50)},'A little later…'),900)});
     vBtn('👋 “Thanks, Captain!”',String(n++),()=>{v3Say(v,'My pleasure'+N()+'. Enjoy the lights!',2.5);v3End();vAct.innerHTML=''},1)});v3Say(v,pick3(['Evening'+N()+'! Beautiful night on the water.','Welcome to the wheelhouse — mind the step.','Good evening! She handles like a dream tonight.']),3)}
 function tourRequest(){BAND.i=(BAND.i+1)%BAND.songs.length;BAND.ev=null;v3Say(TOUR.band[2],pick3(['This one’s for you'+N()+'!','A request? Coming right up!','Here’s one for the dancers!']),3);v3Msg('🎶 The band starts “'+BAND.songs[BAND.i].name+'”',3000)}
 function tourDance(){V3.dance=V3T+12;v3Msg(pick3(['💃 You join the dancers — the floor gently rocks with the boat','💃 You dance to the band as the shoreline lights slide past','💃 Someone twirls you around the floor']),3800)}
@@ -2589,39 +2595,43 @@ function mpConnect(){const t=mpTopic();if(!t){if(MP.ws||MP.topic)mpClose();retur
   ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return}if(m.topic!==t||MP.ws!==ws)return;
     if(m.event==='phx_reply'&&m.ref===MP.jr){MP.ok=!!(m.payload&&m.payload.status==='ok');if(MP.ok){MP.retry=0;mpSend('hi',{id:LB.id});mpPos(true);mpHistory()}}
     else if(m.event==='broadcast'&&m.payload)mpOn(m.payload.event,m.payload.payload||{})};
-  ws.onclose=()=>{if(MP.ws!==ws)return;MP.ws=null;MP.ok=false;MP.topic=null;MP.retry++;MP.next=Date.now()+Math.min(30e3,1500*MP.retry)};ws.onerror=()=>{}}
+  ws.onclose=()=>{if(MP.ws!==ws)return;MP.tqd=0;MP.ws=null;MP.ok=false;MP.topic=null;MP.retry++;MP.next=Date.now()+Math.min(30e3,1500*MP.retry)};ws.onerror=()=>{}}
 function mpClose(){const w=MP.ws;MP.ws=null;MP.ok=false;MP.topic=null;if(w)try{w.close()}catch(_){}for(const id of[...MP.peers.keys()])mpDrop(id,true);MP.chat=[];mpChatDraw()}
 function mpSend(ev,p){if(!MP.ok||!MP.ws||MP.ws.readyState!==1)return false;try{MP.ws.send(JSON.stringify({topic:MP.topic,event:'broadcast',payload:{type:'broadcast',event:ev,payload:p},ref:String(++MP.ref),join_ref:MP.jr}));return true}catch(_){return false}}
-function mpPos(force){const pl=lbPlace(),t=performance.now(),P=V3.pos;const inT=pl==='town'&&P;const x=inT?Math.round(P.x*100)/100:null,z=inT?Math.round(P.z*100)/100:null,y=inT?Math.round(V3.yaw*100)/100:null;
+function mpPos(force){const pl=lbPlace(),t=performance.now(),P=V3.pos,RB=TOUR.B&&TOUR.B.RB;let x=null,z=null,y=null,h=0;const r2=v=>Math.round(v*100)/100;
+  if(pl==='town'&&P){x=r2(P.x);z=r2(P.z);y=r2(V3.yaw);h=r2(V3.mode==='walk'?V3.gy||0:0)}else if(pl==='boat'&&P&&RB){const l=tourL(P.x,P.z);x=r2(l[0]);z=r2(l[1]);y=r2(V3.yaw-RB.rotation.y);h=r2((V3.gy||0)-RB.position.y)}const inT=x!=null;
   const L=MP.lp,moved=!L||L.pl!==pl||(inT&&(Math.abs(L.x-x)>.04||Math.abs(L.z-z)>.04||Math.abs(L.y-y)>.04));
-  if(!force&&!(moved&&t-MP.ps>140)&&t-MP.ps<2000)return;MP.ps=t;MP.lp={pl,x,z,y};mpSend('pos',{id:LB.id,n:who,c:LB.color,pl,x,z,y})}
+  if(!force&&!(moved&&t-MP.ps>140)&&t-MP.ps<2000)return;MP.ps=t;MP.lp={pl,x,z,y};mpSend('pos',{id:LB.id,n:who,c:LB.color,pl,x,z,y,h})}
 function mpOn(ev,p){if(!p||!p.id||p.id===LB.id)return;
-  if(ev==='hi'){mpPos(true);return}
+  if(ev==='hi'||ev==='tq'){if(ev==='hi')mpPos(true);if(V3.on&&TOUR.B&&TOUR.st!=='dock')mpTourSend(false);return}
+  if(ev==='tour'){mpTourOn(p);return}
+  if(ev==='emo'){mpEmoOn(p);return}
   if(ev==='bye'){mpDrop(p.id);return}
   if(ev==='pos'){let q=MP.peers.get(p.id);const nw=!q;if(!q){q={id:p.id,x:p.x,z:p.z,y:p.y,rx:p.x,rz:p.z,ry:p.y||0};MP.peers.set(p.id,q)}
     q.n=String(p.n||'Player').slice(0,24);q.c=/^#[0-9a-f]{6}$/i.test(p.c||'')?p.c:'#999999';q.pl=p.pl;q.last=performance.now();
-    if(typeof p.x==='number'&&typeof p.z==='number'){if(q.rx==null||Math.hypot(p.x-q.rx,p.z-q.rz)>25){q.rx=p.x;q.rz=p.z;q.ry=p.y||0}q.x=p.x;q.z=p.z;q.y=p.y||0}
+    if(typeof p.x==='number'&&typeof p.z==='number'){if(q.rx==null||q.lpl!==p.pl||Math.hypot(p.x-q.rx,p.z-q.rz)>25){q.rx=p.x;q.rz=p.z;q.ry=p.y||0;q.rh=+p.h||0}q.x=p.x;q.z=p.z;q.y=p.y||0;q.h=+p.h||0}q.lpl=p.pl;
     if(nw)mpSys(q.n+' is here'+(q.pl==='town'?' in the old town':q.pl==='boat'?' on the boat tour':''));return}
   if(ev==='chat'){const b=String(p.t||'').slice(0,280).trim();if(!b)return;const q=MP.peers.get(p.id);mpAdd({n:String(p.n||'Player').slice(0,24),c:/^#[0-9a-f]{6}$/i.test(p.c||'')?p.c:'#999999',t:b});if(q){q.bub=b;q.bubT=performance.now()+7000}}}
 function mpDrop(id,quiet){const q=MP.peers.get(id);if(!q)return;MP.peers.delete(id);if(q.av&&q.av.g.parent)q.av.g.parent.remove(q.av.g);if(q.tag)q.tag.remove();if(!quiet)mpSys(q.n+' left')}
 /* 3D avatars + name tags, called from the town frame loop before rendering */
-function mpFrame(dt,T){if(!S3)return;const S=S3,now=performance.now(),vil=document.getElementById('vil');
+function mpFrame(dt,T){if(!S3)return;const S=S3,now=performance.now(),vil=document.getElementById('vil');if(MP.tc&&TOUR.st==='cruise'){const c=MP.tc*Math.min(1,dt*1.5);TOUR.s=Math.min(TOUR.tp.L-.06,TOUR.s+c);MP.tc-=c;if(Math.abs(MP.tc)<.01)MP.tc=0}else MP.tc=0;
   for(const q of MP.peers.values()){if(now-q.last>9000){mpDrop(q.id);continue}
-    const show=q.pl==='town'&&q.x!=null&&!V3.boat;
+    const RB=TOUR.B&&TOUR.B.RB,onB=q.pl==='boat'&&RB&&q.x!=null,show=(q.pl==='town'&&q.x!=null)||onB;
     if(show&&!q.av){let h=0;for(const ch of q.id)h=(h*31+ch.charCodeAt(0))|0;h=Math.abs(h);q.av=person({coat:MP_COATS[h%MP_COATS.length],scarf:q.c,hat:h%3===0?'beanie':h%3===1?'fedora':undefined,hatC:h%3===0?q.c:'#2a2a30',idle:true,long:true});q.av.g.position.set(q.rx,0,q.rz);S.scene.add(q.av.g)}
     if(q.av){q.av.g.visible=show;if(show){const dx=q.x-q.rx,dz=q.z-q.rz,d=Math.hypot(dx,dz),f=Math.min(1,dt*9);q.rx+=dx*f;q.rz+=dz*f;let dy=q.y-q.ry;dy=((dy+Math.PI*3)%(Math.PI*2))-Math.PI;q.ry+=dy*f;
-      q.av.g.position.set(q.rx,0,q.rz);q.av.g.rotation.y=q.ry+Math.PI;const mv=d>.03;q.av.sp=d>.5?1.9:1.15;animPerson(q.av,dt,mv,T)}}
+      q.rh+=((q.h||0)-(q.rh||0))*f;let wx=q.rx,wz=q.rz,wy=q.rh||0,wr=q.ry;if(onB){const w=tourW(q.rx,q.rz);wx=w[0];wz=w[1];wy=RB.position.y+(q.rh||1.3);wr=q.ry+RB.rotation.y}q.wx=wx;q.wz=wz;q.wy=wy;
+      q.av.g.position.set(wx,wy,wz);q.av.g.rotation.y=wr+Math.PI;const mv=d>.03;q.av.sp=d>.5?1.9:1.15;animPerson(q.av,dt,mv,T);mpEmoAnim(q,dt,T,mv)}}
     if(!q.tag){q.tag=document.createElement('div');q.tag.className='mpTag';q.tag.innerHTML='<b></b><span></span>';vil.appendChild(q.tag)}
-    let vis=false;if(show&&q.av){const v=new THREE.Vector3(q.rx,1.86*q.av.k+.06,q.rz),d=v.distanceTo(S.cam.position);v.project(S.cam);if(v.z<1&&d<45&&Math.abs(v.x)<1.2&&Math.abs(v.y)<1.2){vis=true;q.tag.style.transform='translate(-50%,-100%) translate('+((v.x+1)/2*innerWidth).toFixed(1)+'px,'+((1-v.y)/2*innerHeight).toFixed(1)+'px) scale('+Math.max(.7,Math.min(1,9/d)).toFixed(2)+')';q.tag.style.opacity=d>32?Math.max(0,(45-d)/13):1}}
-    q.tag.style.display=vis?'':'none';if(vis){const b=q.tag.firstChild,s=q.tag.lastChild;if(b.textContent!==q.n)b.textContent=q.n;b.style.borderColor=q.c;const bt=q.bub&&now<q.bubT?q.bub:'';if(s.textContent!==bt)s.textContent=bt;s.style.display=bt?'':'none'}}}
+    let vis=false;if(show&&q.av){const v=new THREE.Vector3(q.wx,(q.wy||0)+1.86*q.av.k+.06,q.wz),d=v.distanceTo(S.cam.position);v.project(S.cam);if(v.z<1&&d<45&&Math.abs(v.x)<1.2&&Math.abs(v.y)<1.2){vis=true;q.tag.style.transform='translate(-50%,-100%) translate('+((v.x+1)/2*innerWidth).toFixed(1)+'px,'+((1-v.y)/2*innerHeight).toFixed(1)+'px) scale('+Math.max(.7,Math.min(1,9/d)).toFixed(2)+')';q.tag.style.opacity=d>32?Math.max(0,(45-d)/13):1}}
+    q.tag.style.display=vis?'':'none';if(vis){const b=q.tag.firstChild,s=q.tag.lastChild;if(b.textContent!==q.n)b.textContent=q.n;b.style.borderColor=q.c;const bt=q.emo&&now<q.emo.until?MP_EMO[q.emo.k].e:q.bub&&now<q.bubT?q.bub:'';s.classList.toggle('emo',!!(q.emo&&now<q.emo.until));if(s.textContent!==bt)s.textContent=bt;s.style.display=bt?'':'none'}}}
 /* map dots */
-function mpMap(q,U,V,sc){for(const p of MP.peers.values()){if(p.pl!=='town'||p.rx==null)continue;const u=U(p.rz),v=V(p.rx);q.fillStyle=p.c;q.strokeStyle='#fff';q.lineWidth=2;q.beginPath();q.arc(u,v,6.5,0,7);q.fill();q.stroke();q.font='700 12px system-ui,sans-serif';q.textAlign='center';q.lineWidth=3;q.strokeStyle='rgba(10,20,35,.8)';q.strokeText(p.n,u,v-11);q.fillStyle='#fff';q.fillText(p.n,u,v-11)}}
+function mpMap(q,U,V,sc){for(const p of MP.peers.values()){if((p.pl!=='town'&&p.pl!=='boat')||p.wx==null)continue;const u=U(p.wz),v=V(p.wx);q.fillStyle=p.c;q.strokeStyle='#fff';q.lineWidth=2;q.beginPath();q.arc(u,v,6.5,0,7);q.fill();q.stroke();q.font='700 12px system-ui,sans-serif';q.textAlign='center';q.lineWidth=3;q.strokeStyle='rgba(10,20,35,.8)';q.strokeText(p.n,u,v-11);q.fillStyle='#fff';q.fillText(p.n,u,v-11)}}
 /* chat */
 function mpEl(){let el=document.getElementById('mpChat');if(el)return el;el=document.createElement('div');el.id='mpChat';
-  el.innerHTML='<div class="mpLog" aria-live="polite"></div><div class="mpIn"><input maxlength="280" placeholder="Say something to your lobby…" enterkeyhint="send" aria-label="Chat message"><button type="button" class="mpSend">Send</button></div><button type="button" class="mpBtn" title="Chat (C)">💬<span class="mpK">C</span></button>';
+  el.innerHTML='<div class="mpLog" aria-live="polite"></div><div class="mpIn"><input maxlength="280" placeholder="Say something to your lobby…" enterkeyhint="send" aria-label="Chat message"><button type="button" class="mpSend">Send</button></div><div class="mpBar"><button type="button" class="mpBtn" title="Chat (C)">💬<span class="mpK">C</span></button><button type="button" class="mpBtn mpEB" title="Emotes (G)">🙂<span class="mpK">G</span></button></div>';
   document.body.appendChild(el);const i=el.querySelector('input');
   for(const ev of['keydown','keyup','keypress'])i.addEventListener(ev,e=>{e.stopPropagation();if(ev!=='keydown')return;if(e.key==='Enter'){e.preventDefault();mpPost(i.value);i.value='';mpChat(false)}else if(e.key==='Escape'){e.preventDefault();mpChat(false)}});
-  el.querySelector('.mpSend').onclick=()=>{mpPost(i.value);i.value='';i.focus()};el.querySelector('.mpBtn').onclick=e=>{e.stopPropagation();mpChat(!MP.open)};
+  el.querySelector('.mpSend').onclick=()=>{mpPost(i.value);i.value='';i.focus()};el.querySelector('.mpBtn').onclick=e=>{e.stopPropagation();mpChat(!MP.open)};el.querySelector('.mpEB').onclick=e=>{e.stopPropagation();mpEmoBar()};
   for(const ev of['pointerdown','pointerup','click','wheel','touchstart'])el.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'});
   i.addEventListener('blur',()=>{setTimeout(()=>{if(MP.open&&document.activeElement!==i&&!el.matches(':hover'))mpChat(false)},150)});return el}
 function mpChat(on){const el=mpEl();if(on&&!LB.on){lbShow('pick');return}MP.open=on;el.classList.toggle('open',on);const i=el.querySelector('input');if(on){V3.keys={};MP.ct=performance.now();setTimeout(()=>i.focus(),0)}else i.blur();mpChatDraw()}
@@ -2629,7 +2639,7 @@ function mpAdd(m){m.at=performance.now();MP.chat.push(m);if(MP.chat.length>60)MP
 function mpSys(t){mpAdd({sys:1,t})}
 function mpChatDraw(){const el=mpEl(),L=el.querySelector('.mpLog');const rows=MP.chat.slice(MP.open?-30:-6);L.textContent='';for(const m of rows){const d=document.createElement('div');d.className=m.sys?'mpS':'mpM';d.dataset.at=m.at;if(m.sys)d.textContent=m.t;else{const b=document.createElement('b');b.textContent=m.n;b.style.color=m.c;d.appendChild(b);d.appendChild(document.createTextNode(' '+m.t))}L.appendChild(d)}L.scrollTop=L.scrollHeight;mpFade()}
 function mpFade(){const el=document.getElementById('mpChat');if(!el)return;const now=performance.now();for(const d of el.querySelectorAll('.mpLog>div')){const age=now-d.dataset.at;d.style.opacity=MP.open?1:age<12e3?1:Math.max(0,1-(age-12e3)/3e3)}}
-async function mpPost(v){v=String(v||'').replace(/\s+/g,' ').trim().slice(0,280);if(!v||!LB.on)return;const t=performance.now();if(t-MP.lastMsg<600)return;MP.lastMsg=t;
+async function mpPost(v){v=String(v||'').replace(/\s+/g,' ').trim().slice(0,280);if(!v||!LB.on)return;{const m=v.toLowerCase().match(/^\/(wave|cheer|clap|dance)$/);if(m){mpEmote(m[1]);return}}const t=performance.now();if(t-MP.lastMsg<600)return;MP.lastMsg=t;
   mpAdd({n:who,c:LB.color,t:v,me:1});mpSend('chat',{id:LB.id,n:who,c:LB.color,t:v});
   try{await fetch(LB.url.replace('/players','/chat'),{method:'POST',headers:{apikey:LB.key,Authorization:'Bearer '+LB.key,'Content-Type':'application/json'},body:JSON.stringify({lobby:LB.lobby||LB_SQ,player:LB.id,name:who,color:LB.color,body:v})})}catch(_){}}
 async function mpHistory(){const lob=LB.lobby||LB_SQ,top=MP.topic;try{const since=new Date(Date.now()+(LB.off||0)-3*3600e3).toISOString();const r=await fetch(LB.url.replace('/players','/chat')+'?select=name,color,body,created_at&lobby=eq.'+encodeURIComponent(lob)+'&created_at=gt.'+encodeURIComponent(since)+'&order=created_at.desc&limit=20',{headers:lbH()});if(!r.ok||MP.topic!==top)return;const a=(await r.json()).reverse();
@@ -2637,8 +2647,35 @@ async function mpHistory(){const lob=LB.lobby||LB_SQ,top=MP.topic;try{const sinc
 function mpUi(){const el=mpEl();const show=LB.on&&LB.ok!==false&&!(VM&&VM.on);el.style.display=show?'':'none';if(!show&&MP.open)mpChat(false);
   const tray=document.getElementById('tray');el.style.bottom=(V3.on?14:((tray&&getComputedStyle(tray).display!=='none'?Math.max(0,innerHeight-tray.getBoundingClientRect().top):0)+12))+'px';el.classList.toggle('town',!!V3.on);mpFade()}
 addEventListener('keydown',e=>{if(e.key!=='c'&&e.key!=='C')return;if(e.metaKey||e.ctrlKey||e.altKey||e.repeat)return;const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable))return;if(LB.open||(VM&&VM.on))return;if(!LB.on){if(V3.on){e.preventDefault();lbShow('pick')}return}e.preventDefault();e.stopImmediatePropagation();mpChat(true)},true);
-setInterval(()=>{mpConnect();if(MP.ok){mpPos(false);const t=Date.now();if(t-MP.hb>25e3){MP.hb=t;try{MP.ws.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(++MP.ref)}))}catch(_){}}}if(!V3.on)for(const q of MP.peers.values())if(performance.now()-q.last>9000)mpDrop(q.id);mpUi()},120);
+setInterval(()=>{mpConnect();if(MP.ok){mpPos(false);if(V3.on&&TOUR.B){if(!MP.tqd){MP.tqd=1;mpSend('tq',{id:LB.id})}if(TOUR.st!=='dock'&&mpLeader()&&performance.now()-MP.ts>2000)mpTourSend(false)}else MP.tqd=0;const t=Date.now();if(t-MP.hb>25e3){MP.hb=t;try{MP.ws.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:String(++MP.ref)}))}catch(_){}}}if(!V3.on)for(const q of MP.peers.values())if(performance.now()-q.last>9000)mpDrop(q.id);mpUi()},120);
 addEventListener('pagehide',()=>{if(MP.ok)mpSend('bye',{id:LB.id})});
+/* shared riverboat: one leader (lowest id in town) keeps everyone's boat in step */
+function mpNow(){return Date.now()+(LB.off||0)}
+function mpLeader(){if(!V3.on)return false;for(const q of MP.peers.values())if((q.pl==='town'||q.pl==='boat')&&q.id<LB.id)return false;return true}
+function mpTourSend(force){if(!TOUR.B||!V3.on)return;MP.ts=performance.now();const p={id:LB.id,n:who,st:TOUR.st,s:Math.round(TOUR.s*100)/100,v:Math.round(TOUR.v*1000)/1000,t:mpNow()};if(TOUR.st==='boarding')p.dep=Math.round(mpNow()+(TOUR.dep-V3T)*1000);if(force)p.f=1;mpSend('tour',p)}
+function mpTourOn(p){if(!V3.on||!TOUR.B){MP.tp=p;MP.tpAt=mpNow();return}const st=TOUR.st,lat=Math.max(0,Math.min(4,(mpNow()-(+p.t||mpNow()))/1000)),nm=String(p.n||'A friend').slice(0,24);
+  if(p.st==='boarding'&&p.dep){if(st!=='dock'&&st!=='boarding')return;const dep=V3T+(p.dep-mpNow())/1000;if(dep<V3T-1)return;if(st==='dock'){TOUR.st='boarding';TOUR.ann=0;if(!V3.boat)v3Msg('🛥️ '+nm+' boarded the Lakeside Belle · she casts off in '+Math.max(1,Math.round(dep-V3T))+' s · hurry to the pier to ride together!',6000)}TOUR.dep=dep;return}
+  if(p.st==='cruise'){const L=TOUR.tp.L,ts=Math.min(L-.06,(+p.s||0)+(+p.v||0)*lat),cnt=TOUR.marks.filter(m=>m<=ts).length;
+    if(st==='dock'||st==='boarding'){if(st==='boarding'&&V3.boat)tourHorn();TOUR.st='cruise';TOUR.s=ts;TOUR.v=+p.v||0;TOUR.ann=cnt;MP.tc=0;if(!V3.boat&&st==='dock')v3Msg('🛥️ The Lakeside Belle is out on the lake with '+nm+' aboard',3500);return}
+    if(st==='cruise'){const d=ts-TOUR.s;if(p.f||Math.abs(d)>40){TOUR.s=ts;TOUR.v=+p.v||0;if(p.f)TOUR.ann=Math.max(TOUR.ann,cnt-1);MP.tc=0}else MP.tc=d}}}
+/* emotes */
+const MP_EMO={wave:{e:'👋',t:'waves',d:2600},cheer:{e:'🙌',t:'cheers',d:2400},clap:{e:'👏',t:'claps',d:2400},dance:{e:'💃',t:'dances',d:6000}},MP_EK=['wave','cheer','clap','dance'];
+function mpEmote(k){if(!MP_EMO[k])return;if(!LB.on){lbShow('pick');return}const E=MP_EMO[k];mpSend('emo',{id:LB.id,n:who,k});mpSys('You '+E.t.replace(/s$/,'')+' '+E.e);if(V3.on)v3Msg(E.e+' You '+E.t.replace(/s$/,''),1800);mpEmoBar(false)}
+function mpEmoOn(p){const k=String(p.k||'');if(!MP_EMO[k])return;const q=MP.peers.get(p.id),E=MP_EMO[k];if(q){q.emo={k,t0:performance.now(),until:performance.now()+E.d};q.bubT=0}mpSys((q?q.n:String(p.n||'Someone').slice(0,24))+' '+E.t+' '+E.e)}
+function mpEmoAnim(q,dt,T,mv){const a=q.av,A=a.arms,El=a.elbows,f=Math.min(1,dt*10),now=performance.now(),e=q.emo&&now<q.emo.until?q.emo:null,u=e?(now-e.t0)/1000:0,L=(o,k,v)=>{o[k]+=(v-o[k])*f};
+  if(!e){L(A[0].rotation,'z',-.05);L(A[1].rotation,'z',.05);L(El[0].rotation,'z',0);L(El[1].rotation,'z',0);if(!mv){L(El[0].rotation,'x',-.2);L(El[1].rotation,'x',-.2)}L(a.g.rotation,'x',0);return}
+  if(e.k==='wave'){L(A[1].rotation,'z',2.55);L(A[1].rotation,'x',-.25);L(El[1].rotation,'x',-.35);El[1].rotation.z=Math.sin(u*11)*.55}
+  else if(e.k==='cheer'){const b=Math.sin(u*9)*.18;L(A[0].rotation,'z',-2.75+b);L(A[1].rotation,'z',2.75-b);L(A[0].rotation,'x',0);L(A[1].rotation,'x',0);L(El[0].rotation,'x',-.1);L(El[1].rotation,'x',-.1)}
+  else if(e.k==='clap'){const c=(Math.sin(u*15)+1)/2;L(A[0].rotation,'x',-1.15);L(A[1].rotation,'x',-1.15);A[0].rotation.z=.18+c*.32;A[1].rotation.z=-.18-c*.32;L(El[0].rotation,'x',-.75);L(El[1].rotation,'x',-.75)}
+  else if(e.k==='dance'){const w=Math.sin(u*7);L(A[0].rotation,'z',-1.3-w*.5);L(A[1].rotation,'z',1.3-w*.5);L(El[0].rotation,'x',-.9);L(El[1].rotation,'x',-.9);a.g.position.y+=Math.abs(Math.sin(u*7))*.07;a.g.rotation.y+=Math.sin(u*3.5)*.45}}
+function mpEmoBar(on){let el=document.getElementById('mpEmo');if(!el){el=document.createElement('div');el.id='mpEmo';el.innerHTML=MP_EK.map((k,i)=>'<button type="button" data-k="'+k+'"><span>'+MP_EMO[k].e+'</span>'+k[0].toUpperCase()+k.slice(1)+'<i>'+(i+1)+'</i></button>').join('');const mc=document.getElementById('mpChat');mc.insertBefore(el,mc.querySelector('.mpBar'));
+    el.querySelectorAll('button').forEach(b=>b.onclick=e=>{e.stopPropagation();mpEmote(b.dataset.k)})}
+  if(on==null)on=!el.classList.contains('show');el.classList.toggle('show',on);MP.eo=on}
+addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable))return;if(LB.open||(VM&&VM.on))return;
+  if(MP.eo&&/^[1-4]$/.test(e.key)){e.preventDefault();e.stopImmediatePropagation();mpEmote(MP_EK[+e.key-1]);return}
+  if(MP.eo&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();mpEmoBar(false);return}
+  if((e.key==='g'||e.key==='G')&&!e.repeat){if(!LB.on){if(V3.on){e.preventDefault();lbShow('pick')}return}e.preventDefault();e.stopImmediatePropagation();mpEmoBar()}},true);
+
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
