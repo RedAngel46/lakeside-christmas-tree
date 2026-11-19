@@ -1633,9 +1633,15 @@ function lakeside(){const S=S3,scene=S.scene,W0=-19,WL=-.55;
     }`});
   const water=new THREE.Mesh(new THREE.PlaneGeometry(2500,5300),wm);water.rotation.x=-Math.PI/2;water.position.set(-1180,WL,-2250);scene.add(water);S.water=water;S.waterM=wm;
   {const N=new THREE.Vector3(0,1,0),MP=new THREE.Vector3(0,WL,0),cp=new THREE.Vector3(),view=new THREE.Vector3(),la=new THREE.Vector3(),tg=new THREE.Vector3(),rm=new THREE.Matrix4(),pl=new THREE.Plane(),cl=new THREE.Vector4(),q=new THREE.Vector4(),sz=new THREE.Vector2();
+   /* the reflection is a second full render of the scene: skip it while the lake is off screen, and while the view
+      holds still (under 3° turned, 1 m moved) refresh it every other frame; the ripples hide a frame-old mirror */
+   water.updateMatrixWorld();const wBox=new THREE.Box3().setFromObject(water).expandByScalar(1),wFr=new THREE.Frustum(),wPM=new THREE.Matrix4(),RF={n:0,stale:true,q:new THREE.Quaternion(),wq:new THREE.Quaternion(),p:new THREE.Vector3()};
    S.waterUpd=T=>{const ren=S.ren,cam=S.cam;wm.uniforms.time.value=T;cam.updateMatrixWorld();cp.setFromMatrixPosition(cam.matrixWorld);
-    ren.getDrawingBufferSize(sz);const w=Math.max(64,sz.x/2|0),h=Math.max(64,sz.y/2|0);if(rt.width!==w||rt.height!==h)rt.setSize(w,h);
-    view.subVectors(MP,cp);if(view.dot(N)>0)return;view.reflect(N).negate().add(MP);rm.extractRotation(cam.matrixWorld);la.set(0,0,-1).applyMatrix4(rm).add(cp);
+    ren.getDrawingBufferSize(sz);const w=Math.max(64,sz.x/2|0),h=Math.max(64,sz.y/2|0);if(rt.width!==w||rt.height!==h){rt.setSize(w,h);RF.stale=true}
+    view.subVectors(MP,cp);if(view.dot(N)>0){RF.stale=true;return}
+    wFr.setFromProjectionMatrix(wPM.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse));if(!wFr.intersectsBox(wBox)){RF.stale=true;return}
+    RF.wq.setFromRotationMatrix(cam.matrixWorld);if(!RF.stale&&(RF.n++&1)&&RF.wq.angleTo(RF.q)<.05&&cp.distanceToSquared(RF.p)<1)return;
+    RF.stale=false;RF.q.copy(RF.wq);RF.p.copy(cp);view.reflect(N).negate().add(MP);rm.extractRotation(cam.matrixWorld);la.set(0,0,-1).applyMatrix4(rm).add(cp);
     tg.subVectors(MP,la).reflect(N).negate().add(MP);mc.position.copy(view);mc.up.set(0,1,0).applyMatrix4(rm).reflect(N);mc.lookAt(tg);mc.far=cam.far;mc.updateMatrixWorld();mc.projectionMatrix.copy(cam.projectionMatrix);
     texM.set(.5,0,0,.5,0,.5,0,.5,0,0,.5,.5,0,0,0,1);texM.multiply(mc.projectionMatrix);texM.multiply(mc.matrixWorldInverse);water.updateMatrixWorld();texM.multiply(water.matrixWorld);
     pl.setFromNormalAndCoplanarPoint(N,MP);pl.applyMatrix4(mc.matrixWorldInverse);cl.set(pl.normal.x,pl.normal.y,pl.normal.z,pl.constant);const pm=mc.projectionMatrix.elements;
@@ -1750,18 +1756,19 @@ function carousel(){const S=S3,x=-10,z=-68,g=new THREE.Group();g.position.set(x,
   const GOLD=std('#d6a944',.32,.55,'#3a2608'),DARK=std('#1a1410',.4),CREAM=std('#efe4cc',.5,0,'#1a140c');
   const merge=list=>{let n=0;const gs=list.map(([geo,m])=>{const q=geo.index?geo.toNonIndexed():geo.clone();q.applyMatrix4(m);n+=q.attributes.position.count;return q});const P=new Float32Array(n*3),N=new Float32Array(n*3);let o=0;for(const q of gs){P.set(q.attributes.position.array,o);N.set(q.attributes.normal.array,o);o+=q.attributes.position.array.length;q.dispose()}const b=new THREE.BufferGeometry();b.setAttribute('position',new THREE.BufferAttribute(P,3));b.setAttribute('normal',new THREE.BufferAttribute(N,3));return b};
   const M4=(p,q,s)=>new THREE.Matrix4().compose(p,q||new THREE.Quaternion(),s||new THREE.Vector3(1,1,1));const V=(a,b,c)=>new THREE.Vector3(a,b,c);const UP=V(0,1,0);
-  const sph=new THREE.SphereGeometry(1,20,14),cap=(r,l)=>new THREE.CapsuleGeometry(r,l,6,14);
+  /* LO=1 builds the low-poly horses that are drawn when the player is not close to the carousel */
+  let LO=0;const SPH=[new THREE.SphereGeometry(1,20,14),new THREE.SphereGeometry(1,10,7)],cap=(r,l)=>new THREE.CapsuleGeometry(r,l,LO?3:6,LO?7:14);
   /* limb segment between two points, tapered capsule */
   const seg=(L,a,b,r)=>{const d=b.clone().sub(a),len=d.length();L.push([cap(r,Math.max(.01,len-r)),M4(a.clone().add(b).multiplyScalar(.5),new THREE.Quaternion().setFromUnitVectors(UP,d.normalize()))])};
-  const blob=(L,p,s,rx)=>L.push([sph,M4(p,rx?new THREE.Quaternion().setFromEuler(new THREE.Euler(rx,0,0)):null,s)]);
+  const blob=(L,p,s,rx)=>L.push([SPH[LO],M4(p,rx?new THREE.Quaternion().setFromEuler(new THREE.Euler(rx,0,0)):null,s)]);
   /* one carved jumper, head at +z, all parts merged per material */
-  const horseGeo=pose=>{const B=[],Mn=[],Sd=[],Gd=[],Dk=[];
+  const horseGeo=(pose,lo)=>{LO=lo?1:0;const B=[],Mn=[],Sd=[],Gd=[],Dk=[];
     blob(B,V(0,.01,0),V(.2,.235,.56));blob(B,V(0,.03,.33),V(.205,.255,.27));blob(B,V(0,.05,-.33),V(.215,.25,.28));blob(B,V(0,-.09,.02),V(.17,.15,.4));
     seg(B,V(0,.1,.44),V(0,.66,.72),.125);blob(B,V(0,.28,.52),V(.125,.2,.17),-.5);blob(B,V(0,.6,.66),V(.1,.12,.11));
     seg(B,V(0,.72,.74),V(0,.44,1.07),.085);blob(B,V(0,.45,1.06),V(.075,.08,.1));blob(B,V(0,.7,.77),V(.09,.1,.11));
     for(const s of[-1,1]){const ear=new THREE.ConeGeometry(.035,.14,8);B.push([ear,M4(V(s*.055,.84,.73),new THREE.Quaternion().setFromEuler(new THREE.Euler(-.35,0,s*-.25)))]);blob(Dk,V(s*.085,.66,.86),V(.022,.026,.026));blob(Dk,V(s*.04,.45,1.08),V(.016,.016,.016))}
     /* flowing carved mane (strands on the outer, romance side) and tail */
-    const strand=(L,pts,r)=>L.push([new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),16,r,7),new THREE.Matrix4()]);
+    const strand=(L,pts,r)=>L.push([new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),LO?8:16,r,LO?4:7),new THREE.Matrix4()]);
     for(let i=0;i<11;i++){const t=i/10,c=V(0,.86-t*.62,.72-t*.4),w=Math.sin(i*1.9)*.03;strand(Mn,[c.clone().add(V(.02,.03,0)),c.clone().add(V(-.07,0,-.03)),c.clone().add(V(-.13,-.1+w,-.01)),c.clone().add(V(-.12,-.2,-.06+w)),c.clone().add(V(-.15,-.27,-.03))],.026)}
     strand(Mn,[V(0,.8,.78),V(0,.76,.88),V(-.03,.7,.92)],.03);
     for(let k=0;k<4;k++){const o=(k-1.5)*.025;strand(Mn,[V(o,.12,-.6),V(o,.14+k*.01,-.74),V(o-.02,.02,-.86),V(o+.03,-.18,-.84),V(o,-.36,-.92-k*.02),V(o-.04,-.5,-.86)],.032-k*.003)}
@@ -1777,8 +1784,8 @@ function carousel(){const S=S3,x=-10,z=-68,g=new THREE.Group();g.position.set(x,
     for(let i=0;i<5;i++){const a=-.9+i*.45;blob(Gd,V(Math.sin(a)*.215,.14-Math.abs(Math.sin(a))*.06,.45+Math.cos(a)*.08-.08),V(.03,.03,.02))}
     const nb=new THREE.TorusGeometry(.085,.012,6,18);Gd.push([nb,M4(V(0,.47,1.0),new THREE.Quaternion().setFromEuler(new THREE.Euler(.9,0,0)))]);seg(Gd,V(-.1,.66,.8),V(-.08,.5,.96),.01);seg(Gd,V(.1,.66,.8),V(.08,.5,.96),.01);
     
-    return [B,Mn,Sd,Gd,Dk].map(merge)};
-  const poses=[horseGeo(0),horseGeo(1)];
+    const out=[B,Mn,Sd,Gd,Dk].map(merge);LO=0;return out};
+  const poses=[horseGeo(0),horseGeo(1)],posesLo=[horseGeo(0,1),horseGeo(1,1)];S.horseMs=[];S.carLo=false;
   const PAINT=[['#f3eee4','#d6a944','#8f1d22'],['#2b2420','#e8dcc0','#1f4f7a'],['#cfc3ad','#7a5a3a','#2f6a3e'],['#f3eee4','#c9a046','#5a2a6a'],['#8a8c92','#f0ece2','#8f1d22'],['#7a3f22','#2b1a12','#c9a046'],['#e9dcc0','#f6f0e2','#1f4f7a'],['#f3eee4','#3a2a20','#a3121c']];
   const pm={};const paint=c=>pm[c]||(pm[c]=std(c,.28,0,'#120c08'));
   /* platform: wood boards, gilded skirting */
@@ -1815,7 +1822,7 @@ function carousel(){const S=S3,x=-10,z=-68,g=new THREE.Group();g.position.set(x,
   const tw=cvs(64,256),t2=tw.getContext('2d');t2.fillStyle='#e6c06a';t2.fillRect(0,0,64,256);t2.strokeStyle='#8a6420';t2.lineWidth=10;for(let y=-64;y<320;y+=40){t2.beginPath();t2.moveTo(0,y);t2.lineTo(64,y+64);t2.stroke()}
   const poleM=new THREE.MeshStandardMaterial({map:tex(tw,[1,6]),roughness:.28,metalness:.5,emissive:'#3a2608'}),poleG=new THREE.CylinderGeometry(.038,.038,4,10);
   let n=0;for(const [R,cnt,off] of[[3.75,12,0],[2.35,8,.2]])for(let i=0;i<cnt;i++,n++){const a=i/cnt*6.283+off,pt=PAINT[n%PAINT.length],pose=(i+(R<3?1:0))%3==1?1:0;
-    const h=new THREE.Group();h.rotation.y=-a+Math.PI;const ps=poses[pose];[paint(pt[0]),paint(pt[1]),paint(pt[2]),GOLD,DARK].forEach((m,k)=>{const me=new THREE.Mesh(ps[k],m);h.add(me)});
+    const h=new THREE.Group();h.rotation.y=-a+Math.PI;const ps=poses[pose],pl=posesLo[pose];[paint(pt[0]),paint(pt[1]),paint(pt[2]),GOLD,DARK].forEach((m,k)=>{const me=new THREE.Mesh(ps[k],m);me.userData.hl=[ps[k],pl[k]];h.add(me);S.horseMs.push(me)});
     const holder=new THREE.Group();holder.position.set(Math.cos(a)*R,0,Math.sin(a)*R);holder.add(h);rot.add(holder);
     h.userData.base=pose?1.45:1.35;h.userData.ph=n*1.7;h.userData.amp=pose?.08:.24;h.position.y=h.userData.base;
     const pole=new THREE.Mesh(poleG,poleM);pole.position.set(Math.cos(a)*R,2.5,Math.sin(a)*R);rot.add(pole);S.horses.push(h);if(R>3)S.rideH=S.rideH||h}
@@ -1992,7 +1999,7 @@ function v3Bake(gp){gp.updateMatrixWorld(true);const inv=new THREE.Matrix4().cop
     const out=new THREE.BufferGeometry();for(const a of names){const s=list[0].geometry.attributes[a].itemSize,arr=new Float32Array(nv*s);let o=0;for(const q of gs){const at=q.attributes[a];if(at.isInterleavedBufferAttribute||at.itemSize!==s){o=-1;break}arr.set(at.array.length===at.count*s?at.array:Array.from({length:at.count*s},(_,i)=>at.array[i]),o);o+=at.count*s}if(o<0){out.dispose();continue}out.setAttribute(a,new THREE.BufferAttribute(arr,s,list[0].geometry.attributes[a].normalized))}
     if(Object.keys(out.attributes).length!==names.length){gs.forEach(q=>q.dispose());continue}
     const I=nv>65535?new Uint32Array(ni):new Uint16Array(ni);let oi=0,base=0;for(const q of gs){const qi=q.index.array;for(let i=0;i<qi.length;i++)I[oi+i]=qi[i]+base;oi+=qi.length;base+=q.attributes.position.count;q.dispose()}out.setIndex(new THREE.BufferAttribute(I,1));out.computeBoundingSphere();
-    const m=new THREE.Mesh(out,list[0].material);m.renderOrder=list[0].renderOrder;gp.add(m);for(const o of list){o.parent.remove(o);n++}}
+    const m=new THREE.Mesh(out,list[0].material);m.renderOrder=list[0].renderOrder;m.matrixAutoUpdate=false;gp.add(m);for(const o of list){o.parent.remove(o);n++}}
   return n}
 /* far people: one merged, vertex-coloured mesh (1 draw call instead of ~25) */
 let LODM=null;
@@ -2458,7 +2465,10 @@ function v3Frame(now){if(!V3.on)return;requestAnimationFrame(v3Frame);const S=S3
   /* nearest real lights */
   if(!V3.lt||T>V3.lt){V3.lt=T+(V3.boat?.05:.4);const arr=V3LAMPS.map(l=>[l,l.distanceToSquared(S.cam.position)]).sort((a,b)=>a[1]-b[1]);S.pl.forEach((l,i)=>{const q=arr[i];if(q)l.position.copy(q[0])})}
   /* carousel, star, skaters */
-  S.carRot.rotation.y+=dt*.42;if(S.ships)for(const sh of S.ships){{const u=sh.userData;u.a=(u.a||0)+dt*.045;const a=u.a;sh.position.x=-140+25*Math.cos(a);sh.position.z=-115+45*Math.sin(a);sh.rotation.y=Math.atan2(25*Math.sin(a),-45*Math.cos(a))}sh.position.y=-.55+Math.sin(T*1.3+sh.userData.ph)*.04}if(S.shimmer)S.shimmer.material.opacity=.32+.06*Math.sin(T*1.7);S.horses.forEach(h=>h.position.y=h.userData.base+Math.sin(T*2.2+h.userData.ph)*h.userData.amp);S.star.rotation.y+=dt;S.starG.material.opacity=S.starBoost>T?1:.8+.15*Math.sin(T*2);S.starG.scale.setScalar(S.starBoost>T?9:5);
+  S.carRot.rotation.y+=dt*.42;
+  /* horses are ~28k triangles each; past 16 m nobody can tell them from the light version */
+  if(S.horseMs){const dx=S.cam.position.x+10,dz=S.cam.position.z+68,lo=dx*dx+dz*dz>256;if(lo!==S.carLo){S.carLo=lo;for(const m of S.horseMs)m.geometry=m.userData.hl[lo?1:0]}}
+  if(S.ships)for(const sh of S.ships){{const u=sh.userData;u.a=(u.a||0)+dt*.045;const a=u.a;sh.position.x=-140+25*Math.cos(a);sh.position.z=-115+45*Math.sin(a);sh.rotation.y=Math.atan2(25*Math.sin(a),-45*Math.cos(a))}sh.position.y=-.55+Math.sin(T*1.3+sh.userData.ph)*.04}if(S.shimmer)S.shimmer.material.opacity=.32+.06*Math.sin(T*1.7);S.horses.forEach(h=>h.position.y=h.userData.base+Math.sin(T*2.2+h.userData.ph)*h.userData.amp);S.star.rotation.y+=dt;S.starG.material.opacity=S.starBoost>T?1:.8+.15*Math.sin(T*2);S.starG.scale.setScalar(S.starBoost>T?9:5);
   for(const p of S.skaters){p.a+=p.w*dt*2.2/(p.r/4);p.g.position.set(10+Math.cos(p.a)*p.r,.06,-88+Math.sin(p.a)*p.r);p.g.rotation.y=-p.a;p.ph+=dt*2.6;const sn=Math.sin(p.ph),pu=Math.max(0,sn),pv=Math.max(0,-sn);
     p.legs[0].rotation.z=-pu*.32;p.legs[1].rotation.z=pv*.32;p.legs[0].rotation.x=pu*.35;p.legs[1].rotation.x=pv*.35;p.knees[0].rotation.x=.25+pv*.25;p.knees[1].rotation.x=.25+pu*.25;
     p.g.rotation.x=.16;p.g.rotation.z=.1+sn*.04;p.g.position.y=.06-.03*p.k+Math.abs(sn)*.015;
@@ -2485,7 +2495,10 @@ function v3Frame(now){if(!V3.on)return;requestAnimationFrame(v3Frame);const S=S3
   v3HandUpd(dt,T);
   /* bubble */
   if(BUB&&T<BUB.t){const v=new THREE.Vector3();BUB.p.g.getWorldPosition(v);v.y+=2.05*BUB.p.k;const d=v.distanceTo(S.cam.position);v.project(S.cam);if(v.z<1&&d<18){vBubEl.style.display='block';vBubEl.style.left=((v.x+1)/2*innerWidth)+'px';vBubEl.style.top=((1-v.y)/2*innerHeight)+'px';vBubEl.style.opacity=Math.min(1,(BUB.t-T)*3)}else vBubEl.style.display='none'}else vBubEl.style.display='none';
-  if(typeof mpFrame==='function'){mpFrame(dt,T);if(MP.ok)mpPos(false)}ambFrame(dt,T);v3Cull();v3Adapt(dt);if(S.waterUpd){v3ReflHide(true);S.waterUpd(T);v3ReflHide(false)}S.ren.render(S.scene,S.cam)}
+  if(typeof mpFrame==='function'){mpFrame(dt,T);if(MP.ok)mpPos(false)}ambFrame(dt,T);v3Cull();v3Adapt(dt);
+  /* world matrices once per frame, shared by the reflection and the main pass (render() would redo all ~8000 each time) */
+  S.scene.matrixWorldAutoUpdate=false;S.scene.updateMatrixWorld();
+  if(S.waterUpd){v3ReflHide(true);S.waterUpd(T);v3ReflHide(false)}S.ren.render(S.scene,S.cam)}
 function v3Size(){if(!S3)return;S3.ren.setSize(innerWidth,innerHeight,false);S3.cam.aspect=innerWidth/innerHeight;S3.cam.fov=innerWidth<innerHeight?72:60;S3.cam.updateProjectionMatrix()}
 /* controls */
 const v3c=document.getElementById('v3c');let v3drag=null;
