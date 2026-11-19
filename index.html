@@ -742,7 +742,7 @@ function hitItem(vx,vy){for(const rugPass of[false,true])for(let i=items.length-
   if(!rugPass&&o.type==='gift'&&vx>TCX+o.x-o.w/2&&vx<TCX+o.x+o.w/2&&vy>o.y-o.h-o.w*.35-14&&vy<o.y)return i}return -1}
 
 /* ---------- sound (Web Audio, no files) ---------- */
-let AC=null,master=null,muted=false,NB=null,fireStarted=false;
+let FIRE_G=null,AC=null,master=null,muted=false,NB=null,fireStarted=false;
 function ac(){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.connect(AC.destination)}if(AC.state==='suspended')AC.resume();if(!fireStarted){fireStarted=true;startFire();wxAudio();if(musicOn)startMusic()}return AC}
 function noise(a){if(!NB){NB=a.createBuffer(1,a.sampleRate*2,a.sampleRate);const d=NB.getChannelData(0);let l=0;for(let i=0;i<d.length;i++){const w=Math.random()*2-1;d[i]=w}}return NB}
 function env(f,type,t,peak,dur){const a=AC,o=a.createOscillator();o.type=type;o.frequency.value=f;const g=a.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+.004);g.gain.exponentialRampToValueAtTime(.0004,t+dur);o.connect(g).connect(master);o.start(t);o.stop(t+dur+.02)}
@@ -755,8 +755,8 @@ const sfx={
   thump(){if(!AC)return;nz('lowpass',380,.35,.16);nz('bandpass',3200,.05,.22)},
   poof(){if(!AC)return;nz('bandpass',1400,.12,.28,300)},
   shutter(){if(!AC)return;const t=AC.currentTime;nz('highpass',2500,.35,.04,0,t);nz('highpass',3500,.25,.05,0,t+.09);env(180,'square',t,.03,.03)}};
-function startFire(){const a=AC,n=a.createBufferSource();n.buffer=noise(a);n.loop=true;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=260;const g=a.createGain();g.gain.value=.05;n.connect(f).connect(g).connect(master);n.start();
-  (function crackle(){if(AC.state==='running'&&wide){nz('bandpass',1200+Math.random()*4000,.015+Math.random()*(Math.random()<.1?.12:.04),.015+Math.random()*.03)}setTimeout(crackle,50+Math.random()*320)})()}
+function startFire(){const a=AC,n=a.createBufferSource();n.buffer=noise(a);n.loop=true;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=260;const g=a.createGain();g.gain.value=window.VILON?0:.05;FIRE_G=g;n.connect(f).connect(g).connect(master);n.start();
+  (function crackle(){if(AC.state==='running'&&wide&&!window.VILON){nz('bandpass',1200+Math.random()*4000,.015+Math.random()*(Math.random()<.1?.12:.04),.015+Math.random()*.03)}setTimeout(crackle,50+Math.random()*320)})()}
 
 /* ---------- weather sounds: wind with the snow, rain on the glass, thunder ---------- */
 let wxN=null;
@@ -834,7 +834,7 @@ function mPad(c,t,len){const[root,notes]=CH[c],out=mOut(),lp=AC.createBiquadFilt
   const b=AC.createOscillator();b.type='sine';b.frequency.value=mf(root);mVoice(b,.035,t,.02,len*1.1,out)}
 function songEvents(s){const sp=60/s.bpm,ev=[];let b=0;s.mel.forEach(([m,d])=>{ev.push({b,k:'n',m,d:d*sp});b+=d});
   s.ch.split(' ').forEach((c,i)=>ev.push({b:i*s.bar,k:'c',c,d:s.bar*sp}));ev.sort((x,y)=>x.b-y.b);return{ev,sp,len:b}}
-function startMusic(){if(!AC||mTimer)return;mOut();const t=AC.currentTime;mBus.gain.cancelScheduledValues(t);mBus.gain.setValueAtTime(mBus.gain.value,t);mBus.gain.linearRampToValueAtTime(.9,t+2);
+function startMusic(){if(!AC||mTimer||window.VILON)return;mOut();const t=AC.currentTime;mBus.gain.cancelScheduledValues(t);mBus.gain.setValueAtTime(mBus.gain.value,t);mBus.gain.linearRampToValueAtTime(.9,t+2);
   if(!mState)mState={si:0,i:0,t0:t+.4,...songEvents(SONGS[0])};else{mState.t0=t+.4-mState.ev[mState.i>=mState.ev.length?0:mState.i].b*mState.sp}nowPlaying(mState.si,t+.4);
   mTimer=setInterval(mTick,90);mTick()}
 function mTick(){if(!AC||AC.state!=='running')return;const s=mState,ah=AC.currentTime+.35;
@@ -2323,7 +2323,7 @@ function tourUpd(dt,T){const S=S3,B=TOUR.B;if(!B)return;const RB=B.RB,TP=TOUR.tp
     const [pi,ba,sg]=TOUR.band;pi.arms[0].rotation.x=-1.15+Math.sin(T*9)*.06;pi.arms[1].rotation.x=-1.15+Math.sin(T*9+1.5)*.06;pi.g.rotation.z=Math.sin(bt*Math.PI*.5)*.03;
     ba.arms[0].rotation.x=-1.7;ba.arms[1].rotation.x=-.75+Math.sin(bt*Math.PI)*.15;ba.g.rotation.z=Math.sin(bt*Math.PI*.5)*.025;sg.arms[1].rotation.x=-1.55;sg.elbows&&(sg.elbows[1].rotation.x=-1.0);sg.arms[0].rotation.x=-.3+Math.sin(T*.8)*.25;sg.g.rotation.z=Math.sin(bt*Math.PI*.5)*.04}
   /* music: full in the salon, muffled on deck, faint from the shore */
-  let gT=0,lp=700;if(V3.boat){const inS=V3.lv===0&&V3.bl.x>-12.7&&V3.bl.x<9;gT=inS?.5:.2;lp=inS?7000:1300}else if(V3.on&&dB<110){gT=.16*(1-dB/110);lp=650}if(TOUR.st==='dock'&&!V3.boat)gT*=.6;bandTick(gT,lp);
+  let gT=0,lp=700;if(V3.boat){const inS=V3.lv===0&&V3.bl.x>-12.7&&V3.bl.x<9;gT=inS?.5:.2;lp=inS?7000:1300}else if(V3.on&&dB<55){const u=1-dB/55;gT=.13*u*u;lp=650}if(TOUR.st==='dock'&&!V3.boat)gT*=.6;bandTick(gT,lp);
   /* dancing camera */
   if(V3.dance&&V3.dance>T){V3.yaw+=Math.sin(T*2.2)*dt*.6}
   /* fog opens up away from the plaza */
@@ -2446,7 +2446,7 @@ function v3Frame(now){if(!V3.on)return;requestAnimationFrame(v3Frame);const S=S3
     else if(V3.tgt){const dx=V3.tgt.x-P.x,dz=V3.tgt.z-P.z,d=Math.hypot(dx,dz);if(d>.15){const sp=Math.min(d,1.9*dt);P.x+=dx/d*sp;P.z+=dz/d*sp;moving=true;let want=Math.atan2(-dx,-dz),dy=((want-V3.yaw+Math.PI*3)%(Math.PI*2))-Math.PI;if(d>1.2)V3.yaw+=dy*Math.min(1,dt*3)}
       else{V3.tgt=null;if(V3.pend){const a=V3.pend;V3.pend=null;if(a.face){const fx=a.face.x-P.x,fz=a.face.z-P.z;V3.yawT=Math.atan2(-fx,-fz)}a.go(a)}}}
     if(V3.yawT!=null){const dy=((V3.yawT-V3.yaw+Math.PI*3)%(Math.PI*2))-Math.PI;V3.yaw+=dy*Math.min(1,dt*4);if(Math.abs(dy)<.01)V3.yawT=null}
-    walkClamp(P);if(moving){const rn=k.run&&(k.f||k.b||k.sl||k.sr);V3.bob+=dt*(rn?13:9);V3.step+=dt;if(V3.step>(rn?.3:.5)){V3.step=0;if(AC&&AC.state==='running')nz('bandpass',600+Math.random()*500,.03,.1)}}}
+    walkClamp(P);if(moving){const rn=k.run&&(k.f||k.b||k.sl||k.sr);V3.bob+=dt*(rn?13:9);V3.step+=dt;if(V3.step>(rn?.3:.5)){V3.step=0;ambStep(rn)}}}
   if(V3.jy>0){V3.jv-=11*dt;V3.jy+=V3.jv*dt;if(V3.jy<=0){V3.jy=0;V3.jv=0;if(AC&&AC.state==='running')nz('bandpass',380,.05,.09)}}if(V3.mode!=='walk')V3.jy=0;
   if(!isFinite(V3.bob))V3.bob=0;if(!isFinite(V3.jy)){V3.jy=0;V3.jv=0}
   V3.gy=(V3.gy||0)+((V3.boat&&TOUR.B?TOUR.B.RB.position.y+(V3.floor||1.3)-(V3.seat?(V3.lv===1?.6:.48):0)+(V3.dance>T?Math.abs(Math.sin(T*4.4))*.05:0):V3.mode==='walk'&&P.x<-18.9?(V3.gyo!=null?V3.gyo:-.12):0)-(V3.gy||0))*Math.min(1,dt*(V3.boat?14:8));if(!isFinite(V3.gy))V3.gy=0;
@@ -2485,7 +2485,7 @@ function v3Frame(now){if(!V3.on)return;requestAnimationFrame(v3Frame);const S=S3
   v3HandUpd(dt,T);
   /* bubble */
   if(BUB&&T<BUB.t){const v=new THREE.Vector3();BUB.p.g.getWorldPosition(v);v.y+=2.05*BUB.p.k;const d=v.distanceTo(S.cam.position);v.project(S.cam);if(v.z<1&&d<18){vBubEl.style.display='block';vBubEl.style.left=((v.x+1)/2*innerWidth)+'px';vBubEl.style.top=((1-v.y)/2*innerHeight)+'px';vBubEl.style.opacity=Math.min(1,(BUB.t-T)*3)}else vBubEl.style.display='none'}else vBubEl.style.display='none';
-  if(typeof mpFrame==='function')mpFrame(dt,T);v3Cull();v3Adapt(dt);if(S.waterUpd){v3ReflHide(true);S.waterUpd(T);v3ReflHide(false)}S.ren.render(S.scene,S.cam)}
+  if(typeof mpFrame==='function')mpFrame(dt,T);ambFrame(dt,T);v3Cull();v3Adapt(dt);if(S.waterUpd){v3ReflHide(true);S.waterUpd(T);v3ReflHide(false)}S.ren.render(S.scene,S.cam)}
 function v3Size(){if(!S3)return;S3.ren.setSize(innerWidth,innerHeight,false);S3.cam.aspect=innerWidth/innerHeight;S3.cam.fov=innerWidth<innerHeight?72:60;S3.cam.updateProjectionMatrix()}
 /* controls */
 const v3c=document.getElementById('v3c');let v3drag=null;
@@ -2517,9 +2517,37 @@ addEventListener('keyup',e=>{const k=KM[e.key];if(k)V3.keys[k]=false});
 function v3Open(){ac();if(!window.THREE){toast('The village is still loading…');return}
   const el=document.getElementById('vil');el.classList.add('show');if(FINE){v3X.style.display='block';v3X.style.opacity=.5;if(V3LK.ok!==false)v3Lock()}document.getElementById('vLoad').style.display='flex';
   setTimeout(()=>{try{if(!S3)v3Build()}catch(err){console.error(err);document.getElementById('vLoad').textContent='Sorry, this device can’t show the 3D village.';return}
-    document.getElementById('vLoad').style.display='none';V3.on=true;window.VILON=true;V3.pos=V3.pos||new THREE.Vector3(-2.2,0,-1.5);if(V3.mode!=='walk')V3.mode='walk';V3.pos.set(-2.4,0,-.5);V3.yaw=Math.PI*.04;V3.pitch=-.03;V3.jy=0;V3.jv=0;V3.tgt=null;V3.near=undefined;if(!V3.helped&&matchMedia('(pointer:fine)').matches){V3.helped=1;setTimeout(()=>v3Msg('⌨️ WASD walk · Shift run · Space jump · E talk/use · 1–4 choose · F eat/drink · M map · click for mouse look',6000),900)}V3.l=0;v3Size();vTreatsUI();v3HoldUI();murmur(true);
+    document.getElementById('vLoad').style.display='none';V3.on=true;window.VILON=true;V3.pos=V3.pos||new THREE.Vector3(-2.2,0,-1.5);if(V3.mode!=='walk')V3.mode='walk';V3.pos.set(-2.4,0,-.5);V3.yaw=Math.PI*.04;V3.pitch=-.03;V3.jy=0;V3.jv=0;V3.tgt=null;V3.near=undefined;if(!V3.helped&&matchMedia('(pointer:fine)').matches){V3.helped=1;setTimeout(()=>v3Msg('⌨️ WASD walk · Shift run · Space jump · E talk/use · 1–4 choose · F eat/drink · M map · click for mouse look',6000),900)}V3.l=0;v3Size();vTreatsUI();v3HoldUI();murmur(true);ambTown(true);
     const first=vDid('visit');v3Msg(first?'👋 Tap the street to walk there, drag to look around':'Welcome back to the old town',first?5000:2200);if(first)checkCh();V3LK.free=false;v3Cur();requestAnimationFrame(v3Frame);if(typeof lbPick==='function')setTimeout(lbPick,350)},40)}
-function v3Close(){setTimeout(v3Cur,0);if(typeof MP!=='undefined'&&MP.my){if(MP.my.k==='lead'||MP.my.k==='follow')mpLetGo(true);MP.my=null;mpHold()}if(V3.boat)tourReset();v3X.style.display='none';if(document.pointerLockElement)try{document.exitPointerLock()}catch(_){}V3LK.edge=0;V3.on=false;window.VILON=false;V3.keys={};V3.wish=false;document.getElementById('vil').classList.remove('show');vBubEl.style.display='none';murmur(false);frame.l=performance.now();checkCh()}
+function v3Close(){setTimeout(v3Cur,0);if(typeof MP!=='undefined'&&MP.my){if(MP.my.k==='lead'||MP.my.k==='follow')mpLetGo(true);MP.my=null;mpHold()}if(V3.boat)tourReset();v3X.style.display='none';if(document.pointerLockElement)try{document.exitPointerLock()}catch(_){}V3LK.edge=0;V3.on=false;window.VILON=false;V3.keys={};V3.wish=false;document.getElementById('vil').classList.remove('show');vBubEl.style.display='none';murmur(false);ambTown(false);frame.l=performance.now();checkCh()}
+
+/* ===== outdoor sound in the old town: the living room's music and fire go quiet; wind, the lake, the crowd, skates, a church bell and sleigh bells take over ===== */
+const AMB={on:false,bus:null,t:0,ev:0,bell:0};
+function ambTown(on){if(!AC)return;const t=AC.currentTime;AMB.on=on;
+  if(FIRE_G){FIRE_G.gain.cancelScheduledValues(t);FIRE_G.gain.setValueAtTime(FIRE_G.gain.value,t);FIRE_G.gain.linearRampToValueAtTime(on?0:.05,t+1.2)}
+  if(on){if(mTimer)stopMusic()}else if(musicOn)setTimeout(()=>{if(!window.VILON)startMusic()},300);
+  if(on&&!AMB.bus){const a=AC;AMB.bus=a.createGain();AMB.bus.gain.value=0;AMB.bus.connect(master);
+    const loop=(type,f,q)=>{const n=a.createBufferSource();n.buffer=noise(a);n.loop=true;const fl=a.createBiquadFilter();fl.type=type;fl.frequency.value=f;if(q)fl.Q.value=q;const g=a.createGain();g.gain.value=0;n.connect(fl).connect(g).connect(AMB.bus);n.start(0,Math.random()*1.5);return{g,fl}};
+    AMB.wind=loop('lowpass',340);AMB.gust=loop('bandpass',700,.7);AMB.lap=loop('bandpass',380,1.1);AMB.lapHi=loop('highpass',2400);AMB.ice=loop('bandpass',5200,2.5)}
+  if(AMB.bus){AMB.bus.gain.cancelScheduledValues(t);AMB.bus.gain.setValueAtTime(AMB.bus.gain.value,t);AMB.bus.gain.linearRampToValueAtTime(on?1:0,t+(on?2:.8))}}
+function ambSet(n,v,tc){n.g.gain.setTargetAtTime(v,AC.currentTime,tc||.4)}
+function ambFrame(dt,T){if(!AMB.on||!AMB.bus||!AC||AC.state!=='running'||!S3)return;AMB.t-=dt;if(AMB.t>0)return;AMB.t=.25;
+  const c=S3.cam.position,x=c.x,z=c.z,td=lkTown(x,z),sd=V3.boat?-20:lkSD(x,z),shore=V3.boat?1:Math.max(0,Math.min(1,1-Math.abs(sd)/38)),open=Math.max(0,Math.min(1,(td+6)/60));
+  /* wind: a soft bed between the houses, stronger and gustier out by the water */
+  const gu=.5+.5*Math.sin(T*.23)*Math.sin(T*.61+1.3);ambSet(AMB.wind,.018+.03*open+.012*gu,.8);ambSet(AMB.gust,(.003+.012*open)*gu*gu,.6);AMB.gust.fl.frequency.setTargetAtTime(500+500*gu,AC.currentTime,.6);
+  /* water lapping at the shore and against the hull */
+  const sw=.5+.5*Math.sin(T*1.05)*Math.sin(T*.37+.6);ambSet(AMB.lap,(.012+.05*sw*sw)*shore,.18);ambSet(AMB.lapHi,(.002+.007*sw*sw)*shore,.18);
+  /* blades on the ice near the rink */
+  const dr=Math.hypot(x-10,z+88),ik=Math.max(0,1-dr/22);ambSet(AMB.ice,.02*ik*ik*(.6+.4*Math.sin(T*2.6)),.15);
+  /* the crowd lives on the plaza */
+  if(MUR){const m=V3.boat?0:.04*Math.max(0,Math.min(1,1-(td+8)/45));MUR.g.gain.setTargetAtTime(m,AC.currentTime,.8)}
+  /* now and then: the church bell, sleigh bells passing a street away */
+  if(T>AMB.ev){if(AMB.ev){if(Math.random()<.45&&!V3.boat)ambSleigh(Math.max(.25,1-Math.max(0,td)/80));else ambToll(Math.hypot(x,z+178))}AMB.ev=T+35+Math.random()*50}}
+function ambSleigh(v){const t=AC.currentTime,dur=3.2+Math.random();for(let i=0;i<dur*9;i++){const tt=t+i/9+Math.random()*.05,sw=Math.sin(Math.PI*i/(dur*9));for(const f of[2900,3600,4700])if(Math.random()<.7){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f*(1+Math.random()*.03);g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(.006*v*sw,tt+.004);g.gain.exponentialRampToValueAtTime(.00005,tt+.18);o.connect(g).connect(AMB.bus);o.start(tt);o.stop(tt+.2)}}
+  for(let i=0;i<dur*2.2;i++){const tt=t+i/2.2+.2;nz('lowpass',260,.012*v*Math.sin(Math.PI*i/(dur*2.2)),.09,0,tt)}}
+function ambToll(d){const v=Math.max(.15,Math.min(1,1-d/320)),t=AC.currentTime;for(let i=0;i<3;i++)[[1,.05],[2.4,.016],[3,.012],[4.2,.006]].forEach(([h,p])=>{const o=AC.createOscillator(),g=AC.createGain(),tt=t+i*2.4;o.type='sine';o.frequency.value=196*h;g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(p*v,tt+.01);g.gain.exponentialRampToValueAtTime(.00004,tt+4.5);o.connect(g).connect(AMB.bus);o.start(tt);o.stop(tt+4.6)})}
+function ambStep(run){if(!AC||AC.state!=='running')return;const t=AC.currentTime;if(V3.boat){nz('lowpass',300,.05,.07,0,t);nz('bandpass',900,.012,.05,0,t+.01);return}
+  const snowy=lkTown(V3.pos.x,V3.pos.z)>-3||WX.snow;nz('bandpass',snowy?1800+Math.random()*900:700+Math.random()*400,run?.035:.025,snowy?.13:.08,0,t);if(snowy)nz('highpass',3800,run?.014:.009,.1,0,t+.025);nz('lowpass',240,.04,.06,0,t)}
 document.getElementById('vgo').onclick=v3Open;document.getElementById('vMapB').onclick=e=>{e.stopPropagation();vmToggle()};document.getElementById('vHome').onclick=v3Close;let V3SNOW=true;document.getElementById('vSnow').onclick=()=>{V3SNOW=!V3SNOW;const b=document.getElementById('vSnow');b.textContent=V3SNOW?'❄️ Snowing':'🌙 No snow';b.classList.toggle('off',!V3SNOW);v3Msg(V3SNOW?'❄️ It’s snowing':'🌙 The snow has stopped',1600)};addEventListener('resize',()=>{if(V3.on)v3Size()});
 
 requestAnimationFrame(frame);
