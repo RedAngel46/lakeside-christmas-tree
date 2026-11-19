@@ -1940,9 +1940,9 @@ function v3HoldUI(){const el=document.getElementById('vHold'),h=V3.held;if(h){co
     el.appendChild(document.createTextNode((I[2]==='drink'?'Drink':'Eat')+' '));const d=document.createElement('span');d.className='dots';d.textContent='●'.repeat(h.n)+'○'.repeat(I[3]-h.n);el.appendChild(d);el.classList.add('show')}else el.classList.remove('show')}
 function v3HandUpd(dt,T){const S=S3;if(!HREST)HREST=new THREE.Vector3(.17,-.15,-.5);if(!S.hand){S.hand=new THREE.Group();S.scene.add(S.hand)}const cam=S.cam,H=S.hand;H.position.copy(cam.position);H.quaternion.copy(cam.quaternion);
   /* vendors turn toward you while you talk */
-  if(V3.conv&&V3.conv.v){const v=V3.conv.v,par=v.g.parent,lp=par.worldToLocal(cam.position.clone());const want=Math.atan2(lp.x-v.g.position.x,lp.z-v.g.position.z),dy=((want-v.g.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;v.g.rotation.y+=dy*Math.min(1,dt*4);v.turned=v}
+  if(V3.conv&&V3.conv.v){const v=V3.conv.v,par=v.g.parent,lp=par.worldToLocal((V3.eye||cam.position).clone());const want=Math.atan2(lp.x-v.g.position.x,lp.z-v.g.position.z),dy=((want-v.g.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;v.g.rotation.y+=dy*Math.min(1,dt*4);v.turned=v}
   for(const p of PEOPLE)if(p.turned&&(!V3.conv||V3.conv.v!==p)){p.g.rotation.y*=1-Math.min(1,dt*3);if(Math.abs(p.g.rotation.y)<.01){p.g.rotation.y=0;p.turned=null}}
-  if(V3.chatP){const p=V3.chatP,g=p.g;if(T>p.chatT){V3.chatP=null}else{const dx=cam.position.x-g.position.x,dz=cam.position.z-g.position.z;const want=Math.atan2(dx,dz),dy=((want-g.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;g.rotation.y+=dy*Math.min(1,dt*5)}}
+  if(V3.chatP){const p=V3.chatP,g=p.g;if(T>p.chatT){V3.chatP=null}else{const E=V3.eye||cam.position,dx=E.x-g.position.x,dz=E.z-g.position.z;const want=Math.atan2(dx,dz),dy=((want-g.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;g.rotation.y+=dy*Math.min(1,dt*5)}}
   /* hand-over */
   const G=V3.give;if(G){const u=(T-G.t0),v=G.v,it=G.it;const hp=new THREE.Vector3(0,-.36,.06);
     if(v){const up=Math.min(1,u/.5),dn=u>1.1?Math.max(0,1-(u-1.1)/.5):1;v.arms[1].rotation.x=-1.35*up*dn;v.elbows[1].rotation.x=-.25*up*dn-.2*(1-up*dn);v.arms[1].rotation.z=.12*up*dn}
@@ -2438,6 +2438,31 @@ function vmDraw(){if(!VM.on||!V3.on){if(VM.on&&!V3.on)vmToggle(false);return}req
   {const nice=[1,2,5,10,20,50,100,200,500,1000,2000],m=nice.find(n=>n*sc>=70)||2000,L=m*sc,x0=18,y0=H-22;q.strokeStyle='#f3e6c4';q.lineWidth=2;q.beginPath();q.moveTo(x0,y0-5);q.lineTo(x0,y0);q.lineTo(x0+L,y0);q.lineTo(x0+L,y0-5);q.stroke();q.font='600 11px system-ui,sans-serif';q.textAlign='left';q.fillStyle='#f3e6c4';q.fillText(m>=1000?m/1000+' km':m+' m',x0+L+6,y0+1);
     const lat=45.41723+P.x/111320,lon=-122.6649+P.z/78200;q.textAlign='right';q.fillText(lat.toFixed(5)+'° N  '+Math.abs(lon).toFixed(5)+'° W',W-16,H-16)}
   const cE=el.querySelector('.vmC'),wh=V3.boat?(TOUR.st==='cruise'?'Aboard the Lakeside Belle · out on the lake':'Aboard the Lakeside Belle'):(lkTown(P.x,P.z)<0?'Old Town · Millennium Plaza':'Lakeside');if(cE.textContent!==wh)cE.textContent=wh}
+/* ===== third-person camera: scroll, pinch or +/- to pull back and see your own character, V flips between views ===== */
+const V3Z={max:12,last:5,cd:0,acc:0,ct:0,cands:[],me:null,meL:'',ray:null,head:null,dir:null,pd:0};
+function v3ZoomSet(z){z=z<1.6?0:Math.min(V3Z.max,z);V3.zoomT=z;if(z)V3Z.last=z;try{localStorage.setItem('lakeTreeZoom',String(z))}catch(_){}}
+/* f>1 pulls the camera back, f<1 brings it in; from first person the first step out lands just behind your shoulders */
+function v3ZoomBy(f){const z=V3.zoomT||0;v3ZoomSet(f>1?(z<1.6?2.2:z*f):z*f)}
+function v3Me(){const lk=JSON.stringify(LOOK);if(!V3Z.me||V3Z.meL!==lk){if(V3Z.me&&V3Z.me.g.parent)V3Z.me.g.parent.remove(V3Z.me.g);V3Z.me=lkPerson(LOOK,{idle:true});V3Z.meL=lk;S3.scene.add(V3Z.me.g)}return V3Z.me}
+/* what the camera may bump into: the static things the culler already tracks near you, plus the boat when aboard */
+function v3CamCands(P){const out=[],R=V3Z.max+1;if(CULL.list)for(const e of CULL.list){if(e.dyn||!e.o.visible)continue;const c=e.c||e.o.position,dx=c.x-P.x,dz=c.z-P.z,r=e.r+R;if(dx*dx+dz*dz<r*r)out.push(e.o)}if(V3.boat&&TOUR.B)out.push(TOUR.B.RB);return out}
+function v3Third(dt,T,moving){const S=S3,P=V3.pos,cam=S.cam,my=typeof MP!=='undefined'&&MP.my;
+  if(V3.zoomT==null){let z=0;try{z=+localStorage.getItem('lakeTreeZoom')||0}catch(_){}V3.zoomT=z>=1.6?Math.min(V3Z.max,z):0;if(V3.zoomT)V3Z.last=V3.zoomT}
+  if(!V3Z.tip){V3Z.tip=T+9}else if(V3Z.tip>1&&T>V3Z.tip){V3Z.tip=1;let seen=null;try{seen=localStorage.getItem('lakeTreeZoomTip')}catch(_){}if(!seen&&!V3.zoomT){v3Msg(FINE?'🔭 Scroll to zoom out and see yourself · V switches views':'🔭 Pinch to zoom out and see yourself',4200);try{localStorage.setItem('lakeTreeZoomTip','1')}catch(_){}}}
+  /* sitting, skating, riding and hugs keep their own cameras */
+  const ok=V3.mode==='walk'&&!V3.seat&&!(my&&(my.k==='hug'||my.k==='kiss'));
+  if(!ok)V3.zoom=0;else{V3.zoom=(V3.zoom||0)+(V3.zoomT-(V3.zoom||0))*Math.min(1,dt*7);if(Math.abs(V3.zoomT-V3.zoom)<.01)V3.zoom=V3.zoomT}
+  if(V3.zoom<.35){if(V3Z.me)V3Z.me.g.visible=false;V3.eye=null;V3Z.cd=0;return}
+  const me=v3Me(),gy=(V3.gy||0)+(V3.jy||0);me.g.position.set(P.x,gy,P.z);me.g.rotation.y=V3.yaw+Math.PI;me.sp=V3.keys.run?4.4:2;animPerson(me,dt,moving,T);if(my&&(my.k==='lead'||my.k==='follow'))mpPose(me,my.k,dt);
+  const H=V3Z.head||(V3Z.head=new THREE.Vector3()),D=V3Z.dir||(V3Z.dir=new THREE.Vector3());H.set(P.x,gy+1.5*(me.k||1),P.z);V3.eye=H;
+  const p=V3.pitch,y=V3.yaw;D.set(Math.sin(y)*Math.cos(p),-Math.sin(p),Math.cos(y)*Math.cos(p));
+  /* pull in in front of walls, ease back out once the view is clear */
+  let d=V3.zoom;if(T>V3Z.ct){V3Z.ct=T+.4;V3Z.cands=v3CamCands(P)}
+  if(V3Z.cands.length){const r=V3Z.ray||(V3Z.ray=new THREE.Raycaster());r.params.Points.threshold=0;r.params.Line.threshold=0;r.camera=cam;r.set(H,D);r.near=.15;r.far=d+.35;
+    for(const h of r.intersectObjects(V3Z.cands,true)){const m=h.object.material;if(!h.object.isMesh||!h.object.visible||(m&&(m.transparent&&m.opacity<.6||m.depthWrite===false)))continue;d=Math.max(.3,h.distance-.35);break}}
+  V3Z.cd=d<V3Z.cd||!V3Z.cd?d:V3Z.cd+(d-V3Z.cd)*Math.min(1,dt*3);
+  cam.position.copy(H).addScaledVector(D,V3Z.cd);if(cam.position.y<gy+.3)cam.position.y=gy+.3;
+  me.g.visible=V3Z.cd>.75}
 function v3Frame(now){if(!V3.on)return;requestAnimationFrame(v3Frame);const S=S3,T=now/1000,dt=Math.min(.05,(now-(V3.l||now))/1000);V3.l=now;V3T=T;if(S.tourUpd)S.tourUpd(dt,T);
   /* player */
   const P=V3.pos,k=V3.keys;let moving=false;
@@ -2453,7 +2478,7 @@ function v3Frame(now){if(!V3.on)return;requestAnimationFrame(v3Frame);const S=S3
   let ey=1.62+(V3.mode==='walk'?V3.gy:0)+(moving&&!(V3.jy>0)?Math.sin(V3.bob)*(k.run?.05:.035):0)+(V3.jy||0),cx=P.x,cz=P.z,yaw=V3.yaw;
   if(V3.mode==='skate'){const u=(T-V3.t0)/16,a=u*6.28*1.6,r=4.4;cx=10+Math.cos(a)*r;cz=-88+Math.sin(a)*r;yaw=Math.atan2(Math.sin(a),-Math.cos(a))*-1;yaw=-a;ey=1.6+Math.sin(T*3)*.03;if(u>=1){V3.mode='walk';P.set(10-7.2,0,-86.5);V3.yaw=-Math.PI/2;v3Msg('That was fun! ⛸️')}else{V3.yaw=yaw}}
   if(V3.mode==='ride'){const u=(T-V3.t0)/14,a=S.carRot.rotation.y+Math.PI*.15,r=3.75;cx=-10+Math.cos(-a)*r;cz=-68+Math.sin(-a)*r;yaw=-a+Math.PI;ey=2.55+Math.sin(T*2.2)*.24;if(u>=1){V3.mode='walk';P.set(-10+6.2,0,-66.5);V3.yaw=Math.PI/2+.3}else V3.yaw=yaw}
-  S.cam.position.set(cx,ey,cz);S.cam.rotation.set(0,0,0);S.cam.rotation.order='YXZ';S.cam.rotation.y=V3.mode==='walk'?V3.yaw:yaw;S.cam.rotation.x=V3.pitch;
+  S.cam.position.set(cx,ey,cz);S.cam.rotation.set(0,0,0);S.cam.rotation.order='YXZ';S.cam.rotation.y=V3.mode==='walk'?V3.yaw:yaw;S.cam.rotation.x=V3.pitch;v3Third(dt,T,moving);
   S.sky.position.copy(S.cam.position);
   /* nearest real lights */
   if(!V3.lt||T>V3.lt){V3.lt=T+(V3.boat?.05:.4);const arr=V3LAMPS.map(l=>[l,l.distanceToSquared(S.cam.position)]).sort((a,b)=>a[1]-b[1]);S.pl.forEach((l,i)=>{const q=arr[i];if(q)l.position.copy(q[0])})}
@@ -2482,7 +2507,7 @@ function v3Frame(now){if(!V3.on)return;requestAnimationFrame(v3Frame);const S=S3
   if(!near&&V3.mode==='walk'&&!V3.boat){if(!V3.ct||T>V3.ct){V3.ct=T+.2;let best=null,bd=1.8;for(const p of WALKERS.concat(PEOPLE.filter(q=>q.idle&&!q.vend&&q.g.parent===S.scene))){if(p.g.scale.x<.8||p===S.santa)continue;const d=Math.hypot(p.g.position.x-P.x,p.g.position.z-P.z);if(d<bd){bd=d;best=p}}V3.cp=best}if(V3.cp){const p=V3.cp;near=p.chatAct||(p.chatAct={id:'chat',lab:'💬 Say hello',p:p.g.position,r:1.8,go:()=>v3Chat(p)})}}
   if(V3.conv&&Math.hypot(V3.conv.a.p.x-P.x,V3.conv.a.p.z-P.z)>V3.conv.a.r+1.2){v3End();vAct.innerHTML=''}
   if(near!==V3.near&&!V3.wish){V3.near=near;vAct.innerHTML='';if(near)vBtn(near.lab,'E',()=>near.go(near))}
-  v3HandUpd(dt,T);
+  v3HandUpd(dt,T);if(S.hand)S.hand.visible=!(V3.zoom>.35);
   /* bubble */
   if(BUB&&T<BUB.t){const v=new THREE.Vector3();BUB.p.g.getWorldPosition(v);v.y+=2.05*BUB.p.k;const d=v.distanceTo(S.cam.position);v.project(S.cam);if(v.z<1&&d<18){vBubEl.style.display='block';vBubEl.style.left=((v.x+1)/2*innerWidth)+'px';vBubEl.style.top=((1-v.y)/2*innerHeight)+'px';vBubEl.style.opacity=Math.min(1,(BUB.t-T)*3)}else vBubEl.style.display='none'}else vBubEl.style.display='none';
   if(typeof mpFrame==='function'){mpFrame(dt,T);if(MP.ok)mpPos(false)}ambFrame(dt,T);v3Cull();v3Adapt(dt);if(S.waterUpd){v3ReflHide(true);S.waterUpd(T);v3ReflHide(false)}S.ren.render(S.scene,S.cam)}
@@ -2510,9 +2535,17 @@ v3c.addEventListener('pointerup',e=>{if(!v3drag||v3drag.id!==e.pointerId)return;
   let pt=hit?hit.point:null;const dir=r.ray.direction;let best=null,bd=1e9;for(const a of ACTS){const v=a.p.clone().setY(1.2).sub(r.ray.origin),along=v.dot(dir);if(along<0||along>40)continue;const perp=v.clone().sub(dir.clone().multiplyScalar(along)).length();if(perp<1.6+along*.04&&along<bd){bd=along;best=a}}
   if(best&&(!pt||best.p.distanceTo(S.cam.position)<pt.distanceTo(S.cam.position)+4)){V3.tgt=best.p.clone();V3.pend=best;best.face=best.v?best.v.g.getWorldPosition(new THREE.Vector3()):null;return}
   if(pt){const q={x:pt.x,z:pt.z};walkClamp(q);V3.tgt=new THREE.Vector3(q.x,0,q.z);V3.pend=null;showTap(e.clientX,e.clientY)}});
+/* zoom: one wheel notch (or ~100px of trackpad scroll) per step; a trackpad pinch arrives as ctrl+wheel */
+v3c.addEventListener('wheel',e=>{if(!V3.on)return;e.preventDefault();const u=e.deltaMode===1?40:e.deltaMode===2?400:1;V3Z.acc+=e.deltaY*u*(e.ctrlKey?6:1);while(Math.abs(V3Z.acc)>=100){const o=V3Z.acc>0;V3Z.acc-=o?100:-100;v3ZoomBy(o?1.25:1/1.25)}},{passive:false});
+/* two-finger pinch on touch screens: fingers together pulls the camera back */
+const V3TP=new Map();const v3Pd=()=>{const [a,b]=[...V3TP.values()];return Math.hypot(a.x-b.x,a.y-b.y)||1};
+v3c.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;V3TP.set(e.pointerId,{x:e.clientX,y:e.clientY});if(V3TP.size===2){v3drag=null;V3Z.pd=v3Pd()}});
+v3c.addEventListener('pointermove',e=>{const q=V3TP.get(e.pointerId);if(!q)return;q.x=e.clientX;q.y=e.clientY;if(V3TP.size!==2||!V3Z.pd)return;const d=v3Pd(),f=V3Z.pd/d,z=V3.zoomT||0;
+  if(!z){if(f>1.15){v3ZoomSet(2.2);V3Z.pd=d}}else if(Math.abs(f-1)>.02){v3ZoomSet(z*f);V3Z.pd=d}});
+for(const ev of['pointerup','pointercancel'])v3c.addEventListener(ev,e=>{V3TP.delete(e.pointerId);if(V3TP.size<2)V3Z.pd=0});
 function showTap(x,y){const el=document.getElementById('vTap');el.style.left=x+'px';el.style.top=y+'px';el.classList.remove('go');void el.offsetWidth;el.classList.add('go')}
 const KM={ArrowUp:'f',w:'f',W:'f',ArrowDown:'b',s:'b',S:'b',ArrowLeft:'l',ArrowRight:'r',a:'sl',A:'sl',d:'sr',D:'sr',Shift:'run'};
-addEventListener('keydown',e=>{if(!V3.on)return;if(e.key==='Escape'&&VM.on){vmToggle(false);return}if((e.key==='m'||e.key==='M')&&!e.metaKey&&!e.ctrlKey){e.preventDefault();if(!e.repeat)vmToggle();return}if(VM.on&&(e.key==='='||e.key==='+'||e.key==='-'||e.key==='_')){e.preventDefault();vmZoom(e.key==='-'||e.key==='_'?1/1.4:1.4);return}if(e.key==='Escape'){if(V3.conv||V3.wish){v3End();vAct.innerHTML='';return}if(document.pointerLockElement===v3c||performance.now()-V3LK.un<400)return;if(V3LK.ok===false&&FINE&&!V3LK.free){V3LK.free=true;V3LK.edge=0;v3Cur();v3Msg('🖱️ Mouse released · click to look around again · Esc again to leave town',4500);return}if(!document.getElementById('rw').classList.contains('show'))v3Close();return}if(e.key===' '||e.code==='Space'){e.preventDefault();if(!e.repeat&&V3.mode==='walk'&&!(V3.jy>0)){V3.jv=4.3;V3.jy=.001;if(AC&&AC.state==='running')nz('bandpass',500,.04,.12)}return}const kl=e.key.toLowerCase();if(e.key==='Enter'||kl==='e'){e.preventDefault();if(e.repeat)return;const bs=vAct.querySelectorAll('button'),b=[...bs].find(x=>x.dataset.k==='E')||bs[0];if(b)b.click();return}if(/^[1-6]$/.test(e.key)){const b=vAct.querySelectorAll('button')[+e.key-1];if(b){e.preventDefault();b.click()}return}if(kl==='f'){e.preventDefault();if(!e.repeat)v3Consume();return}const k=KM[e.key];if(k){V3.keys[k]=true;e.preventDefault()}});
+addEventListener('keydown',e=>{if(!V3.on)return;if(e.key==='Escape'&&VM.on){vmToggle(false);return}if((e.key==='m'||e.key==='M')&&!e.metaKey&&!e.ctrlKey){e.preventDefault();if(!e.repeat)vmToggle();return}if(VM.on&&(e.key==='='||e.key==='+'||e.key==='-'||e.key==='_')){e.preventDefault();vmZoom(e.key==='-'||e.key==='_'?1/1.4:1.4);return}if(!e.metaKey&&!e.ctrlKey&&!e.altKey&&(e.key==='='||e.key==='+'||e.key==='-'||e.key==='_')){e.preventDefault();v3ZoomBy(e.key==='-'||e.key==='_'?1.3:1/1.3);return}if((e.key==='v'||e.key==='V')&&!e.metaKey&&!e.ctrlKey){e.preventDefault();if(!e.repeat)v3ZoomSet(V3.zoomT?0:V3Z.last);return}if(e.key==='Escape'){if(V3.conv||V3.wish){v3End();vAct.innerHTML='';return}if(document.pointerLockElement===v3c||performance.now()-V3LK.un<400)return;if(V3LK.ok===false&&FINE&&!V3LK.free){V3LK.free=true;V3LK.edge=0;v3Cur();v3Msg('🖱️ Mouse released · click to look around again · Esc again to leave town',4500);return}if(!document.getElementById('rw').classList.contains('show'))v3Close();return}if(e.key===' '||e.code==='Space'){e.preventDefault();if(!e.repeat&&V3.mode==='walk'&&!(V3.jy>0)){V3.jv=4.3;V3.jy=.001;if(AC&&AC.state==='running')nz('bandpass',500,.04,.12)}return}const kl=e.key.toLowerCase();if(e.key==='Enter'||kl==='e'){e.preventDefault();if(e.repeat)return;const bs=vAct.querySelectorAll('button'),b=[...bs].find(x=>x.dataset.k==='E')||bs[0];if(b)b.click();return}if(/^[1-6]$/.test(e.key)){const b=vAct.querySelectorAll('button')[+e.key-1];if(b){e.preventDefault();b.click()}return}if(kl==='f'){e.preventDefault();if(!e.repeat)v3Consume();return}const k=KM[e.key];if(k){V3.keys[k]=true;e.preventDefault()}});
 addEventListener('keyup',e=>{const k=KM[e.key];if(k)V3.keys[k]=false});
 function v3Open(){ac();if(!window.THREE){toast('The village is still loading…');return}
   const el=document.getElementById('vil');el.classList.add('show');if(FINE){v3X.style.display='block';v3X.style.opacity=.5;if(V3LK.ok!==false)v3Lock()}document.getElementById('vLoad').style.display='flex';
