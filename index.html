@@ -2452,14 +2452,19 @@ function v3Third(dt,T,moving){const S=S3,P=V3.pos,cam=S.cam,my=typeof MP!=='unde
   /* sitting, skating, riding and hugs keep their own cameras */
   const ok=V3.mode==='walk'&&!V3.seat&&!(my&&(my.k==='hug'||my.k==='kiss'));
   if(!ok)V3.zoom=0;else{V3.zoom=(V3.zoom||0)+(V3.zoomT-(V3.zoom||0))*Math.min(1,dt*7);if(Math.abs(V3.zoomT-V3.zoom)<.01)V3.zoom=V3.zoomT}
-  if(V3.zoom<.35){if(V3Z.me)V3Z.me.g.visible=false;V3.eye=null;V3Z.cd=0;return}
+  /* (wait for the culler's first pass, so your own character never lands in its list of static things) */
+  if(V3.zoom<.35||!CULL.list){if(V3Z.me)V3Z.me.g.visible=false;V3.eye=null;V3Z.cd=0;return}
   const me=v3Me(),gy=(V3.gy||0)+(V3.jy||0);me.g.position.set(P.x,gy,P.z);me.g.rotation.y=V3.yaw+Math.PI;me.sp=V3.keys.run?4.4:2;animPerson(me,dt,moving,T);if(my&&(my.k==='lead'||my.k==='follow'))mpPose(me,my.k,dt);
   const H=V3Z.head||(V3Z.head=new THREE.Vector3()),D=V3Z.dir||(V3Z.dir=new THREE.Vector3());H.set(P.x,gy+1.5*(me.k||1),P.z);V3.eye=H;
   const p=V3.pitch,y=V3.yaw;D.set(Math.sin(y)*Math.cos(p),-Math.sin(p),Math.cos(y)*Math.cos(p));
   /* pull in in front of walls, ease back out once the view is clear */
   let d=V3.zoom;if(T>V3Z.ct){V3Z.ct=T+.4;V3Z.cands=v3CamCands(P)}
-  if(V3Z.cands.length){const r=V3Z.ray||(V3Z.ray=new THREE.Raycaster());r.params.Points.threshold=0;r.params.Line.threshold=0;r.camera=cam;r.set(H,D);r.near=.15;r.far=d+.35;
-    for(const h of r.intersectObjects(V3Z.cands,true)){const m=h.object.material;if(!h.object.isMesh||!h.object.visible||(m&&(m.transparent&&m.opacity<.6||m.depthWrite===false)))continue;d=Math.max(.3,h.distance-.35);break}}
+  if(V3Z.cands.length){const r=V3Z.ray||(V3Z.ray=new THREE.Raycaster());r.params.Points.threshold=0;r.params.Line.threshold=0;r.camera=cam;
+    const solid=h=>{const m=h.object.material;return h.object.isMesh&&h.object.visible&&!(m&&(m.transparent&&m.opacity<.6||m.depthWrite===false))};
+    /* walls are one-sided, so look both ways: out from your head, and back from where the camera wants to be (inside a shop or the boat's salon) */
+    const far=d+.35;r.set(H,D);r.near=.15;r.far=far;const out=r.intersectObjects(V3Z.cands,true).find(solid);let hd=out?out.distance:far;
+    const C=V3Z.cpt||(V3Z.cpt=new THREE.Vector3());C.copy(H).addScaledVector(D,far);D.negate();r.set(C,D);r.near=0;r.far=far-.15;const back=r.intersectObjects(V3Z.cands,true).find(solid);D.negate();if(back)hd=Math.min(hd,far-back.distance);
+    if(hd<far)d=Math.max(.3,hd-.35)}
   V3Z.cd=d<V3Z.cd||!V3Z.cd?d:V3Z.cd+(d-V3Z.cd)*Math.min(1,dt*3);
   cam.position.copy(H).addScaledVector(D,V3Z.cd);if(cam.position.y<gy+.3)cam.position.y=gy+.3;
   me.g.visible=V3Z.cd>.75}
