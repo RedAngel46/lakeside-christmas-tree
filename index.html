@@ -112,7 +112,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #vLobB{position:absolute;top:10px;left:316px;font:600 14px -apple-system,system-ui,sans-serif;border:0;border-radius:999px;padding:9px 14px;color:#fff;background:rgba(20,26,40,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer;z-index:3}
 .lobN:not(:empty){display:inline-block;margin-left:5px;min-width:18px;padding:0 5px;border-radius:9px;background:#5aa866;color:#fff;font:700 12px/18px -apple-system,system-ui,sans-serif;text-align:center}
 #lob{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(6,8,14,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}#lob.show{display:flex}
-#lob .lbC{width:min(400px,calc(100% - 28px));max-height:calc(100% - 40px);overflow:auto;padding:18px 18px 16px;border-radius:18px;color:#f6ecd8;font:15px/1.4 -apple-system,system-ui,sans-serif;background:linear-gradient(#2c1d12,#1a110a);box-shadow:0 18px 60px rgba(0,0,0,.6),0 0 0 1px rgba(240,215,150,.3) inset}
+#lob .lbC{box-sizing:border-box;width:min(400px,calc(100% - 28px));max-height:calc(100% - 40px);overflow:auto;padding:18px 18px 16px;border-radius:18px;color:#f6ecd8;font:15px/1.4 -apple-system,system-ui,sans-serif;background:linear-gradient(#2c1d12,#1a110a);box-shadow:0 18px 60px rgba(0,0,0,.6),0 0 0 1px rgba(240,215,150,.3) inset}
 #lob .lbH{display:flex;align-items:center;justify-content:space-between;gap:10px}#lob h3{margin:0;font:italic 700 22px Georgia,serif;color:#f3dfa8}#lob h4{margin:16px 0 6px;font:600 12px -apple-system,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
 #lob .lbS{margin:12px 0 10px;opacity:.9}#lob .lbS i,#lob li i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;box-shadow:0 0 0 2px rgba(255,255,255,.18)}
 #lob .row{display:flex;gap:8px;flex-wrap:wrap}#lob .lbF{display:flex;gap:8px}#lob input{flex:1;min-width:0;font:16px -apple-system,system-ui,sans-serif;padding:9px 12px;border-radius:12px;border:1px solid rgba(240,215,150,.35);background:rgba(255,255,255,.08);color:#fff;outline:none}#lob input:focus{border-color:#e8c66e}
@@ -120,6 +120,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #lob ul{list-style:none;margin:0;padding:0}#lob li{display:flex;align-items:center;gap:2px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.07)}#lob li b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#lob li em{font-style:normal;font-size:12px;margin-left:6px;padding:1px 7px;border-radius:9px;background:rgba(232,198,110,.2);color:#f3dfa8}#lob li span{margin-left:auto;padding-left:10px;font-size:13px;opacity:.75;white-space:nowrap}
 #lob .lbE{margin:8px 0;opacity:.7;font-size:14px}#lob .lbCp{margin-top:14px;width:100%;font:600 14px -apple-system,system-ui,sans-serif;padding:10px;border-radius:12px;border:1px dashed rgba(240,215,150,.4);background:transparent;color:#f3dfa8;cursor:pointer}
 @media(max-width:560px){#vLobB{top:58px;left:10px}}
+#lob .lbG{gap:10px}#lob .lbG .lbGi{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center}#lob .lbG small{flex-basis:100%;font-size:13px;opacity:.7;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#lob .lbG.inv{background:rgba(232,198,110,.1);border-radius:10px;padding-left:8px;padding-right:8px}#lob .lbNew{display:flex;gap:8px;margin-top:12px}#lob[data-mode=pick] .lbC{width:min(460px,calc(100% - 24px))}#lob *{box-sizing:border-box}@media(max-width:420px){#lob .lbC{padding:16px 14px 14px}#lob .lbNew .pill{padding:8px 12px}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="title">Lakeside living room · Lake Oswego</div>
@@ -2474,60 +2475,93 @@ function v3Open(){ac();if(!window.THREE){toast('The village is still loading…'
   const el=document.getElementById('vil');el.classList.add('show');if(FINE){v3X.style.display='block';v3X.style.opacity=.5;if(V3LK.ok!==false)v3Lock()}document.getElementById('vLoad').style.display='flex';
   setTimeout(()=>{try{if(!S3)v3Build()}catch(err){console.error(err);document.getElementById('vLoad').textContent='Sorry, this device can’t show the 3D village.';return}
     document.getElementById('vLoad').style.display='none';V3.on=true;window.VILON=true;V3.pos=V3.pos||new THREE.Vector3(-2.2,0,-1.5);if(V3.mode!=='walk')V3.mode='walk';V3.pos.set(-2.4,0,-.5);V3.yaw=Math.PI*.04;V3.pitch=-.03;V3.jy=0;V3.jv=0;V3.tgt=null;V3.near=undefined;if(!V3.helped&&matchMedia('(pointer:fine)').matches){V3.helped=1;setTimeout(()=>v3Msg('⌨️ WASD walk · Shift run · Space jump · E talk/use · 1–4 choose · F eat/drink · M map · click for mouse look',6000),900)}V3.l=0;v3Size();vTreatsUI();v3HoldUI();murmur(true);
-    const first=vDid('visit');v3Msg(first?'👋 Tap the street to walk there, drag to look around':'Welcome back to the old town',first?5000:2200);if(first)checkCh();requestAnimationFrame(v3Frame)},40)}
+    const first=vDid('visit');v3Msg(first?'👋 Tap the street to walk there, drag to look around':'Welcome back to the old town',first?5000:2200);if(first)checkCh();requestAnimationFrame(v3Frame);if(typeof lbPick==='function')setTimeout(lbPick,350)},40)}
 function v3Close(){if(V3.boat)tourReset();v3X.style.display='none';if(document.pointerLockElement)try{document.exitPointerLock()}catch(_){}V3LK.edge=0;V3.on=false;window.VILON=false;V3.keys={};V3.wish=false;document.getElementById('vil').classList.remove('show');vBubEl.style.display='none';murmur(false);frame.l=performance.now();checkCh()}
 document.getElementById('vgo').onclick=v3Open;document.getElementById('vMapB').onclick=e=>{e.stopPropagation();vmToggle()};document.getElementById('vHome').onclick=v3Close;let V3SNOW=true;document.getElementById('vSnow').onclick=()=>{V3SNOW=!V3SNOW;const b=document.getElementById('vSnow');b.textContent=V3SNOW?'❄️ Snowing':'🌙 No snow';b.classList.toggle('off',!V3SNOW);v3Msg(V3SNOW?'❄️ It’s snowing':'🌙 The snow has stopped',1600)};addEventListener('resize',()=>{if(V3.on)v3Size()});
 
 requestAnimationFrame(frame);
 /* ---------- multiplayer lobby (Supabase: who's online, by name and place) ---------- */
-const LB={url:'https://kpvllwbuwqbnclvzccds.supabase.co/rest/v1/players',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwdmxsd2J1d3FibmNsdnpjY2RzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxMjAzNjEsImV4cCI6MjExMDY5NjM2MX0.N2e3a0Pz6zyWGpDOh6QP30ZevptkXfxFTcEEyShsp1k',id:null,on:false,color:null,list:[],seen:new Set(),open:false,err:0,ft:0,bt:0,pl:'',busy:false,link:'https://redangel46.github.io/lakeside-christmas-tree/'};
-try{const j=JSON.parse(localStorage.getItem('lakeTreeLobby')||'null');if(j&&j.id){LB.id=j.id;LB.on=!!j.on;LB.color=j.color||null}}catch(_){}
+const LB={url:'https://kpvllwbuwqbnclvzccds.supabase.co/rest/v1/players',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwdmxsd2J1d3FibmNsdnpjY2RzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxMjAzNjEsImV4cCI6MjExMDY5NjM2MX0.N2e3a0Pz6zyWGpDOh6QP30ZevptkXfxFTcEEyShsp1k',id:null,on:false,color:null,list:[],seen:new Set(),open:false,mode:'room',err:0,ft:0,bt:0,pl:'',busy:false,edit:false,lobby:null,lname:'',inv:null,invN:'',link:'https://redangel46.github.io/lakeside-christmas-tree/'};
+try{const j=JSON.parse(localStorage.getItem('lakeTreeLobby')||'null');if(j&&j.id){LB.id=j.id;LB.on=!!j.on;LB.color=j.color||null;LB.lobby=j.lobby||null;LB.lname=j.lname||''}}catch(_){}
+try{const q=new URLSearchParams(location.search),c=(q.get('lobby')||'').toLowerCase();if(/^[a-z0-9]{4,12}$/.test(c)){LB.inv=c;LB.invN=(q.get('n')||'').slice(0,32)}}catch(_){}
 const LB_COL=['#d9534a','#e3a63c','#5aa866','#4a8fd6','#a874d6','#d870a8','#3fb8b0','#c98a52'];
 if(!LB.color)LB.color=LB_COL[Math.random()*LB_COL.length|0];
 const LB_PL={home:'🏠 Living room',town:'🏘️ Old town',boat:'🛥️ Boat tour'};
-function lbSave(){try{localStorage.setItem('lakeTreeLobby',JSON.stringify({id:LB.id,on:LB.on,color:LB.color}))}catch(_){}}
+const LB_SQ='square',LB_SQN='Lakeside Square';
+function lbSave(){try{localStorage.setItem('lakeTreeLobby',JSON.stringify({id:LB.id,on:LB.on,color:LB.color,lobby:LB.lobby,lname:LB.lname}))}catch(_){}}
 function lbH(j){const h={apikey:LB.key,Authorization:'Bearer '+LB.key};if(j){h['Content-Type']='application/json';h.Prefer='return=representation'}return h}
 function lbPlace(){return V3.on?(V3.boat?'boat':'town'):'home'}
 function lbEsc(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function lbNote(m){if(V3.on)v3Msg(m,3200);else{const el=document.getElementById('np');clearTimeout(npT);clearTimeout(tT);el.textContent=m;el.style.opacity=1;tT=setTimeout(()=>el.style.opacity=0,3200)}}
-async function lbBeat(){if(!LB.on||!who)return;LB.bt=Date.now();LB.pl=lbPlace();const body={name:who,color:LB.color,place:LB.pl,last_seen:new Date().toISOString()};
+function lbCode(){const a='abcdefghjkmnpqrstuvwxyz23456789';let s='';for(let i=0;i<6;i++)s+=a[Math.random()*a.length|0];return s}
+function lbInvite(){return LB.link+(LB.lobby&&LB.lobby!==LB_SQ?'?lobby='+LB.lobby+'&n='+encodeURIComponent(LB.lname||''):'')}
+function lbLobOf(p){return p.lobby||LB_SQ}
+async function lbBeat(){if(!LB.on||!who)return;LB.bt=Date.now();LB.pl=lbPlace();const body={name:who,color:LB.color,place:LB.pl,lobby:LB.lobby&&LB.lobby!==LB_SQ?LB.lobby:null,lobby_name:LB.lobby&&LB.lobby!==LB_SQ?(LB.lname||null):null,last_seen:new Date().toISOString()};
   try{if(LB.id){const r=await fetch(LB.url+'?id=eq.'+encodeURIComponent(LB.id),{method:'PATCH',headers:lbH(1),body:JSON.stringify(body)});if(r.ok){const a=await r.json();if(a&&a.length){lbOff(a[0]);LB.err=0;return true}}}
     const r=await fetch(LB.url,{method:'POST',headers:lbH(1),body:JSON.stringify(body)});if(!r.ok)throw 0;const a=await r.json();LB.id=a[0].id;lbOff(a[0]);lbSave();LB.err=0;return true}catch(_){LB.err++;return false}}
-async function lbFetch(){LB.ft=Date.now();try{const since=new Date(Date.now()+(LB.off||0)-75e3).toISOString();const r=await fetch(LB.url+'?select=id,name,color,place,last_seen&last_seen=gt.'+encodeURIComponent(since)+'&order=created_at.asc&limit=60',{headers:lbH()});if(!r.ok)throw 0;const a=await r.json();
-    if(LB.on&&LB.ok)for(const p of a)if(p.id!==LB.id&&!LB.seen.has(p.id))lbNote('👋 '+p.name+' just came online');
+async function lbFetch(){LB.ft=Date.now();try{const since=new Date(Date.now()+(LB.off||0)-75e3).toISOString();const r=await fetch(LB.url+'?select=id,name,color,place,lobby,lobby_name,last_seen&last_seen=gt.'+encodeURIComponent(since)+'&order=created_at.asc&limit=200',{headers:lbH()});if(!r.ok)throw 0;const a=await r.json();
+    if(LB.on&&LB.ok)for(const p of a)if(p.id!==LB.id&&!LB.seen.has(p.id)&&lbLobOf(p)===(LB.lobby||LB_SQ))lbNote('👋 '+p.name+' joined your lobby');
     LB.seen=new Set(a.map(p=>p.id));LB.list=a;LB.ok=true;LB.err=0}catch(_){LB.err++}lbDraw()}
 function lbOff(p){const t=Date.parse(p&&p.last_seen);if(t>1e12)LB.off=t-Date.now()}
-function lbOthers(){return LB.list.filter(p=>p.id!==LB.id)}
-function lbDraw(){const n=lbOthers().length;document.querySelectorAll('.lobN').forEach(e=>e.textContent=n?String(n):'');
-  const el=document.getElementById('lob');if(!LB.open)return;const L=el.querySelector('.lbL'),M=el.querySelector('.lbMe');
-  if(LB.on&&!LB.edit){M.innerHTML='<p class="lbS"><i style="background:'+lbEsc(LB.color)+'"></i>You’re online as <b>'+lbEsc(who)+'</b> · '+LB_PL[lbPlace()]+'</p><div class="row"><button type="button" class="pill" id="lbRen">Change name</button><button type="button" class="pill" id="lbOut">Leave lobby</button></div>';
-    M.querySelector('#lbOut').onclick=lbLeave;M.querySelector('#lbRen').onclick=()=>{LB.edit=true;M.innerHTML='';lbForm()}}
+function lbMates(){const L=LB.lobby||LB_SQ;return LB.list.filter(p=>p.id!==LB.id&&lbLobOf(p)===L)}
+function lbLobbies(){const m=new Map();for(const p of LB.list){if(p.id===LB.id)continue;const c=lbLobOf(p);if(!m.has(c))m.set(c,{code:c,name:c===LB_SQ?LB_SQN:(p.lobby_name||'Lobby '+c),ppl:[]});m.get(c).ppl.push(p)}
+  if(LB.inv&&!m.has(LB.inv))m.set(LB.inv,{code:LB.inv,name:LB.invN||'Lobby '+LB.inv,ppl:[]});
+  if(!m.has(LB_SQ))m.set(LB_SQ,{code:LB_SQ,name:LB_SQN,ppl:[]});
+  return[...m.values()].sort((a,b)=>(b.code===LB.inv)-(a.code===LB.inv)||(b.code===(LB.on&&LB.lobby))-(a.code===(LB.on&&LB.lobby))||b.ppl.length-a.ppl.length)}
+function lbOffline(){return!LB.ok&&LB.err>0}
+function lbOffMsg(){return location.hostname.indexOf('github.io')<0?'<p class="lbE">This copy of the game can’t go online. Play together on the game’s own site: <a href="'+LB.link+'" target="_blank" rel="noopener" style="color:#ffd27a">'+LB.link.replace('https://','')+'</a></p>':'<p class="lbE">Can’t reach the lobbies right now. Check your connection, I’ll keep trying.</p>'}
+function lbDot(c){return'<i style="background:'+lbEsc(/^#[0-9a-f]{6}$/i.test(c||'')?c:'#999')+'"></i>'}
+function lbDraw(){const n=LB.on?lbMates().length:LB.list.filter(p=>p.id!==LB.id).length;document.querySelectorAll('.lobN').forEach(e=>e.textContent=n?String(n):'');
+  const el=document.getElementById('lob');if(!LB.open||!el)return;el.dataset.mode=LB.mode;if(LB.mode==='pick')return lbDrawPick(el);
+  el.querySelector('h3').textContent='👥 '+(LB.on?(LB.lobby&&LB.lobby!==LB_SQ?LB.lname||'Your lobby':LB_SQN):'Lobby');
+  const L=el.querySelector('.lbL'),M=el.querySelector('.lbMe');
+  if(LB.on&&!LB.edit){M.innerHTML='<p class="lbS">'+lbDot(LB.color)+'You’re online as <b>'+lbEsc(who)+'</b> · '+LB_PL[lbPlace()]+'</p><div class="row"><button type="button" class="pill" id="lbSw">Switch lobby</button><button type="button" class="pill" id="lbRen">Change name</button><button type="button" class="pill" id="lbOut">Leave</button></div>';
+    M.querySelector('#lbOut').onclick=lbLeave;M.querySelector('#lbSw').onclick=()=>lbShow('pick');M.querySelector('#lbRen').onclick=()=>{LB.edit=true;M.innerHTML='';lbForm()}}
+  else if(!LB.on){M.innerHTML='<p class="lbS">You’re not in a lobby. Pick one to show up for other players.</p><div class="row"><button type="button" class="pill gold" id="lbSw">Choose a lobby</button></div>';M.querySelector('#lbSw').onclick=()=>lbShow('pick')}
   else if(!M.querySelector('#lbIn'))lbForm();
-  const me=LB.on&&LB.id?LB.list.find(p=>p.id===LB.id):null,o=lbOthers();let h='';
-  if(!LB.ok&&LB.err>0)h=(location.hostname.indexOf('github.io')<0?'<p class="lbE">This copy of the game can’t go online. Play together on the game’s own site: <a href="'+LB.link+'" target="_blank" rel="noopener" style="color:#ffd27a">'+LB.link.replace('https://','')+'</a></p>':'<p class="lbE">Can’t reach the lobby right now. Check your connection, I’ll keep trying.</p>');
-  else if(!LB.ok)h='<p class="lbE">Looking for players…</p>';
-  else{const rows=(me?[me]:[]).concat(o);for(const p of rows){const you=p.id===LB.id;h+='<li><i style="background:'+lbEsc(/^#[0-9a-f]{6}$/i.test(p.color||'')?p.color:'#999')+'"></i><b>'+lbEsc(p.name)+'</b>'+(you?'<em>you</em>':'')+'<span>'+(LB_PL[p.place]||'')+'</span></li>'}
-    h='<ul>'+h+'</ul>';if(!o.length)h+='<p class="lbE">Nobody else is here right now. Send friends your game link and they’ll show up here.</p>'}
-  L.innerHTML=h}
-function lbForm(){const M=document.querySelector('#lob .lbMe');M.innerHTML='<p class="lbS">Join to show up for other players. Only your name and where you are in the game are shared.</p><div class="lbF"><input id="lbIn" maxlength="24" autocomplete="nickname" placeholder="Your name" enterkeyhint="go"><button type="button" class="pill gold" id="lbGo">'+(LB.on?'Save':'Join')+'</button></div>';
-  const i=M.querySelector('#lbIn');i.value=who||'';const go=()=>lbJoin(i.value);M.querySelector('#lbGo').onclick=go;
-  for(const ev of['keydown','keyup','keypress'])i.addEventListener(ev,e=>{e.stopPropagation();if(ev==='keydown'&&e.key==='Enter'){e.preventDefault();go()}if(ev==='keydown'&&e.key==='Escape'){e.preventDefault();lbToggle(false)}});
-  if(!COARSE)setTimeout(()=>i.focus(),60)}
-async function lbJoin(v){v=String(v||'').replace(/\s+/g,' ').trim().slice(0,24);if(!v){const i=document.getElementById('lbIn');if(i)i.focus();return}if(LB.busy)return;LB.busy=true;
-  if(v!==who){who=v;showWho();saveNow()}LB.on=true;lbSave();const ok=await lbBeat();LB.busy=false;LB.edit=false;if(!ok){LB.on=false;lbSave();lbNote('Couldn’t join the lobby, try again in a moment');lbDraw();return}lbNote('🎄 You’re in the lobby as '+who);await lbFetch()}
+  const me=LB.on&&LB.id?LB.list.find(p=>p.id===LB.id):null,o=LB.on?lbMates():LB.list.filter(p=>p.id!==LB.id);let h='';
+  if(lbOffline())h=lbOffMsg();else if(!LB.ok)h='<p class="lbE">Looking for players…</p>';
+  else{const rows=(me?[me]:[]).concat(o);for(const p of rows){const you=p.id===LB.id;h+='<li>'+lbDot(p.color)+'<b>'+lbEsc(p.name)+'</b>'+(you?'<em>you</em>':'')+'<span>'+(LB_PL[p.place]||'')+'</span></li>'}
+    h='<ul>'+h+'</ul>';if(!o.length)h+='<p class="lbE">'+(LB.on?'Nobody else is in this lobby yet. Copy the invite link and send it to friends.':'Nobody is online right now.')+'</p>'}
+  el.querySelector('h4').textContent=LB.on?'In this lobby':'Online now';L.innerHTML=h;el.querySelector('#lbCp').style.display=LB.on?'':'none'}
+function lbDrawPick(el){el.querySelector('h3').textContent='🏘️ Old Town lobbies';el.querySelector('h4').textContent='Open lobbies';
+  const M=el.querySelector('.lbMe'),L=el.querySelector('.lbL');el.querySelector('#lbCp').style.display='none';
+  if(!M.querySelector('#lbIn')){M.innerHTML='<p class="lbS">Join a lobby to explore the town with friends, or start your own.</p><div class="lbF"><input id="lbIn" maxlength="24" autocomplete="nickname" placeholder="Your name" enterkeyhint="done"></div>';const i=M.querySelector('#lbIn');i.value=who||'';lbKeys(i,()=>i.blur())}
+  let h='';
+  if(lbOffline())h=lbOffMsg();else if(!LB.ok)h='<p class="lbE">Looking for lobbies…</p>';
+  else{for(const g of lbLobbies()){const mine=LB.on&&(LB.lobby||LB_SQ)===g.code,inv=g.code===LB.inv&&!mine;const names=g.ppl.slice(0,3).map(p=>lbEsc(p.name)).join(', ')+(g.ppl.length>3?' +'+(g.ppl.length-3):'');
+      h+='<li class="lbG'+(inv?' inv':'')+'"><div class="lbGi"><b>'+lbEsc(g.name)+'</b>'+(inv?'<em>invited</em>':'')+(mine?'<em>you’re here</em>':'')+'<small>'+(g.ppl.length?g.ppl.length+' online · '+names:(g.code===LB_SQ?'The open lobby for everyone':'Waiting for players'))+'</small></div><button type="button" class="pill'+(mine?'':' gold')+'" data-lb="'+lbEsc(g.code)+'" data-ln="'+lbEsc(g.name)+'">'+(mine?'Continue':'Join')+'</button></li>'}
+    h='<ul>'+h+'</ul><div class="lbNew"><input id="lbNn" maxlength="32" placeholder="New lobby name"><button type="button" class="pill" id="lbMk">Create lobby</button></div>'}
+  h+='<button type="button" class="lbCp" id="lbSolo">'+(LB.on?'Leave lobby and play solo':'Play solo')+'</button>';
+  const keep=L.querySelector('#lbNn'),kv=keep?keep.value:'',kf=document.activeElement===keep;L.innerHTML=h;
+  L.querySelectorAll('[data-lb]').forEach(b=>b.onclick=()=>{const c=b.dataset.lb;if(LB.on&&(LB.lobby||LB_SQ)===c){lbToggle(false);return}lbEnter(c,c===LB_SQ?LB_SQN:b.dataset.ln)});
+  const nn=L.querySelector('#lbNn');if(nn){nn.value=kv||'';if(!kv)nn.placeholder=(lbName()?poss(lbName())+' lobby':'New lobby name');lbKeys(nn,()=>L.querySelector('#lbMk').click());if(kf)nn.focus();
+    L.querySelector('#lbMk').onclick=()=>{const v=(nn.value.trim()||(lbName()?poss(lbName())+' lobby':'')).slice(0,32);if(!v){nn.focus();return}lbEnter(lbCode(),v)}}
+  L.querySelector('#lbSolo').onclick=()=>{if(LB.on)lbLeave();lbToggle(false)}}
+function lbName(){const i=document.getElementById('lbIn');return String(i&&i.value||who||'').replace(/\s+/g,' ').trim().slice(0,24)}
+function lbKeys(i,enter){for(const ev of['keydown','keyup','keypress'])i.addEventListener(ev,e=>{e.stopPropagation();if(ev==='keydown'&&e.key==='Enter'){e.preventDefault();enter()}if(ev==='keydown'&&e.key==='Escape'){e.preventDefault();lbToggle(false)}})}
+async function lbEnter(code,name){const v=lbName();if(!v){const i=document.getElementById('lbIn');if(i){i.focus();i.placeholder='Type your name first'}return}if(LB.busy)return;LB.busy=true;
+  if(v!==who){who=v;showWho();saveNow()}const was=[LB.on,LB.lobby,LB.lname];LB.lobby=code;LB.lname=name;LB.on=true;lbSave();const ok=await lbBeat();LB.busy=false;
+  if(!ok){[LB.on,LB.lobby,LB.lname]=was;lbSave();lbNote('Couldn’t join that lobby, try again in a moment');lbDraw();return}
+  if(code===LB.inv)LB.inv=null;lbNote('🎄 You joined '+name);LB.seen=new Set();LB.ok=false;await lbFetch();LB.mode='room';lbToggle(false)}
+function lbForm(){const M=document.querySelector('#lob .lbMe');M.innerHTML='<p class="lbS">Only your name and where you are in the game are shared.</p><div class="lbF"><input id="lbIn" maxlength="24" autocomplete="nickname" placeholder="Your name" enterkeyhint="go"><button type="button" class="pill gold" id="lbGo">Save</button></div>';
+  const i=M.querySelector('#lbIn');i.value=who||'';const go=()=>lbRename(i.value);M.querySelector('#lbGo').onclick=go;lbKeys(i,go);if(!COARSE)setTimeout(()=>i.focus(),60)}
+async function lbRename(v){v=String(v||'').replace(/\s+/g,' ').trim().slice(0,24);if(!v)return;if(v!==who){who=v;showWho();saveNow()}LB.edit=false;await lbBeat();await lbFetch()}
 function lbLeave(){LB.on=false;LB.edit=false;lbSave();if(LB.id)fetch(LB.url+'?id=eq.'+encodeURIComponent(LB.id),{method:'PATCH',headers:lbH(1),body:JSON.stringify({last_seen:'2000-01-01T00:00:00Z'})}).catch(()=>{}).then(lbFetch);lbNote('You left the lobby');lbDraw()}
 function lbEl(){let el=document.getElementById('lob');if(el)return el;el=document.createElement('div');el.id='lob';el.setAttribute('role','dialog');el.setAttribute('aria-label','Lobby');
   el.innerHTML='<div class="lbC"><div class="lbH"><h3>👥 Lobby</h3><button type="button" class="pill" id="lbX">Close</button></div><div class="lbMe"></div><h4>Online now</h4><div class="lbL"></div><button type="button" class="lbCp" id="lbCp">🔗 Copy invite link</button></div>';
   document.body.appendChild(el);el.querySelector('#lbX').onclick=()=>lbToggle(false);
   el.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.target===el)lbToggle(false)});for(const ev of['pointerup','click','wheel','touchstart'])el.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'});
-  el.querySelector('#lbCp').onclick=async()=>{try{await navigator.clipboard.writeText(LB.link);lbNote('Invite link copied')}catch(_){prompt('Copy this link and send it to a friend:',LB.link)}};return el}
-function lbToggle(on){if(on==null)on=!LB.open;LB.open=on;const el=lbEl();el.classList.toggle('show',on);if(on){if(document.pointerLockElement)try{document.exitPointerLock()}catch(_){}lbDraw();lbFetch()}}
+  el.querySelector('#lbCp').onclick=async()=>{const u=lbInvite();try{await navigator.clipboard.writeText(u);lbNote('Invite link copied')}catch(_){prompt('Copy this link and send it to a friend:',u)}};return el}
+function lbShow(mode){LB.mode=mode;const el=lbEl();el.querySelector('.lbMe').innerHTML='';el.querySelector('.lbL').innerHTML='';lbToggle(true)}
+function lbPick(){if(!V3.on)return;lbShow('pick')}
+function lbToggle(on){if(on==null)on=!LB.open;LB.open=on;const el=lbEl();el.classList.toggle('show',on);if(on){if(document.pointerLockElement)try{document.exitPointerLock()}catch(_){}lbDraw();lbFetch()}else{LB.mode='room';LB.edit=false;el.querySelector('.lbMe').innerHTML=''}}
 setInterval(()=>{if(document.hidden)return;const t=Date.now();if(LB.on&&who&&(t-LB.bt>20e3||lbPlace()!==LB.pl))lbBeat().then(()=>{if(LB.open)lbFetch()});if(t-LB.ft>(LB.open?5e3:30e3))lbFetch()},1500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(LB.on)lbBeat();lbFetch()}});
 addEventListener('pagehide',()=>{if(LB.on&&LB.id)try{fetch(LB.url+'?id=eq.'+encodeURIComponent(LB.id),{method:'PATCH',headers:lbH(1),body:JSON.stringify({last_seen:'2000-01-01T00:00:00Z'}),keepalive:true})}catch(_){}});
-for(const id of['lobB','vLobB'])document.getElementById(id).onclick=e=>{e.stopPropagation();ac();lbToggle()};
+for(const id of['lobB','vLobB'])document.getElementById(id).onclick=e=>{e.stopPropagation();ac();if(LB.open)lbToggle(false);else lbShow(LB.on?'room':'pick')};
 addEventListener('keydown',e=>{if(LB.open&&e.key==='Escape'){lbToggle(false);e.stopImmediatePropagation()}},true);
-setTimeout(()=>{if(LB.on)lbBeat();lbFetch()},1200);
+setTimeout(()=>{if(LB.on)lbBeat();lbFetch();if(LB.inv)lbNote('🎄 You’re invited to '+(LB.invN||'a lobby')+'. Enter the Old Town to join.')},1200);
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
