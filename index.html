@@ -130,6 +130,12 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #lob .lkCh{display:flex;flex-wrap:wrap;gap:7px}#lob .lkCh .ch{font:500 13px -apple-system,system-ui,sans-serif;border:1px solid rgba(240,215,150,.22);border-radius:999px;padding:6px 12px;background:rgba(255,255,255,.06);color:#f6ecd8;cursor:pointer}#lob .lkCh .ch.on{background:rgba(232,198,110,.25);border-color:#e8c66e;color:#fff}
 #lob .lkCh .sw{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.15);cursor:pointer;padding:0;position:relative}#lob .lkCh .sw.on{border-color:#f3dfa8;box-shadow:0 0 0 2px rgba(232,198,110,.45)}#lob .lkCh .sw.no::after{content:'';position:absolute;left:4px;right:4px;top:50%;height:2px;background:rgba(255,255,255,.5);transform:rotate(-45deg)}
 #lob .lkA{margin-top:14px;justify-content:flex-end}#lob .lkN{font-size:12.5px}#lob .lbF #lbLk{white-space:nowrap}
+#mpEmo .mpSep{flex-basis:100%;height:0}#mpEmo button.pk{background:rgba(70,30,40,.78)}#mpEmo button.pk:hover{background:rgba(190,70,90,.85)}
+.mpTag span:not(.emo){position:relative;animation:mpPop .3s}.mpTag span:not(.emo)::after{content:'';position:absolute;left:50%;bottom:-7px;margin-left:-7px;border:7px solid transparent;border-bottom:0;border-top-color:rgba(255,250,240,.95)}.mpTag span:not(.emo){margin-bottom:10px}
+#mpAsk{position:fixed;left:50%;top:76px;transform:translate(-50%,-12px);z-index:45;display:none;flex-direction:column;align-items:center;gap:10px;max-width:calc(100% - 24px);padding:14px 18px;border-radius:16px;color:#f6ecd8;font:15px/1.35 -apple-system,system-ui,sans-serif;text-align:center;background:linear-gradient(#2c1d12,#1a110a);box-shadow:0 14px 40px rgba(0,0,0,.55),0 0 0 1px rgba(240,215,150,.3) inset;opacity:0;transition:opacity .2s,transform .2s}
+#mpAsk.show{display:flex;opacity:1;transform:translate(-50%,0)}#mpAsk p{margin:0;font-weight:600}#mpAsk div{display:flex;gap:8px}#mpAsk button,#mpHold button{font:600 14px -apple-system,system-ui,sans-serif;border:0;border-radius:999px;padding:8px 16px;cursor:pointer;color:#fff;background:rgba(255,255,255,.14)}#mpAsk button.ok{color:#1a1208;background:linear-gradient(#e8c66e,#b8862a)}#mpAsk i,#mpHold i{font:700 11px ui-monospace,Menlo,monospace;font-style:normal;padding:0 5px;margin-left:4px;border-radius:5px;background:rgba(0,0,0,.18)}
+#mpHold{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:44;display:none;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:999px;color:#fff;font:600 14px -apple-system,system-ui,sans-serif;background:rgba(20,26,40,.8);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}#mpHold.show{display:flex}#mpHold button{padding:6px 12px}
+@media (pointer:coarse){#mpAsk i,#mpHold i{display:none}}
 .mpTag{position:absolute;left:0;top:0;pointer-events:none;text-align:center;white-space:nowrap;transform-origin:50% 100%;z-index:2}
 .mpTag b{display:inline-block;font:600 13px -apple-system,system-ui,sans-serif;color:#fff;background:rgba(14,18,28,.72);padding:3px 9px;border-radius:999px;border:1.5px solid #999;text-shadow:0 1px 2px #000}
 .mpTag span{display:block;max-width:240px;margin:0 auto 6px;white-space:normal;font:500 13px/1.35 -apple-system,system-ui,sans-serif;color:#1c140c;background:rgba(255,250,240,.95);padding:6px 10px;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,.35);order:-1}
@@ -2511,7 +2517,7 @@ function v3Open(){ac();if(!window.THREE){toast('The village is still loading…'
   setTimeout(()=>{try{if(!S3)v3Build()}catch(err){console.error(err);document.getElementById('vLoad').textContent='Sorry, this device can’t show the 3D village.';return}
     document.getElementById('vLoad').style.display='none';V3.on=true;window.VILON=true;V3.pos=V3.pos||new THREE.Vector3(-2.2,0,-1.5);if(V3.mode!=='walk')V3.mode='walk';V3.pos.set(-2.4,0,-.5);V3.yaw=Math.PI*.04;V3.pitch=-.03;V3.jy=0;V3.jv=0;V3.tgt=null;V3.near=undefined;if(!V3.helped&&matchMedia('(pointer:fine)').matches){V3.helped=1;setTimeout(()=>v3Msg('⌨️ WASD walk · Shift run · Space jump · E talk/use · 1–4 choose · F eat/drink · M map · click for mouse look',6000),900)}V3.l=0;v3Size();vTreatsUI();v3HoldUI();murmur(true);
     const first=vDid('visit');v3Msg(first?'👋 Tap the street to walk there, drag to look around':'Welcome back to the old town',first?5000:2200);if(first)checkCh();V3LK.free=false;v3Cur();requestAnimationFrame(v3Frame);if(typeof lbPick==='function')setTimeout(lbPick,350)},40)}
-function v3Close(){setTimeout(v3Cur,0);if(V3.boat)tourReset();v3X.style.display='none';if(document.pointerLockElement)try{document.exitPointerLock()}catch(_){}V3LK.edge=0;V3.on=false;window.VILON=false;V3.keys={};V3.wish=false;document.getElementById('vil').classList.remove('show');vBubEl.style.display='none';murmur(false);frame.l=performance.now();checkCh()}
+function v3Close(){setTimeout(v3Cur,0);if(typeof MP!=='undefined'&&MP.my){if(MP.my.k==='lead'||MP.my.k==='follow')mpLetGo(true);MP.my=null;mpHold()}if(V3.boat)tourReset();v3X.style.display='none';if(document.pointerLockElement)try{document.exitPointerLock()}catch(_){}V3LK.edge=0;V3.on=false;window.VILON=false;V3.keys={};V3.wish=false;document.getElementById('vil').classList.remove('show');vBubEl.style.display='none';murmur(false);frame.l=performance.now();checkCh()}
 document.getElementById('vgo').onclick=v3Open;document.getElementById('vMapB').onclick=e=>{e.stopPropagation();vmToggle()};document.getElementById('vHome').onclick=v3Close;let V3SNOW=true;document.getElementById('vSnow').onclick=()=>{V3SNOW=!V3SNOW;const b=document.getElementById('vSnow');b.textContent=V3SNOW?'❄️ Snowing':'🌙 No snow';b.classList.toggle('off',!V3SNOW);v3Msg(V3SNOW?'❄️ It’s snowing':'🌙 The snow has stopped',1600)};addEventListener('resize',()=>{if(V3.on)v3Size()});
 
 requestAnimationFrame(frame);
@@ -2685,29 +2691,32 @@ function mpSend(ev,p){if(!MP.ok||!MP.ws||MP.ws.readyState!==1)return false;try{M
 function mpPos(force){const pl=lbPlace(),t=performance.now(),P=V3.pos,RB=TOUR.B&&TOUR.B.RB;let x=null,z=null,y=null,h=0;const r2=v=>Math.round(v*100)/100;
   if(pl==='town'&&P){x=r2(P.x);z=r2(P.z);y=r2(V3.yaw);h=r2(V3.mode==='walk'?V3.gy||0:0)}else if(pl==='boat'&&P&&RB){const l=tourL(P.x,P.z);x=r2(l[0]);z=r2(l[1]);y=r2(V3.yaw-RB.rotation.y);h=r2((V3.gy||0)-RB.position.y)}const inT=x!=null;
   const L=MP.lp,moved=!L||L.pl!==pl||(inT&&(Math.abs(L.x-x)>.04||Math.abs(L.z-z)>.04||Math.abs(L.y-y)>.04));
-  if(!force&&!(moved&&t-MP.ps>140)&&t-MP.ps<2000)return;MP.ps=t;MP.lp={pl,x,z,y};mpSend('pos',{id:LB.id,n:who,c:LB.color,pl,x,z,y,h,lk:LOOK})}
+  if(!force&&!(moved&&t-MP.ps>140)&&t-MP.ps<2000)return;MP.ps=t;MP.lp={pl,x,z,y};const m={id:LB.id,n:who,c:LB.color,pl,x,z,y,h,lk:LOOK};if(MP.my&&MP.my.k==='follow')m.hd=MP.my.lead;mpSend('pos',m)}
 function mpOn(ev,p){if(!p||!p.id||p.id===LB.id)return;
   if(ev==='hi'||ev==='tq'){if(ev==='hi')mpPos(true);if(V3.on&&TOUR.B&&TOUR.st!=='dock')mpTourSend(false);return}
   if(ev==='tour'){mpTourOn(p);return}
   if(ev==='emo'){mpEmoOn(p);return}
+  if(ev==='ask'){mpAskOn(p);return}if(ev==='ans'){mpAnsOn(p);return}
+  if(ev==='pend'){if(MP.my&&MP.my.w===p.id){const o=MP.peers.get(p.id);MP.my=null;mpHold();v3Msg('🤝 '+(o?o.n:'They')+' let go',1800)}const q=MP.peers.get(p.id);if(q&&q.pz){const w=q.pz.w;q.pz=null;const o=MP.peers.get(w);if(o&&o.pz&&o.pz.w===p.id)o.pz=null}return}
   if(ev==='bye'){mpDrop(p.id);return}
   if(ev==='pos'){let q=MP.peers.get(p.id);const nw=!q;if(!q){q={id:p.id,x:p.x,z:p.z,y:p.y,rx:p.x,rz:p.z,ry:p.y||0};MP.peers.set(p.id,q)}
     if(p.lk&&typeof p.lk==='object'){const L=lkClean(p.lk),js=JSON.stringify(L);if(js!==q.lks){q.lks=js;q.lk=L;if(q.av){if(q.av.g.parent)q.av.g.parent.remove(q.av.g);q.av=null}}}q.n=String(p.n||'Player').slice(0,24);q.c=/^#[0-9a-f]{6}$/i.test(p.c||'')?p.c:'#999999';q.pl=p.pl;q.last=performance.now();
     if(typeof p.x==='number'&&typeof p.z==='number'){if(q.rx==null||q.lpl!==p.pl||Math.hypot(p.x-q.rx,p.z-q.rz)>25){q.rx=p.x;q.rz=p.z;q.ry=p.y||0;q.rh=+p.h||0}q.x=p.x;q.z=p.z;q.y=p.y||0;q.h=+p.h||0}q.lpl=p.pl;
+    if(typeof p.hd==='string'&&p.pl==='town'){if(p.hd===LB.id&&!(MP.my&&MP.my.w===p.id))mpSend('pend',{id:LB.id});else if(!q.pz||q.pz.k!=='follow'){const t0=performance.now();q.pz={k:'follow',lead:p.hd,w:p.hd,t0};const L=MP.peers.get(p.hd);if(L&&!L.pz)L.pz={k:'lead',w:p.id,t0}}}else if(q.pz&&q.pz.k==='follow'){const L=MP.peers.get(q.pz.lead);if(L&&L.pz&&L.pz.w===p.id)L.pz=null;q.pz=null}
     if(nw)mpSys(q.n+' is here'+(q.pl==='town'?' in the old town':q.pl==='boat'?' on the boat tour':''));return}
-  if(ev==='chat'){const b=String(p.t||'').slice(0,280).trim();if(!b)return;const q=MP.peers.get(p.id);mpAdd({n:String(p.n||'Player').slice(0,24),c:/^#[0-9a-f]{6}$/i.test(p.c||'')?p.c:'#999999',t:b});if(q){q.bub=b;q.bubT=performance.now()+7000}}}
-function mpDrop(id,quiet){const q=MP.peers.get(id);if(!q)return;MP.peers.delete(id);if(q.av&&q.av.g.parent)q.av.g.parent.remove(q.av.g);if(q.tag)q.tag.remove();if(!quiet)mpSys(q.n+' left')}
+  if(ev==='chat'){const b=String(p.t||'').slice(0,280).trim();if(!b)return;const q=MP.peers.get(p.id);mpAdd({n:String(p.n||'Player').slice(0,24),c:/^#[0-9a-f]{6}$/i.test(p.c||'')?p.c:'#999999',t:b});if(q){q.bub=b;q.bubT=performance.now()+Math.min(12000,4500+b.length*70)}}}
+function mpDrop(id,quiet){if(MP.my&&MP.my.w===id){MP.my=null;if(typeof mpHold==='function')mpHold()}for(const o of MP.peers.values())if(o.pz&&o.pz.w===id)o.pz=null;if(MP.inc&&MP.inc.from===id){MP.inc=null;mpAskShow()}const q=MP.peers.get(id);if(!q)return;MP.peers.delete(id);if(q.av&&q.av.g.parent)q.av.g.parent.remove(q.av.g);if(q.tag)q.tag.remove();if(!quiet)mpSys(q.n+' left')}
 /* 3D avatars + name tags, called from the town frame loop before rendering */
 function mpFrame(dt,T){if(!S3)return;const S=S3,now=performance.now(),vil=document.getElementById('vil');if(MP.tc&&TOUR.st==='cruise'){const c=MP.tc*Math.min(1,dt*1.5);TOUR.s=Math.min(TOUR.tp.L-.06,TOUR.s+c);MP.tc-=c;if(Math.abs(MP.tc)<.01)MP.tc=0}else MP.tc=0;
   for(const q of MP.peers.values()){if(now-q.last>9000){mpDrop(q.id);continue}
     const RB=TOUR.B&&TOUR.B.RB,onB=q.pl==='boat'&&RB&&q.x!=null,show=(q.pl==='town'&&q.x!=null)||onB;
     if(show&&!q.av){let h=0;for(const ch of q.id)h=(h*31+ch.charCodeAt(0))|0;h=Math.abs(h);q.av=q.lk?lkPerson(q.lk,{idle:true}):person({coat:MP_COATS[h%MP_COATS.length],scarf:q.c,hat:h%3===0?'beanie':h%3===1?'fedora':undefined,hatC:h%3===0?q.c:'#2a2a30',idle:true,long:true});q.av.g.position.set(q.rx,0,q.rz);S.scene.add(q.av.g)}
-    if(q.av){q.av.g.visible=show;if(show){const dx=q.x-q.rx,dz=q.z-q.rz,d=Math.hypot(dx,dz),f=Math.min(1,dt*9);q.rx+=dx*f;q.rz+=dz*f;let dy=q.y-q.ry;dy=((dy+Math.PI*3)%(Math.PI*2))-Math.PI;q.ry+=dy*f;
+    if(q.av){q.av.g.visible=show;if(show){mpPairPre(q,now);const dx=q.x-q.rx,dz=q.z-q.rz,d=Math.hypot(dx,dz),f=Math.min(1,dt*9);q.rx+=dx*f;q.rz+=dz*f;let dy=q.y-q.ry;dy=((dy+Math.PI*3)%(Math.PI*2))-Math.PI;q.ry+=dy*f;
       q.rh+=((q.h||0)-(q.rh||0))*f;let wx=q.rx,wz=q.rz,wy=q.rh||0,wr=q.ry;if(onB){const w=tourW(q.rx,q.rz);wx=w[0];wz=w[1];wy=RB.position.y+(q.rh||1.3);wr=q.ry+RB.rotation.y}q.wx=wx;q.wz=wz;q.wy=wy;
-      q.av.g.position.set(wx,wy,wz);q.av.g.rotation.y=wr+Math.PI;const mv=d>.03;q.av.sp=d>.5?1.9:1.15;animPerson(q.av,dt,mv,T);mpEmoAnim(q,dt,T,mv)}}
+      q.av.g.position.set(wx,wy,wz);q.av.g.rotation.y=wr+Math.PI;const mv=d>.03;q.av.sp=d>.5?1.9:1.15;animPerson(q.av,dt,mv,T);if(q.pz)mpPose(q.av,q.pz.k,dt);else mpEmoAnim(q,dt,T,mv)}}
     if(!q.tag){q.tag=document.createElement('div');q.tag.className='mpTag';q.tag.innerHTML='<b></b><span></span>';vil.appendChild(q.tag)}
     let vis=false;if(show&&q.av){const v=new THREE.Vector3(q.wx,(q.wy||0)+1.86*q.av.k+.06,q.wz),d=v.distanceTo(S.cam.position);v.project(S.cam);if(v.z<1&&d<45&&Math.abs(v.x)<1.2&&Math.abs(v.y)<1.2){vis=true;q.tag.style.transform='translate(-50%,-100%) translate('+((v.x+1)/2*innerWidth).toFixed(1)+'px,'+((1-v.y)/2*innerHeight).toFixed(1)+'px) scale('+Math.max(.7,Math.min(1,9/d)).toFixed(2)+')';q.tag.style.opacity=d>32?Math.max(0,(45-d)/13):1}}
-    q.tag.style.display=vis?'':'none';if(vis){const b=q.tag.firstChild,s=q.tag.lastChild;if(b.textContent!==q.n)b.textContent=q.n;b.style.borderColor=q.c;const bt=q.emo&&now<q.emo.until?MP_EMO[q.emo.k].e:q.bub&&now<q.bubT?q.bub:'';s.classList.toggle('emo',!!(q.emo&&now<q.emo.until));if(s.textContent!==bt)s.textContent=bt;s.style.display=bt?'':'none'}}}
+    q.tag.style.display=vis?'':'none';if(vis){const b=q.tag.firstChild,s=q.tag.lastChild;if(b.textContent!==q.n)b.textContent=q.n;b.style.borderColor=q.c;const bt=q.emo&&now<q.emo.until?MP_EMO[q.emo.k].e:q.bub&&now<q.bubT?q.bub:'';s.classList.toggle('emo',!!(q.emo&&now<q.emo.until));if(s.textContent!==bt)s.textContent=bt;s.style.display=bt?'':'none'}}mpPairLocal(dt,T)}
 /* map dots */
 function mpMap(q,U,V,sc){for(const p of MP.peers.values()){if((p.pl!=='town'&&p.pl!=='boat')||p.wx==null)continue;const u=U(p.wz),v=V(p.wx);q.fillStyle=p.c;q.strokeStyle='#fff';q.lineWidth=2;q.beginPath();q.arc(u,v,6.5,0,7);q.fill();q.stroke();q.font='700 12px system-ui,sans-serif';q.textAlign='center';q.lineWidth=3;q.strokeStyle='rgba(10,20,35,.8)';q.strokeText(p.n,u,v-11);q.fillStyle='#fff';q.fillText(p.n,u,v-11)}}
 /* chat */
@@ -2752,10 +2761,77 @@ function mpEmoAnim(q,dt,T,mv){const a=q.av,A=a.arms,El=a.elbows,f=Math.min(1,dt*
   else if(e.k==='cheer'){const b=Math.sin(u*9)*.18;L(A[0].rotation,'z',-2.75+b);L(A[1].rotation,'z',2.75-b);L(A[0].rotation,'x',0);L(A[1].rotation,'x',0);L(El[0].rotation,'x',-.1);L(El[1].rotation,'x',-.1)}
   else if(e.k==='clap'){const c=(Math.sin(u*15)+1)/2;L(A[0].rotation,'x',-1.15);L(A[1].rotation,'x',-1.15);A[0].rotation.z=.18+c*.32;A[1].rotation.z=-.18-c*.32;L(El[0].rotation,'x',-.75);L(El[1].rotation,'x',-.75)}
   else if(e.k==='dance'){const w=Math.sin(u*7);L(A[0].rotation,'z',-1.3-w*.5);L(A[1].rotation,'z',1.3-w*.5);L(El[0].rotation,'x',-.9);L(El[1].rotation,'x',-.9);a.g.position.y+=Math.abs(Math.sin(u*7))*.07;a.g.rotation.y+=Math.sin(u*3.5)*.45}}
-function mpEmoBar(on){let el=document.getElementById('mpEmo');if(!el){el=document.createElement('div');el.id='mpEmo';el.innerHTML=MP_EK.map((k,i)=>'<button type="button" data-k="'+k+'"><span>'+MP_EMO[k].e+'</span>'+k[0].toUpperCase()+k.slice(1)+'<i>'+(i+1)+'</i></button>').join('');const mc=document.getElementById('mpChat');mc.insertBefore(el,mc.querySelector('.mpBar'));
-    el.querySelectorAll('button').forEach(b=>b.onclick=e=>{e.stopPropagation();mpEmote(b.dataset.k)})}
+function mpEmoBar(on){let el=document.getElementById('mpEmo');if(!el){el=document.createElement('div');el.id='mpEmo';el.innerHTML=MP_EK.map((k,i)=>'<button type="button" data-k="'+k+'"><span>'+MP_EMO[k].e+'</span>'+k[0].toUpperCase()+k.slice(1)+'<i>'+(i+1)+'</i></button>').join('')+'<b class="mpSep"></b>'+['hug','kiss','hand'].map((k,i)=>'<button type="button" class="pk" data-p="'+k+'" title="Ask the nearest player"><span>'+MP_PK[k].e+'</span>'+MP_PK[k].l+'<i>'+(i+5)+'</i></button>').join('');const mc=document.getElementById('mpChat');mc.insertBefore(el,mc.querySelector('.mpBar'));
+    el.querySelectorAll('button').forEach(b=>b.onclick=e=>{e.stopPropagation();if(b.dataset.p)mpAsk(b.dataset.p);else mpEmote(b.dataset.k)})}
   if(on==null)on=!el.classList.contains('show');el.classList.toggle('show',on);MP.eo=on}
+/* ---------- paired interactions: hug, kiss, hold hands (always asked first) ---------- */
+const MP_PK={hug:{e:'🤗',l:'Hug',ask:'a hug',d:3800,gap:.44},kiss:{e:'❤️',l:'Kiss',ask:'a kiss',d:3600,gap:.5},hand:{e:'🤝',l:'Hold hands',ask:'to hold hands and walk together'}};
+MP_EMO.hug={e:'🤗',t:'hugs',d:3800};MP_EMO.kiss={e:'❤️',t:'kisses',d:3600};
+const yawTo=(fx,fz,tx,tz)=>Math.atan2(-(tx-fx),-(tz-fz));
+function mpNear(){const P=V3.pos;if(!V3.on||V3.boat||!P)return null;let best=null,bd=1e9;for(const q of MP.peers.values()){if(q.pl!=='town'||q.wx==null)continue;const d=Math.hypot(q.wx-P.x,q.wz-P.z);if(d>3.2)continue;const a=Math.abs(((yawTo(P.x,P.z,q.wx,q.wz)-V3.yaw+Math.PI*3)%(Math.PI*2))-Math.PI),sc=d+a*.8;if(sc<bd){bd=sc;best=q}}return best}
+function mpAsk(k){if(!MP_PK[k])return;if(!LB.on){lbShow('pick');return}mpEmoBar(false);
+  if(MP.my){if(MP.my.k==='lead'||MP.my.k==='follow'){mpLetGo(true);return}return}
+  const q=mpNear();if(!q){v3Msg('Walk up to someone in your lobby first (within 3 m)',2600);return}
+  if(MP.out&&performance.now()<MP.out.until){v3Msg('Still waiting for '+MP.out.n+' to answer…',1800);return}
+  MP.out={to:q.id,n:q.n,k,until:performance.now()+15e3};mpSend('ask',{id:LB.id,n:who,to:q.id,k});v3Msg(MP_PK[k].e+' Asking '+q.n+(k==='hand'?' to hold hands…':' for '+MP_PK[k].ask+'…'),2600);
+  clearTimeout(MP.outT);MP.outT=setTimeout(()=>{if(MP.out&&MP.out.to===q.id){MP.out=null;v3Msg(q.n+' didn’t answer this time',2200)}},15e3)}
+function mpAskEl(){let el=document.getElementById('mpAsk');if(el)return el;el=document.createElement('div');el.id='mpAsk';el.innerHTML='<p></p><div><button type="button" class="ok">Accept <i>Y</i></button><button type="button" class="no">No thanks <i>N</i></button></div>';document.body.appendChild(el);
+  for(const ev of['pointerdown','pointerup','click','touchstart'])el.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'});el.querySelector('.ok').onclick=()=>mpAnswer(true);el.querySelector('.no').onclick=()=>mpAnswer(false);return el}
+function mpAskShow(){const el=mpAskEl(),a=MP.inc;el.classList.toggle('show',!!a);if(!a)return;const P=MP_PK[a.k];el.querySelector('p').textContent=P.e+' '+a.n+(a.k==='hand'?' would like to hold your hand and walk together':' would like '+P.ask)}
+function mpAnswer(ok){const a=MP.inc;MP.inc=null;clearTimeout(MP.incT);mpAskShow();if(!a)return;const q=MP.peers.get(a.from);
+  if(!ok||!q||q.wx==null||!V3.on||V3.boat||V3.mode!=='walk'||MP.my){mpSend('ans',{id:LB.id,n:who,to:a.from,k:a.k,ok:false});if(ok)v3Msg('You can only do that together in the old town',2200);return}
+  const m={id:LB.id,n:who,to:a.from,k:a.k,ok:true};
+  if(a.k!=='hand'){const P=V3.pos,dx=q.wx-P.x,dz=q.wz-P.z,d=Math.hypot(dx,dz)||1,ux=dx/d,uz=dz/d,mx=(P.x+q.wx)/2,mz=(P.z+q.wz)/2,g=MP_PK[a.k].gap/2;
+    m.ax=+(mx+ux*g).toFixed(2);m.az=+(mz+uz*g).toFixed(2);m.bx=+(mx-ux*g).toFixed(2);m.bz=+(mz-uz*g).toFixed(2)}
+  mpSend('ans',m);mpPairOn(m)}
+function mpAskOn(p){if(p.to!==LB.id||!MP_PK[p.k])return;const q=MP.peers.get(p.id);if(!q)return;if(MP.my||MP.inc){mpSend('ans',{id:LB.id,n:who,to:p.id,k:p.k,ok:false,busy:1});return}
+  MP.inc={from:p.id,n:q.n,k:p.k};mpAskShow();if(AC&&AC.state==='running')try{nz('bandpass',1400,.04,.12)}catch(_){}clearTimeout(MP.incT);MP.incT=setTimeout(()=>{MP.inc=null;mpAskShow()},15e3)}
+/* an accepted pair: m.id accepted m.to's request. For hand, the asker (m.to) leads. Everyone in the lobby applies it. */
+function mpPairOn(m){const k=m.k,now=performance.now(),A=m.to,B=m.id;
+  const set=(id,pz)=>{if(id===LB.id){MP.my=Object.assign({t0:now},pz);if(pz.k==='hug'||pz.k==='kiss')MP.cam=1}else{const q=MP.peers.get(id);if(q){q.pz=Object.assign({t0:now},pz);if(pz.k==='hug'||pz.k==='kiss'){q.emo={k,t0:now,until:now+MP_PK[k].d};q.bubT=0}}}};
+  if(k==='hand'){set(A,{k:'lead',w:B});set(B,{k:'follow',lead:A,w:A})}
+  else{const until=now+MP_PK[k].d;set(A,{k,w:B,tx:m.ax,tz:m.az,ty:yawTo(m.ax,m.az,m.bx,m.bz),until});set(B,{k,w:A,tx:m.bx,tz:m.bz,ty:yawTo(m.bx,m.bz,m.ax,m.az),until})}
+  const nm=id=>id===LB.id?'you':(MP.peers.get(id)||{}).n||'someone';
+  if(A===LB.id||B===LB.id){const o=nm(A===LB.id?B:A);v3Msg(k==='hand'?(A===LB.id?'🤝 '+o+' takes your hand. Walk and they come along':'🤝 You’re holding hands with '+o+'. They lead the way'):MP_PK[k].e+' You and '+o,2600);mpSys(k==='hand'?'🤝 You and '+o+' are holding hands':MP_PK[k].e+' You '+(k==='hug'?'hug':'kiss')+' '+o);mpHold()}
+  else mpSys(MP_PK[k].e+' '+nm(A)+' and '+nm(B)+(k==='hand'?' are holding hands':k==='hug'?' hug':' kiss'))}
+function mpAnsOn(p){if(!MP_PK[p.k])return;if(p.ok){if(p.to===LB.id){MP.out=null;clearTimeout(MP.outT)}mpPairOn(p);return}
+  if(p.to===LB.id&&MP.out){MP.out=null;clearTimeout(MP.outT);v3Msg(p.busy?String(p.n||'They').slice(0,24)+' is busy right now':String(p.n||'They').slice(0,24)+' said no thanks',2200)}}
+function mpUnpair(id){const q=id===LB.id?null:MP.peers.get(id),pz=id===LB.id?MP.my:q&&q.pz;if(!pz)return;if(q)q.pz=null;else{MP.my=null;mpHold()}
+  if(pz.w){const o=pz.w===LB.id?null:MP.peers.get(pz.w);if(pz.w===LB.id){if(MP.my&&MP.my.w===id){MP.my=null;mpHold();v3Msg('🤝 You let go of each other',1800)}}else if(o&&o.pz&&o.pz.w===id)o.pz=null}}
+function mpLetGo(send){if(!MP.my||(MP.my.k!=='lead'&&MP.my.k!=='follow'))return;if(send)mpSend('pend',{id:LB.id});const o=MP.peers.get(MP.my.w);mpUnpair(LB.id);if(o&&o.pz&&o.pz.w===LB.id)o.pz=null;v3Msg('🤝 You let go'+(o?' of '+o.n:''),1800)}
+function mpHold(){let el=document.getElementById('mpHold');const h=MP.my&&(MP.my.k==='lead'||MP.my.k==='follow');if(!el){if(!h)return;el=document.createElement('div');el.id='mpHold';el.innerHTML='<span></span><button type="button">Let go <i>J</i></button>';document.body.appendChild(el);for(const ev of['pointerdown','pointerup','click','touchstart'])el.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'});el.querySelector('button').onclick=()=>mpLetGo(true)}
+  el.classList.toggle('show',!!(h&&V3.on));if(h){const o=MP.peers.get(MP.my.w);el.querySelector('span').textContent='🤝 '+(MP.my.k==='lead'?(o?o.n:'Your friend')+' is walking with you':'Walking with '+(o?o.n:'your friend'))}}
+/* before smoothing: where a paired peer should stand */
+function mpPairPre(q,now){const z=q.pz;if(!z)return;
+  if(z.until&&now>z.until){q.pz=null;return}
+  if(z.k==='hug'||z.k==='kiss'){q.x=z.tx;q.z=z.tz;q.y=z.ty;return}
+  if(z.k==='follow'){let lx,lz,ly;if(z.lead===LB.id){if(!V3.on||V3.boat){q.pz=null;return}lx=V3.pos.x;lz=V3.pos.z;ly=V3.yaw}else{const L=MP.peers.get(z.lead);if(!L||L.pl!=='town'||L.rx==null){q.pz=null;return}lx=L.rx;lz=L.rz;ly=L.ry}
+    q.x=lx+Math.cos(ly)*.62;q.z=lz-Math.sin(ly)*.62;q.y=ly;q.h=0}}
+/* arm poses on top of walking / emotes */
+function mpPose(a,k,dt,u){if(!a)return;const A=a.arms,El=a.elbows,f=Math.min(1,dt*8),L=(o,p,v)=>{o[p]+=(v-o[p])*f};a.g.rotation.order='YXZ';
+  if(k==='hug'){for(let i=0;i<2;i++){const s=i?1:-1;L(A[i].rotation,'x',-1.25);L(A[i].rotation,'z',-s*.32);L(El[i].rotation,'x',-.25);L(El[i].rotation,'z',-s*1.15)}L(a.g.rotation,'x',.05)}
+  else if(k==='kiss'){for(let i=0;i<2;i++){const s=i?1:-1;L(A[i].rotation,'x',-.75);L(A[i].rotation,'z',-s*.22);L(El[i].rotation,'x',-.55);L(El[i].rotation,'z',s*.5)}L(a.g.rotation,'x',.1)}
+  else if(k==='lead'){L(A[0].rotation,'z',-.3);A[0].rotation.x*=.5;L(El[0].rotation,'x',-.12)}
+  else if(k==='follow'){L(A[1].rotation,'z',.3);A[1].rotation.x*=.5;L(El[1].rotation,'x',-.12)}}
+/* my own side: move into place, show my avatar and a side camera for hugs and kisses, follow the leader when holding hands */
+function mpPairLocal(dt,T){const z=MP.my,S=S3,now=performance.now();if(!z){if(MP.me)MP.me.g.visible=false;return}
+  if(!V3.on||V3.boat||V3.mode!=='walk'){if(z.k==='lead'||z.k==='follow')mpLetGo(true);else MP.my=null;if(MP.me)MP.me.g.visible=false;return}
+  const P=V3.pos,f=Math.min(1,dt*6);
+  if(z.k==='hug'||z.k==='kiss'){if(now>z.until){MP.my=null;if(MP.me)MP.me.g.visible=false;V3.yaw=z.ty;V3.pitch=0;return}V3.keys={};V3.tgt=null;
+    P.x+=(z.tx-P.x)*f;P.z+=(z.tz-P.z)*f;let dy=((z.ty-V3.yaw+Math.PI*3)%(Math.PI*2))-Math.PI;V3.yaw+=dy*f;
+    const lk=JSON.stringify(LOOK);if(!MP.me||MP.meL!==lk){if(MP.me&&MP.me.g.parent)MP.me.g.parent.remove(MP.me.g);MP.me=lkPerson(LOOK,{idle:true});MP.meL=lk;S.scene.add(MP.me.g)}
+    const me=MP.me;me.g.visible=true;me.g.position.set(P.x,V3.gy||0,P.z);me.g.rotation.y=V3.yaw+Math.PI;animPerson(me,dt,false,T);mpPose(me,z.k,dt);
+    const o=z.w&&MP.peers.get(z.w),gp=MP_PK[z.k].gap,ox=o&&o.wx!=null?o.wx:z.tx-Math.sin(z.ty)*gp,oz=o&&o.wz!=null?o.wz:z.tz-Math.cos(z.ty)*gp,mx=(P.x+ox)/2,mz=(P.z+oz)/2,dx=ox-P.x,dz=oz-P.z,d=Math.hypot(dx,dz)||1,px=-dz/d,pz=dx/d;
+    const u=(now-z.t0)/1000,c=Math.min(1,u/.6,Math.max(0,(z.until-now)/600));const e=c*c*(3-2*c);
+    const tp=new THREE.Vector3(mx+px*2.3+dx/d*.6,1.45+(V3.gy||0),mz+pz*2.3+dz/d*.6);S.cam.position.lerp(tp,e);const q0=S.cam.quaternion.clone();S.cam.lookAt(mx,1.2+(V3.gy||0),mz);const q1=S.cam.quaternion.clone();S.cam.quaternion.slerpQuaternions(q0,q1,e);return}
+  if(MP.me)MP.me.g.visible=false;
+  if(z.k==='follow'){const L=MP.peers.get(z.lead);if(!L||L.pl!=='town'||L.rx==null){mpLetGo(true);return}V3.keys={};V3.tgt=null;const tx=L.rx+Math.cos(L.ry)*.62,tz=L.rz-Math.sin(L.ry)*.62;
+    if(Math.hypot(tx-P.x,tz-P.z)>6){P.x=tx;P.z=tz}else{P.x+=(tx-P.x)*Math.min(1,dt*7);P.z+=(tz-P.z)*Math.min(1,dt*7)}}
+  if(z.k==='lead'){const o=MP.peers.get(z.w);if(!o){mpUnpair(LB.id);v3Msg('🤝 You let go',1600)}}}
 addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable))return;if(LB.open||(VM&&VM.on))return;
+  if(MP.inc&&/^[yn]$/i.test(e.key)){e.preventDefault();e.stopImmediatePropagation();mpAnswer(/y/i.test(e.key));return}
+  if(V3.on&&LB.on&&/^j$/i.test(e.key)&&!e.repeat){e.preventDefault();e.stopImmediatePropagation();if(MP.my&&(MP.my.k==='lead'||MP.my.k==='follow'))mpLetGo(true);else mpAsk('hand');return}
+  if(MP.eo&&/^[5-7]$/.test(e.key)){e.preventDefault();e.stopImmediatePropagation();mpAsk(['hug','kiss','hand'][+e.key-5]);return}
   if(MP.eo&&/^[1-4]$/.test(e.key)){e.preventDefault();e.stopImmediatePropagation();mpEmote(MP_EK[+e.key-1]);return}
   if(MP.eo&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();mpEmoBar(false);return}
   if((e.key==='g'||e.key==='G')&&!e.repeat){if(!LB.on){if(V3.on){e.preventDefault();lbShow('pick')}return}e.preventDefault();e.stopImmediatePropagation();mpEmoBar()}},true);
