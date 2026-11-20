@@ -1071,7 +1071,14 @@ const same=(a,b)=>a.type===b.type&&(a.type==='decor'?a.kind===b.kind:a.paper===b
 if(!saved||!(saved.v>=4)){const miss=V2.filter(d=>!items.some(o=>same(o,d)));if(miss.length)items.unshift(...miss.map(d=>({...d}))) }
 items=items.filter(o=>!(o.type==='decor'&&o.kind==='dog'));
 let lastSave='',nmAsked=!!(saved&&saved.nmAsked);
-const DEF_WHO='Maria';if(saved&&typeof saved.who==='string'&&saved.who)who=saved.who.slice(0,24);else{who=DEF_WHO;nmAsked=true}
+/* the player's name also lives in a cookie, so it is remembered even when the saved tree is not */
+const NCK='lakeTreeName';
+function nameCookie(){try{const m=document.cookie.match(/(?:^|;\s*)lakeTreeName=([^;]*)/);return m?decodeURIComponent(m[1]).replace(/\s+/g,' ').trim().slice(0,24):null}catch(_){return null}}
+function setNameCookie(v){try{document.cookie=NCK+'='+(v?encodeURIComponent(v)+';max-age=31536000':';max-age=0')+';path='+location.pathname.replace(/[^/]*$/,'')+';SameSite=Lax'+(location.protocol==='https:'?';Secure':'')}catch(_){}}
+{const ck=nameCookie();let sv=saved&&typeof saved.who==='string'?saved.who.replace(/\s+/g,' ').trim().slice(0,24):'';
+  /* older versions filled in 'Maria' for everyone who had not typed a name; without a cookie we cannot tell it was chosen, so ask once */
+  if(sv==='Maria'&&ck==null){sv='';nmAsked=false}
+  who=ck||sv;if(!who)nmAsked=false;else if(ck==null)setNameCookie(who)}
 if(saved&&saved.prog&&typeof saved.prog==='object'){const q=saved.prog;['got','ch','doors'].forEach(k=>{if(Array.isArray(q[k]))prog[k]=q[k].slice()});prog.caught=+q.caught||0;prog.photo=+q.photo||0;if(q.fx&&typeof q.fx==='object')prog.fx=Object.assign({},q.fx);if(q.vil&&typeof q.vil==='object')prog.vil={t:Array.isArray(q.vil.t)?q.vil.t.slice():[],a:Array.isArray(q.vil.a)?q.vil.a.slice():[]}}
 const nm=document.getElementById('nm'),nmIn=document.getElementById('nmIn');
 function showWho(){document.getElementById('who').textContent=who?poss(who)+' tree':'';document.getElementById('me').title=who?'Name: '+who:'Your name';document.getElementById('meL').textContent=who?' '+who:' Name'}
@@ -1082,7 +1089,7 @@ document.getElementById('nmS').onclick=nmSave;nmIn.addEventListener('keydown',e=
 document.getElementById('nmX').onclick=closeNm;document.getElementById('me').onclick=()=>openNm();
 nm.addEventListener('pointerdown',e=>{if(e.target===nm)closeNm()});addEventListener('keydown',e=>{if(e.key==='Escape'&&nm.classList.contains('show'))closeNm()});
 showWho();if(!who&&!nmAsked)setTimeout(()=>{if(!nm.classList.contains('show'))openNm(true)},900);
-function saveNow(){if(drag)return;const v=JSON.stringify({v:4,items,dim,wx:WX,who,nmAsked,prog});if(v!==lastSave){lastSave=v;store(v)}}
+let lastCk=who;function saveNow(){if(who!==lastCk){lastCk=who;setNameCookie(who)}if(drag)return;const v=JSON.stringify({v:4,items,dim,wx:WX,who,nmAsked,prog});if(v!==lastSave){lastSave=v;store(v)}}
 setInterval(saveNow,700);addEventListener('pagehide',saveNow);
 try{const h=JSON.parse(sessionStorage.getItem('lakeTreeHist')||'[]');if(Array.isArray(h))hist=h.filter(x=>typeof x==='string');const f=JSON.parse(sessionStorage.getItem('lakeTreeFut')||'[]');if(Array.isArray(f))fut=f.filter(x=>typeof x==='string')}catch(_){}undoState();
 function saveHist(){try{sessionStorage.setItem('lakeTreeHist',JSON.stringify(hist));sessionStorage.setItem('lakeTreeFut',JSON.stringify(fut))}catch(_){}}setInterval(saveHist,1500);addEventListener('pagehide',saveHist);document.addEventListener('visibilitychange',saveNow);
