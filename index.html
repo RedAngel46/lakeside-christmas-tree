@@ -202,6 +202,20 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #ecJ{position:fixed;top:148px;left:50%;transform:translateX(-50%);z-index:35;display:none;align-items:center;gap:10px;background:rgba(14,22,40,.78);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#f3e6c4;font:600 13px system-ui,sans-serif;padding:6px 8px 6px 14px;border-radius:999px;white-space:nowrap;max-width:calc(100vw - 20px)}
 #ecJ.show{display:flex}#ecJ span{overflow:hidden;text-overflow:ellipsis}#ecJ button{border:0;border-radius:999px;padding:5px 12px;font:700 12px system-ui;background:linear-gradient(#e8c66e,#b8862a);color:#1a1208;cursor:pointer}
 @media(max-width:560px){#ecG{bottom:150px}#ecJ{top:104px}}
+#plP{position:fixed;z-index:40;top:58px;right:10px;width:min(390px,calc(100vw - 20px));max-height:calc(100vh - 80px);overflow:auto;padding:14px 16px;color:#f3ead6;background:rgba(14,20,34,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(232,198,110,.25);border-radius:16px;font:14px -apple-system,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.45);display:none}
+#plP.show{display:block}#plP h4{margin:14px 0 4px;font:600 13px system-ui;color:#d9cdb0;text-transform:uppercase;letter-spacing:.06em}
+.plChip{display:inline-block;padding:3px 10px;border-radius:999px;font:700 12px system-ui;background:rgba(255,255,255,.12)}.plChip.sale{background:#b8862a;color:#1a1208}.plChip.own{background:#3f6a4a}.plChip.rent{background:#4a5f86}
+.plPrice{font:600 28px Georgia,serif;color:#fff;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+#plP .ecBtns button.go{background:linear-gradient(#e8c66e,#b8862a);color:#1a1208}#plP .ecBtns button:disabled{opacity:.45;cursor:default}
+#plP input{width:110px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);color:#fff;border-radius:8px;padding:7px 9px;font:600 14px system-ui}
+.plSw{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.plSw button{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}.plSw button.on{border-color:#e8c66e;box-shadow:0 0 0 2px rgba(232,198,110,.4)}
+.plSt button{border:0;border-radius:999px;padding:7px 12px;font:600 12.5px system-ui;background:rgba(255,255,255,.1);color:#fff;cursor:pointer}.plSt button.on{background:rgba(232,198,110,.85);color:#1a1208}
+.plPpl{list-style:none;margin:0;padding:0}.plPpl li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}.plPpl li span{flex:1}.plPpl i{display:block;font-style:normal;color:#8f897b;font-size:11.5px}
+.plPpl button,.plPpl select{border:0;border-radius:999px;padding:6px 10px;font:600 12px system-ui;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}.plPpl select{appearance:none;-webkit-appearance:none}
+.plErr{color:#ef9a8a;font-size:12.5px;min-height:16px;margin:6px 0 0}
+#plAsk{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:41;background:rgba(28,20,14,.95);color:#f3ead8;padding:12px 16px;border-radius:16px;font:600 14px -apple-system,system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.5);display:none;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:92vw}
+#plAsk.show{display:flex}#plAsk button{border:0;border-radius:999px;padding:7px 14px;font:700 13px system-ui;cursor:pointer;background:rgba(255,255,255,.12);color:#f3ead8}#plAsk button.go{background:linear-gradient(#e8c66e,#b8862a);color:#1a1208}
+@media(max-width:560px){#plP{top:auto;bottom:10px;right:10px;max-height:62vh}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="title">Lakeside living room · Lake Oswego</div>
@@ -2927,7 +2941,7 @@ function hsGo(tx,tz,tl){if(V3.pose)hsStand();const P=V3.pos,a=hsRoom(P.x,P.z,V3.
   const t={x:tx,z:tz};const hl=V3.hl;V3.hl=tl;hsClamp(t);V3.hl=hl;pts.push(new THREE.Vector3(t.x,0,t.z));V3.tgt=pts.shift();V3.path=pts;V3.stk=0}
 function hsLights(){const cy=S3.cam.position.y,l=cy>HS.F+.9?1:cy<HS.F-.3?0:V3.hl||0,L=HS.lamps[l],c=S3.cam.position;
   const arr=L.map(q=>[q,q.p.distanceToSquared(c)]).sort((a,b)=>a[1]-b[1]);S3.pl.forEach((pl,i)=>{const q=arr[i]&&arr[i][0];if(q){pl.position.copy(q.p);pl.intensity=HS.LI*(q.k||1);pl.distance=q.d||9}else pl.intensity=0})}
-function hsLook(on){const S=S3;if(!S.hemi){S.hemi=S.scene.children.find(o=>o.isHemisphereLight);S.dl=S.scene.children.find(o=>o.isDirectionalLight)}
+function hsLook(on){const S=S3;if(!S.hemi||!S.dl){S.hemi=S.hemi||S.scene.children.find(o=>o.isHemisphereLight);S.dl=S.dl||S.sunL||S.scene.children.find(o=>o.isDirectionalLight)}
   const tt=document.getElementById('vTitle');if(on){S.hemi.color.set(0xfff0e0);S.hemi.groundColor.set(0x5a4a3c);S.hemi.intensity=1.05;S.dl.intensity=.08;S.pl.forEach(l=>l.color.set(0xffdcb4));if(tt){HS.tt=HS.tt||tt.textContent;tt.textContent=(HS.ownerN?poss(HS.ownerN)+' house':typeof who!=='undefined'&&who?poss(who)+' house':'Your house')+' · Lake Oswego'}}
   else{S.hemi.color.set(0x8a9ad0);S.hemi.groundColor.set(0x3a2c20);S.hemi.intensity=1.45;S.dl.intensity=.55;S.pl.forEach(l=>{l.intensity=22;l.distance=15;l.color.set(0xffb062)});if(tt&&HS.tt)tt.textContent=HS.tt}
   if(HS.fireL)HS.fireL.intensity=on?4:0;V3.lt=0}
@@ -4474,6 +4488,233 @@ function ecTick(T){if(!EC.job)return;try{ecBaristaTick();ecShiftTick(T);ecCourie
   b.addEventListener('pointerdown',e=>e.stopPropagation());b.onclick=e=>{e.stopPropagation();ac();const p=document.getElementById('ecP');ecPanel(!(p&&p.classList.contains('show')))};
   addEventListener('keydown',e=>{if(e.key==='Escape'){const p=document.getElementById('ecP');if(p&&p.classList.contains('show')){ecPanel(false);e.stopImmediatePropagation()}else{const g=document.getElementById('ecG');if(g&&g.classList.contains('show')&&!EC.job){ecGame(false);e.stopImmediatePropagation()}}}},true);
   const go=()=>{if(V3.on&&!EC.st&&!EC.busy&&EC.ok!==false)ecOpen()};setInterval(go,3000);(function loop(){requestAnimationFrame(loop);if(V3.on)ecTick(performance.now()/1000)})()})();
+/* ---------- Lakeshore Lane: plots, ownership, private access, doorbells and invites ---------- */
+const PL={plots:new Map(),acc:[],leases:[],ok:null,busy:0,last:0,lp:null,peers:new Map(),ask:null,ring:null,g:{},obst:[],hello:0,sig:''};
+const PL_D={},PL_IDS=[];
+const PL_STY={cra:{n:'Craftsman',c:['#6f7d64','#5f7183','#d8cdb2','#7a3b32','#a7aca6']},cab:{n:'Lake cabin',c:['#3d3a36','#5a4636','#3e4a3c','#6b2e26']},mod:{n:'Modern',c:['#2f3336','#e8e6e0','#4c5640','#2c3646']}};
+(()=>{const P=[12500,10500,10000,10000,10500,11500],ST=['cra','cab','mod','cra','cab','mod'],C=[0,1,0,1,0,2],w=57.5/6;
+  for(let i=0;i<6;i++){const x0=-18.5+i*w,x1=x0+w,cx=(x0+x1)/2,n=1+2*i,id='LL-'+n,gx=cx+1.6;
+    PL_D[id]={id,n,name:n+' Lakeshore Lane',side:'s',x0,x1,z0:24.6,z1:39.3,cx,hw:7.2,hz0:28.4,hz1:35,dlx:-1.6,gx,gz:24.6,out:23.7,dx:gx,price:P[i],sty:ST[i],col:PL_STY[ST[i]].c[C[i]],lake:1,dock:cx-2.2}}
+  [[10.6,24.7,8500,'mod',1],[24.7,38.9,9000,'cra',3]].forEach(([x0,x1,pr,st,ci],i)=>{const n=2+2*i,id='LL-'+n,cx=(x0+x1)/2,gx=cx-1.8;
+    PL_D[id]={id,n,name:n+' Lakeshore Lane',side:'n',x0,x1,z0:6.2,z1:19.8,cx,hw:9,hz0:9,hz1:16,dlx:-1.8,gx,gz:19.8,out:20.7,dx:gx,price:pr,sty:st,col:PL_STY[st].c[ci]}});
+  for(const id of ['LL-1','LL-2','LL-3','LL-4','LL-5','LL-7','LL-9','LL-11']){const d=PL_D[id];PL_IDS.push(id);const s=d.side==='s';
+    d.R=[[d.x0+.3,s?24.95:6.5,d.x1-.3,s?39.05:19.45],[d.gx-.5,s?24.1:19.3,d.gx+.5,s?25.2:20.4]];if(d.dock!=null)d.R.push([d.dock-.55,38.9,d.dock+.55,44.2]);
+    d.H=[d.cx-d.hw/2-.25,d.hz0-.25,d.cx+d.hw/2+.25,d.hz1+.25];d.dz=s?d.hz0:d.hz1}})();
+const PL_PUB=[[-5.1,3,5.1,8.7],[-18.3,5.9,10.35,8.7],[9.0,5.9,10.35,20.4],[-18.3,5.9,-6.9,24.3],[-18.3,20.1,38.9,24.3]];
+const plInR=(r,p)=>p.x>=r[0]&&p.x<=r[2]&&p.z>=r[1]&&p.z<=r[3];
+function plNm(id){return PL_D[id]?PL_D[id].name:id}
+function plRole(id){const p=PL.plots.get(id);if(!p||!EC.acct)return null;if(p.owner===EC.acct)return 'owner';const now=Date.now(),r=PL.acc.find(x=>x.plot===id&&x.account===EC.acct&&(!x.expires_at||Date.parse(x.expires_at)>now));return r?(r.role==='owner'?'coowner':r.role):null}
+function plOpenH(id){const p=PL.plots.get(id);return !p||p.state==='unclaimed'||p.state==='for_sale'||(p.state==='for_rent'&&!PL.leases.some(l=>l.plot===id&&!l.room))}
+function plCan(id){return plOpenH(id)||!!plRole(id)}
+function plAuth(id){const r=plRole(id);return r==='owner'||r==='coowner'||r==='roommate'||r==='tenant'}
+function plAt(p){for(const id of PL_IDS)if(PL_D[id].R.some(r=>plInR(r,p)))return id;return null}
+function plOk(p){let ok=PL_PUB.some(r=>plInR(r,p));if(!ok)for(const id of PL_IDS){if(plCan(id)&&PL_D[id].R.some(r=>plInR(r,p))){ok=true;break}}if(!ok)return false;
+  for(const id of PL_IDS){const h=PL_D[id].H;if(p.x>h[0]&&p.x<h[2]&&p.z>h[1]&&p.z<h[3])return false}for(const o of PL.obst)if(Math.hypot(p.x-o.x,p.z-o.z)<o.r)return false;return true}
+function plSnap(p){let best=null,bd=1e9;const rs=PL_PUB.slice();for(const id of PL_IDS)if(plCan(id))rs.push(...PL_D[id].R);
+  for(const r of rs){const q={x:Math.max(r[0],Math.min(r[2],p.x)),z:Math.max(r[1],Math.min(r[3],p.z))};for(const id of PL_IDS){const h=PL_D[id].H;if(q.x>h[0]&&q.x<h[2]&&q.z>h[1]&&q.z<h[3]){const o=[[h[0]-.01,q.z],[h[2]+.01,q.z],[q.x,h[1]-.01],[q.x,h[3]+.01]].sort((a,b)=>Math.hypot(a[0]-p.x,a[1]-p.z)-Math.hypot(b[0]-p.x,b[1]-p.z))[0];q.x=o[0];q.z=o[1]}}
+    const d=Math.hypot(q.x-p.x,q.z-p.z);if(d<bd){bd=d;best=q}}if(best){p.x=best.x;p.z=best.z}}
+{const _wcPl=walkClamp;walkClamp=function(p){const me=p===V3.pos;
+  if(p.x>200||p.z<=5||p.x<-19.6||p.x>41||(me&&(V3.boat||V3.ovl||V3.inH))){const r=_wcPl.apply(this,arguments);if(me)PL.lp={x:p.x,z:p.z};return r}
+  if(!me){p.x=Math.max(-18.6,Math.min(39.6,p.x));p.z=Math.min(44,p.z);for(const id of PL_IDS){const h=PL_D[id].H;if(p.x>h[0]&&p.x<h[2]&&p.z>h[1]&&p.z<h[3]){const o=[[h[0],p.z],[h[2],p.z],[p.x,h[1]],[p.x,h[3]]].sort((a,b)=>Math.hypot(a[0]-p.x,a[1]-p.z)-Math.hypot(b[0]-p.x,b[1]-p.z))[0];p.x=o[0];p.z=o[1]}}return}
+  if(plOk(p)){PL.lp={x:p.x,z:p.z};return}const L=PL.lp;
+  if(L&&Math.hypot(L.x-p.x,L.z-p.z)<2.5){const a={x:p.x,z:L.z},b={x:L.x,z:p.z};if(plOk(a)){p.x=a.x;p.z=a.z}else if(plOk(b)){p.x=b.x;p.z=b.z}else{p.x=L.x;p.z=L.z}}else plSnap(p);PL.lp={x:p.x,z:p.z}}}
+/* ---- the lane itself: road, lawns, fences, gates, houses, signs ---- */
+function plCv(w,h,f){const c=cvs(w,h),g=c.getContext('2d');f(g,w,h);const t=tex(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+function plMat(k,f){PL.M=PL.M||{};return PL.M[k]||(PL.M[k]=f())}
+function plTexs(){if(PL.T)return PL.T;const T=PL.T={};
+  T.lap=plCv(64,128,(g,w,h)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h);for(let y=0;y<h;y+=16){const q=g.createLinearGradient(0,y,0,y+16);q.addColorStop(0,'rgba(0,0,0,.3)');q.addColorStop(.18,'rgba(0,0,0,.05)');q.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=q;g.fillRect(0,y,w,16)}});
+  T.bat=plCv(128,64,(g,w,h)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h);for(let x=0;x<w;x+=32){g.fillStyle='rgba(0,0,0,.28)';g.fillRect(x,0,3,h);g.fillStyle='rgba(255,255,255,.4)';g.fillRect(x+3,0,4,h)}for(let i=0;i<300;i++){g.fillStyle='rgba(0,0,0,'+Math.random()*.06+')';g.fillRect(Math.random()*w,Math.random()*h,1,6)}});
+  T.ced=plCv(128,64,(g,w,h)=>{g.fillStyle='#8a6a52';g.fillRect(0,0,w,h);for(let x=0;x<w;x+=8){g.fillStyle='hsl('+(22+Math.random()*10)+',26%,'+(30+Math.random()*14)+'%)';g.fillRect(x,0,7,h);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x+7,0,1,h)}});
+  T.shg=plCv(64,64,(g,w,h)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h);for(let y=0;y<h;y+=8)for(let x=(y/8%2)*6;x<w;x+=12){g.fillStyle='rgba(0,0,0,'+(.08+Math.random()*.16)+')';g.fillRect(x,y,11,7)}});
+  T.gra=plCv(128,128,(g,w,h)=>{g.fillStyle='#55603f';g.fillRect(0,0,w,h);for(let i=0;i<2600;i++){g.fillStyle='hsl('+(60+Math.random()*40)+','+(20+Math.random()*25)+'%,'+(18+Math.random()*22)+'%)';g.fillRect(Math.random()*w,Math.random()*h,1,2+Math.random()*3)}});
+  T.asp=plCv(128,128,(g,w,h)=>{g.fillStyle='#2b2d30';g.fillRect(0,0,w,h);for(let i=0;i<3000;i++){const v=30+Math.random()*40;g.fillStyle='rgb('+v+','+v+','+(v+3)+')';g.fillRect(Math.random()*w,Math.random()*h,1,1)}});
+  T.pav=plCv(64,64,(g,w,h)=>{g.fillStyle='#4a4741';g.fillRect(0,0,w,h);for(let y=0;y<h;y+=16)for(let x=(y/16%2)*8;x<w;x+=16){const v=130+Math.random()*30;g.fillStyle='rgb('+v+','+(v-6)+','+(v-14)+')';g.fillRect(x+1,y+1,14,14)}});
+  return T}
+function plSign(d){const c=PL.g[d.id].sc,g=c.getContext('2d'),p=PL.plots.get(d.id),st=p?p.state:'unclaimed';g.clearRect(0,0,256,176);
+  g.fillStyle='#f4efe4';g.fillRect(0,0,256,176);g.fillStyle=st==='for_rent'?'#2c3e5e':'#7a1f24';g.fillRect(0,0,256,58);g.fillStyle='#fff';g.textAlign='center';g.font='700 36px Georgia,serif';
+  g.fillText(st==='for_rent'?'FOR RENT':'FOR SALE',128,42);g.fillStyle='#1f1a14';g.font='700 34px Georgia,serif';
+  g.fillText(st==='for_rent'?ecUSD(p.rent)+' a day':ecUSD(p&&p.state==='for_sale'?p.price:(p?p.list_price:d.price)),128,100);g.font='600 18px system-ui,sans-serif';g.fillStyle='#4a4035';
+  g.fillText(st==='unclaimed'?'Lakeside Realty · new listing':st==='for_rent'?'Ask '+(p.owner_name||'the owner')+' · ring the bell':'Offered by '+((p&&p.owner_name)||'the owner'),128,134);g.font='600 15px system-ui,sans-serif';g.fillText(d.name,128,160);PL.g[d.id].st.needsUpdate=true}
+function plPlate(d){const c=cvs(128,64),g=c.getContext('2d'),p=PL.plots.get(d.id);g.fillStyle='#1d1f22';g.fillRect(0,0,128,64);g.strokeStyle='#b9975a';g.lineWidth=3;g.strokeRect(4,4,120,56);g.fillStyle='#e8d6a8';g.textAlign='center';g.font='700 30px Georgia,serif';g.fillText(String(d.n),64,36);g.font='600 11px system-ui';g.fillText(p&&p.owner_name&&p.state!=='unclaimed'?p.owner_name.slice(0,16):'LAKESHORE LN',64,54);return tex(c)}
+function plHouse(d){const S=S3,T=plTexs(),cfg=(PL.plots.get(d.id)||{}).house||{},st=PL_STY[cfg.s]?cfg.s:d.sty,col=/^#[0-9a-f]{6}$/i.test(cfg.c||'')?cfg.c:(PL_STY[cfg.s]?PL_STY[st].c[0]:d.col);
+  const g=new THREE.Group(),s=d.side==='s',w=d.hw,dd=d.hz1-d.hz0;g.position.set(d.cx,0,(d.hz0+d.hz1)/2);g.rotation.y=s?Math.PI:0;
+  const L=(c,o)=>new THREE.MeshLambertMaterial(Object.assign({color:c},o||{}));
+  const wallM=plMat('w'+st+col,()=>{const t=(st==='cra'?T.lap:st==='cab'?T.bat:T.bat).clone();t.needsUpdate=true;t.repeat.set(st==='cra'?2:3,st==='cra'?2.4:1);return L(col,{map:t})});
+  const trim=plMat('trim',()=>L('#ece6da')),dark=plMat('dark',()=>L('#22252a')),stone=plMat('stone',()=>L('#8d867b')),wood=plMat('wood',()=>L('#6a4a32')),ced=plMat('ced',()=>{const t=T.ced.clone();t.needsUpdate=true;t.repeat.set(3,1);return L('#ffffff',{map:t})}),
+    roofM=plMat('roof'+st+(S.sea.snow?1:0),()=>S.sea.snow?L('#e6ebf3'):(()=>{const t=T.shg.clone();t.needsUpdate=true;t.repeat.set(3,4);return L(st==='cra'?'#3a3532':st==='cab'?'#2e3236':'#26282b',{map:st==='cra'?t:null})})()),
+    glass=plMat('glass',()=>L('#1a222c',{emissive:'#f0a860',emissiveIntensity:.42})),glassD=plMat('glassD',()=>L('#141b24',{emissive:'#3a4a5c',emissiveIntensity:.25})),brass=plMat('brass',()=>L('#c9a25a',{emissive:'#5a3e10'})),
+    doorM=plMat('door'+st,()=>L(st==='cra'?'#5a1f1a':st==='cab'?'#7a5636':'#1c1d20'));
+  const B=(m,sx,sy,sz,x,y,z,rx,ry,rz)=>{const o=new THREE.Mesh(S.boxG,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,rz||0);g.add(o);return o};
+  if(!PL.prism){const sh=new THREE.Shape();sh.moveTo(-.5,0);sh.lineTo(.5,0);sh.lineTo(0,1);sh.closePath();PL.prism=new THREE.ExtrudeGeometry(sh,{depth:1,bevelEnabled:false});PL.prism.translate(0,0,-.5)}
+  const gable=(m,span,rise,len,x,y,z,alongX)=>{const o=new THREE.Mesh(PL.prism,m);o.scale.set(span,rise,len);o.position.set(x,y,z);if(alongX)o.rotation.y=Math.PI/2;g.add(o);return o};
+  const roof=(span,rise,len,y,x,z,alongX,ov)=>{const h=span/2,a=Math.atan2(rise,h),Lr=Math.hypot(h,rise)+ov;for(const sd of[-1,1]){const cx=sd*(h/2+Math.cos(a)*ov/2)+Math.sin(a)*.06*sd,cy=y+rise/2-Math.sin(a)*ov/2+Math.cos(a)*.06;
+      if(alongX)B(roofM,len+ov*1.2,.13,Lr,x,cy,z+cx,sd*a,0,0);else B(roofM,Lr,.13,len+ov*1.2,x+cx,cy,z,0,0,-sd*a)}B(dark,alongX?len+ov*1.2:.16,.12,alongX?.16:len+ov*1.2,x,y+rise+.02,z)};
+  const win=(x,y,z,ww,hh,ry,lit)=>{const q=new THREE.Group();q.position.set(x,y,z);q.rotation.y=ry||0;g.add(q);const a=(m,sx,sy,sz,px,py,pz)=>{const o=new THREE.Mesh(S.boxG,m);o.scale.set(sx,sy,sz);o.position.set(px,py,pz);q.add(o)};
+    a(trim,ww+.18,hh+.18,.08,0,0,.02);a(lit===false?glassD:glass,ww,hh,.04,0,0,.06);a(trim,.05,hh,.03,0,0,.09);if(hh>.9)a(trim,ww,.05,.03,0,hh*.18,.09);a(trim,ww+.3,.07,.16,0,-hh/2-.1,.08)};
+  const door=(x,z,hh,m)=>{B(trim,1.2,hh+.15,.1,x,.45+hh/2,z+.02);B(m||doorM,.95,hh,.1,x,.45+hh/2,z+.06);B(glass,.6,.28,.02,x,.45+hh-.3,z+.12);B(brass,.06,.06,.06,x+.34,1.45,z+.14);
+    B(dark,.16,.3,.16,x+.85,2.1,z+.12);B(plMat('lamp',()=>L('#ffe2b0',{emissive:'#ffcf8a',emissiveIntensity:1})),.11,.2,.11,x+.85,2.08,z+.13);
+    const pl=new THREE.Mesh(S.planeG,new THREE.MeshBasicMaterial({map:plPlate(d)}));pl.scale.set(.42,.21,1);pl.position.set(x-.85,1.9,z+.09);g.add(pl);
+    if(S.sea.xmas){const wr=new THREE.Mesh(S.torG,plMat('wreath',()=>L('#2c4a2a')));wr.scale.set(.26,.26,.26);wr.position.set(x,1.85,z+.16);g.add(wr)}};
+  const fz=dd/2,dl=d.dlx;B(stone,w+.16,.5,dd+.16,0,.25,0);
+  if(st==='cra'){B(wallM,w,3,dd,0,2,0);B(trim,w+.1,.14,dd+.1,0,3.5,0);gable(wallM,w,2.3,dd,0,3.5,0);roof(w,2.3,dd,3.5,0,0,false,.55);
+    B(wood,w,.4,1.8,0,.2,fz+.9);B(stone,1.3,.2,.4,dl,.1,fz+2);
+    const pr=B(roofM,w+.3,.12,2.3,0,3.35,fz+1.05,.22);pr.position.y=3.32;B(trim,w+.1,.24,.24,0,3.08,fz+1.75);
+    for(const x of[-w/2+.3,dl-.95,dl+.95,w/2-.3]){B(stone,.5,.9,.5,x,.85,fz+1.6);B(trim,.26,1.6,.26,x,2.1,fz+1.6)}
+    door(dl,fz,2.1);win(dl+2.3,2.05,fz,1.0,1.4);win(dl+3.5,2.05,fz,1.0,1.4,0,w>8);win(0,4.35,fz,1.1,.7);
+    for(const sd of[-1,1])for(const zz of[-dd/4,dd/4])win(sd*w/2,2.05,zz,.9,1.3,sd*Math.PI/2,zz>0||sd>0);for(const x of[-w/4,w/4])win(x,2.05,-fz,1,1.3,Math.PI,x>0);
+    B(stone,.8,6.4,.9,w/2+.3,3.2,-dd/6);B(dark,.5,.3,.5,w/2+.3,6.5,-dd/6)}
+  else if(st==='cab'){B(wallM,w,3.1,dd,0,2.05,0);gable(wallM,dd,2.9,w,0,3.6,0,true);roof(dd,2.9,w,3.6,0,0,true,.6);
+    B(wood,1.6,.4,1.2,dl,.2,fz+.6);gable(wood,1.8,.7,1.3,dl,2.85,fz+.55);B(roofM,1.2,.08,1.5,dl-.5,3.3,fz+.6,0,0,.66);B(roofM,1.2,.08,1.5,dl+.5,3.3,fz+.6,0,0,-.66);
+    door(dl,fz,2.1,ced);for(const x of[dl+1.7,dl+2.9])win(x,2.1,fz,.8,1.7);win(dl-1.7,2.3,fz,.9,.9,0,false);
+    for(const x of[-w/2+1,-w/2+2.3,w/2-2.3,w/2-1])win(x,2,-fz,1.0,2.3,Math.PI);win(0,4.4,-fz,1.6,1.0,Math.PI);
+    for(const sd of[-1,1]){win(sd*w/2,2.05,0,1.1,1.3,sd*Math.PI/2,sd>0);win(sd*w/2,4.5,0,.8,.8,sd*Math.PI/2)}
+    B(wood,w+.4,.35,2,0,.18,-fz-1);for(let x=-w/2-.1;x<=w/2+.15;x+=w/4)B(dark,.06,1,.06,x,.85,-fz-1.95);B(dark,w+.4,.05,.05,0,1.33,-fz-1.95);
+    B(stone,1.1,7.6,1.1,-w/4,3.8,0)}
+  else{B(ced,w,3,dd,0,1.8,0);const uw=w*.72,ux=w/2-uw/2,ud=dd*.86;B(wallM,uw,2.7,ud,ux,4.65,-dd*.07);B(dark,w+.7,.24,dd+.7,0,3.42,0);B(dark,uw+.9,.24,ud+.9,ux,6.12,-dd*.07);
+    door(dl,fz,2.35,doorM);B(ced,1.9,.14,1.3,dl,3.0,fz+.6);win(dl+2.4,1.95,fz,2.6,2.1);win(ux,4.7,-dd*.07+ud/2,uw*.7,1.0);win(-w/2+.9,1.95,fz,.6,2.1,0,false);
+    for(const sd of[-1,1])win(sd*w/2,1.95,0,1.8,1.4,sd*Math.PI/2,sd<0);win(0,1.95,-fz,w*.7,2.2,Math.PI);win(ux,4.7,-dd*.07-ud/2,uw*.6,1.2,Math.PI);
+    B(wood,w,.3,1.6,0,.15,-fz-.8);B(stone,.9,1,.9,-w/2+.6,.5,fz+1.2)}
+  if(s){/* lake side deck steps */B(wood,1.2,.2,.5,0,.1,-fz-1.95)}
+  try{v3Bake(g)}catch(e){console.error(e)}return g}
+function plBuild(){const S=S3;if(!S||PL.built)return;PL.built=1;const T=plTexs(),root=new THREE.Group();S.scene.add(root);PL.root=root;
+  const L=(c,o)=>new THREE.MeshLambertMaterial(Object.assign({color:c},o||{})),snow=!!S.sea.snow;
+  const B=(m,sx,sy,sz,x,y,z,p)=>{const o=new THREE.Mesh(S.boxG,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);(p||root).add(o);return o};
+  const flat=(m,x0,z0,x1,z1,y,rep)=>{const o=new THREE.Mesh(S.planeG,m);o.rotation.x=-Math.PI/2;o.scale.set(x1-x0,z1-z0,1);o.position.set((x0+x1)/2,y,(z0+z1)/2);root.add(o);return o};
+  const asp=T.asp.clone();asp.needsUpdate=true;asp.repeat.set(14,1);flat(L('#ffffff',{map:asp}),-18.6,20.45,39,24.0,.012);
+  const curb=L('#9a968e');B(curb,57.6,.12,.2,10.2,.06,20.35);B(curb,57.6,.12,.2,10.2,.06,24.1);
+  const lawnM=snow?L('#e6ebf2'):(()=>{const t=T.gra.clone();t.needsUpdate=true;t.repeat.set(3,4);return L('#ffffff',{map:t})})(),pavM=(()=>{const t=T.pav.clone();t.needsUpdate=true;t.repeat.set(1,4);return L('#ffffff',{map:t})})();
+  /* seawall along the lake, private docks */
+  const sw=L('#857e72'),plank=L('#5b4636'),post=L('#3a2c20');B(sw,61,1.3,.45,11.5,-.55,39.55);B(L('#a39c90'),61,.1,.55,11.5,.12,39.55);
+  /* fences: cedar boards on posts */
+  const segs=[];const fence=(x0,z0,x1,z1)=>{if(Math.hypot(x1-x0,z1-z0)>.05)segs.push([x0,z0,x1,z1])};
+  for(const id of PL_IDS){const d=PL_D[id],s=d.side==='s',fz=d.gz,bz=s?39.25:6.2;
+    flat(lawnM,d.x0+.05,s?24.7:6.25,d.x1-.05,s?39.3:19.75,.014);flat(pavM,d.gx-.5,s?24.7:d.hz1,d.gx+.5,s?d.hz0:19.75,.02);
+    fence(d.x0,fz,d.gx-.82,fz);fence(d.gx+.82,fz,d.x1,fz);fence(d.x0,fz,d.x0,bz);if(id==='LL-11'||id==='LL-4')fence(d.x1,fz,d.x1,bz);if(!s)fence(d.x0,bz,d.x1,bz);
+    if(d.dock!=null){B(plank,1.2,.12,5.2,d.dock,.0,41.7);for(const z of[40.4,42.4,44.1])for(const sd of[-1,1])B(post,.14,1.3,.14,d.dock+sd*.55,-.5,z);B(post,.1,.9,.1,d.dock+.5,.45,44.2)}}
+  const fenceM=L('#ffffff',{map:(()=>{const t=T.ced.clone();t.needsUpdate=true;t.repeat.set(4,1);return t})()}),postM=L('#4a3626');let nb=0,np=0;for(const [x0,z0,x1,z1] of segs){nb+=4;np+=Math.ceil(Math.hypot(x1-x0,z1-z0)/2.4)+1}
+  const IB=new THREE.InstancedMesh(S.boxG,fenceM,nb),IP=new THREE.InstancedMesh(S.boxG,postM,np),o3=new THREE.Object3D();nb=0;np=0;
+  for(const [x0,z0,x1,z1] of segs){const len=Math.hypot(x1-x0,z1-z0),ry=Math.atan2(-(z1-z0),x1-x0);for(let k=0;k<4;k++){o3.position.set((x0+x1)/2,.26+k*.22,(z0+z1)/2);o3.rotation.set(0,ry,0);o3.scale.set(len,.17,.035);o3.updateMatrix();IB.setMatrixAt(nb++,o3.matrix)}
+    const n=Math.ceil(len/2.4);for(let k=0;k<=n;k++){const u=k/n;o3.position.set(x0+(x1-x0)*u,.55,z0+(z1-z0)*u);o3.rotation.set(0,ry,0);o3.scale.set(.1,1.1,.1);o3.updateMatrix();IP.setMatrixAt(np++,o3.matrix)}}
+  root.add(IB);root.add(IP);
+  /* per plot: gate pillars with the doorbell, a gate leaf, mailbox, realtor sign, the house */
+  const pil=L('#8d867b'),cap=L('#a39c90'),lampM=L('#ffe2b0',{emissive:'#ffcf8a',emissiveIntensity:1}),bellM=L('#d8b26a',{emissive:'#7a5520'}),blk=L('#1d1f22'),wht=L('#efe9dc');
+  for(const id of PL_IDS){const d=PL_D[id],s=d.side==='s',fz=d.gz,o=s?-1:1,G=PL.g[id]={};
+    for(const sd of[-1,1]){B(pil,.36,1.25,.36,d.gx+sd*.8,.62,fz);B(cap,.46,.08,.46,d.gx+sd*.8,1.29,fz);B(blk,.15,.04,.15,d.gx+sd*.8,1.35,fz);B(lampM,.1,.14,.1,d.gx+sd*.8,1.44,fz);B(blk,.17,.05,.17,d.gx+sd*.8,1.535,fz)}
+    B(bellM,.1,.14,.03,d.gx+.8,1.0,fz+o*.19);
+    const lf=new THREE.Group();lf.userData.nobake=1;lf.position.set(d.gx-.62,0,fz);root.add(lf);for(let k=0;k<4;k++)B(fenceM,1.24,.17,.04,.62,.3+k*.22,0,lf);B(postM,.06,.95,.06,1.18,.5,0,lf);v3Bake(lf);G.leaf=lf;G.ang=0;
+    B(post,.08,1.1,.08,d.gx+1.35,.55,fz+o*.35);B(blk,.24,.24,.46,d.gx+1.35,1.2,fz+o*.35);
+    const sp=new THREE.Group();sp.userData.nobake=1;sp.position.set(d.gx-2.4,0,fz-o*1.1);root.add(sp);B(wht,.09,1.9,.09,0,.95,0,sp);B(wht,1.05,.07,.07,.48,1.8,0,sp);
+    G.sc=cvs(256,176);G.st=tex(G.sc);const bd=new THREE.Mesh(S.planeG,new THREE.MeshLambertMaterial({map:G.st,side:THREE.DoubleSide,emissive:'#2a2620'}));bd.scale.set(.92,.63,1);bd.position.set(.55,1.38,0);if(s)bd.rotation.y=Math.PI;sp.add(bd);
+    for(const x of[.15,.95])B(wht,.02,.12,.02,x,1.72,0,sp);v3Bake(sp);G.sign=sp;plSign(d);
+    G.house=plHouse(d);G.house.userData.nobake=1;root.add(G.house);{const p=PL.plots.get(id);G.hk=JSON.stringify([(p&&p.house)||{},p&&p.owner_name])}
+    PL.obst.push({x:d.gx-2.4,z:fz-o*1.1,r:.25},{x:d.gx+1.35,z:fz+o*.35,r:.22});
+    const gate={id:'plgate',plid:id,p:new THREE.Vector3(d.gx,0,d.out),r:1.7,get lab(){return plGateLab(id)},get more(){return plGateMore(id)},go:()=>plGateGo(id)};
+    const dr={id:'pldoor',plid:id,p:new THREE.Vector3(d.dx,0,s?d.hz0-.55:d.hz1+.55),r:1.3,get lab(){return !plCan(id)?'🔒 Locked':plRole(id)?'🚪 Go inside':'🚪 Look inside · open house'},go:()=>plCan(id)?plEnter(id):v3Msg('🔒 The door is locked',2000)};
+    ACTS.push(gate,dr)}
+  /* lane lamps, a street sign, benches and firs on the green */
+  for(const x of[-15,-3,9.5,22,33.5])lampPost(x,20.3);lampPost(-17.7,13);for(const x of[-15,-3,9.5,22,33.5])PL.obst.push({x,z:20.3,r:.35});PL.obst.push({x:-17.7,z:13,r:.35});
+  const sg=cvs(256,64),sq=sg.getContext('2d');sq.fillStyle='#1e5a3a';sq.fillRect(0,0,256,64);sq.strokeStyle='#fff';sq.lineWidth=3;sq.strokeRect(4,4,248,56);sq.fillStyle='#fff';sq.font='700 30px system-ui,sans-serif';sq.textAlign='center';sq.fillText('Lakeshore Ln',128,43);
+  const ss=new THREE.MeshBasicMaterial({map:tex(sg),side:THREE.DoubleSide});B(L('#3a3d40'),.08,2.9,.08,-7.4,1.45,6.3);const sb=new THREE.Mesh(S.planeG,ss);sb.scale.set(1.3,.32,1);sb.position.set(-7.4,2.75,6.3);sb.rotation.y=Math.PI/2;root.add(sb);PL.obst.push({x:-7.4,z:6.3,r:.2});
+  const sb2=sb.clone();sb2.position.set(9.5,2.75,6.3);root.add(sb2);B(L('#3a3d40'),.08,2.9,.08,9.5,1.45,6.3);PL.obst.push({x:9.5,z:6.3,r:.2});
+  for(const z of[11,16.5]){B(plank,.5,.06,1.8,-17.6,.48,z);B(plank,.08,.5,1.8,-17.35,.75,z);for(const dz of[-.75,.75])B(post,.45,.45,.06,-17.6,.23,z+dz);PL.obst.push({x:-17.6,z,r:.7},{x:-17.6,z:z-.6,r:.6},{x:-17.6,z:z+.6,r:.6})}
+  const fir=L(snow?'#9fb0a8':'#22382a'),trk=L('#3e2c20');for(const [x,z,k] of[[-9,13,1.2],[-15,18.6,1],[38,7.4,1.3],[23.6,7.2,1.1],[-17.6,37.8,.9],[38.3,37.8,1]]){B(trk,.3*k,1.4*k,.3*k,x,.7*k,z);for(let i=0;i<3;i++){const c=new THREE.Mesh(S.coneG,fir);c.scale.set((1.7-i*.42)*k,(2.2-i*.3)*k,(1.7-i*.42)*k);c.position.set(x,(1.6+i*1.25)*k,z);root.add(c)}PL.obst.push({x,z,r:.5*k})}
+  try{v3Bake(root)}catch(e){console.error(e)}
+  if(typeof MAPB!=='undefined')for(const id of PL_IDS){const d=PL_D[id],s=d.side==='s';MAPB.push([d.cx,s?d.hz0:d.hz1,s?Math.PI:0,d.hw,d.hz1-d.hz0])}
+  plFetch()}
+function plApply(){if(!PL.built)return;for(const id of PL_IDS){const d=PL_D[id],G=PL.g[id];if(!G)continue;const p=PL.plots.get(id),st=p?p.state:'unclaimed';
+    G.sign.visible=st!=='owned';const k=JSON.stringify(p?[p.state,p.price,p.rent,p.list_price,p.owner_name]:0);if(G.sk!==k){G.sk=k;plSign(d)}
+    const hk=JSON.stringify([(p&&p.house)||{},p&&p.owner_name]);if(G.hk!==hk){G.hk=hk;const old=G.house;G.house=plHouse(d);G.house.userData.nobake=1;PL.root.add(G.house);if(old){PL.root.remove(old);old.traverse(o=>{if(o.isMesh&&o.geometry!==S3.boxG&&o.geometry!==PL.prism&&o.geometry!==S3.planeG)o.geometry.dispose()})}}}
+  V3.near=undefined;if(document.getElementById('plP')?.classList.contains('show'))plPanel(PL.pid)}
+async function plFetch(){if(PL.busy||!LB.url)return;PL.busy=1;try{const base=LB.url.replace(/players$/,''),h=lbH();
+    const [a,b,c]=await Promise.all(['plots?select=id,name,state,owner,owner_name,price,rent,list_price,house','plot_access?select=plot,account,name,role,room,expires_at','leases?select=id,plot,room,tenant,tenant_name,landlord,rent,due_at,missed,state'].map(q=>fetch(base+q,{headers:h}).then(r=>r.ok?r.json():Promise.reject(r.status))));
+    for(const p of a)if(PL_D[p.id])PL.plots.set(p.id,p);PL.acc=b;PL.leases=c;PL.ok=true;PL.last=Date.now();plApply()}catch(e){PL.ok=false;PL.last=Date.now()}finally{PL.busy=0}}
+/* ---- prompts at the gate ---- */
+function plGateLab(id){const d=PL_D[id],p=PL.plots.get(id),st=p?p.state:'unclaimed',r=plRole(id);
+  if(st==='unclaimed'||st==='for_sale')return '🏡 '+d.name+' · for sale '+ecUSD(st==='for_sale'?p.price:(p?p.list_price:d.price));
+  if(r)return '🏡 '+d.name+(r==='owner'?' · your home':r==='guest'?' · you’re invited':' · you live here');
+  return '🔔 Ring the doorbell at '+d.n}
+function plGateMore(id){const p=PL.plots.get(id),st=p?p.state:'unclaimed';return st==='owned'&&!plRole(id)||st==='for_rent'?[{lab:'ℹ️ About this home',go:()=>plPanel(id)}]:[]}
+function plGateGo(id){const p=PL.plots.get(id),st=p?p.state:'unclaimed';if(st==='owned'&&!plRole(id))plRing(id);else plPanel(id)}
+/* ---- doorbell, invites and keys over the lobby's realtime channel ---- */
+function plHi(){if(EC.acct&&typeof MP!=='undefined'&&MP.ok)mpSend('eca',{id:LB.id,a:EC.acct,n:(who||'Player').slice(0,24)})}
+function plRing(id){const d=PL_D[id];vChime([79,74]);if(!LB.on||typeof MP==='undefined'||!MP.ok){v3Msg('🔔 Ding-dong… join a lobby so the people who live here can hear you',3600);return}
+  if(PL.ring&&PL.ring.id===id&&Date.now()-PL.ring.t<8000){v3Msg('🔔 You rang already · give them a moment',2200);return}
+  PL.ring={id,t:Date.now()};mpSend('ring',{id:LB.id,n:(who||'Player').slice(0,24),a:EC.acct,p:id});v3Msg('🔔 Ding-dong · you rang the bell at '+d.name,3000);
+  clearTimeout(PL.ringT);PL.ringT=setTimeout(()=>{if(PL.ring&&PL.ring.id===id){PL.ring=null;v3Msg('🚪 No one came to the door at '+d.name+' · try again later',3600)}},30000)}
+function plAskEl(){let el=document.getElementById('plAsk');if(!el){el=document.createElement('div');el.id='plAsk';document.body.appendChild(el);for(const ev of['pointerdown','pointerup','touchstart'])el.addEventListener(ev,e=>e.stopPropagation(),{passive:true})}return el}
+function plAskShow(txt,yes,no,go){const el=plAskEl();el.innerHTML='';const t=document.createElement('span');t.textContent=txt;el.appendChild(t);
+  const a=document.createElement('button');a.className='go';a.textContent=yes;a.onclick=()=>{el.classList.remove('show');PL.ask=null;go(true)};const b=document.createElement('button');b.textContent=no;b.onclick=()=>{el.classList.remove('show');PL.ask=null;go(false)};
+  el.appendChild(a);el.appendChild(b);el.classList.add('show');clearTimeout(PL.askT);PL.askT=setTimeout(()=>{if(PL.ask&&PL.ask.txt===txt){el.classList.remove('show');PL.ask=null}},30000);PL.ask={txt};if(AC&&AC.state==='running')vChime([76,72])}
+const PL_EV={
+  eca(p){if(typeof p.a==='string'&&/^[0-9a-f-]{36}$/.test(p.a))PL.peers.set(p.id,{a:p.a,n:String(p.n||'Player').slice(0,24)})},
+  pupd(){clearTimeout(PL.upT);PL.upT=setTimeout(plFetch,400)},
+  ring(p){if(!PL_D[p.p]||!plAuth(p.p)||typeof p.a!=='string')return;const n=String(p.n||'Someone').slice(0,24);PL.peers.set(p.id,{a:p.a,n});
+    plAskShow('🔔 '+n+' is ringing the doorbell at '+plNm(p.p),'Let them in','Not now',async ok=>{if(!ok){mpSend('ringa',{id:LB.id,to:p.id,ok:0,p:p.p,n:who});return}
+      try{await ecRpc('access_set',Object.assign(ecA(),{p_plot:p.p,p_target:p.a,p_role:'guest',p_minutes:60}));mpSend('ringa',{id:LB.id,to:p.id,ok:1,p:p.p,n:who});mpSend('pupd',{id:LB.id});plFetch();v3Msg('🔓 You let '+n+' in · they can come and go for an hour',3200)}
+      catch(e){v3Msg('⚠️ '+e.message,3200)}});PL.ask.from=p.id},
+  ringa(p){if(PL.ask&&PL.ask.from===p.to&&p.to!==LB.id){plAskEl().classList.remove('show');PL.ask=null}if(p.to!==LB.id)return;const n=String(p.n||'They').slice(0,24);PL.ring=null;clearTimeout(PL.ringT);
+    if(p.ok){plFetch().then(()=>{v3Msg('🔓 '+n+' opened the gate · welcome to '+plNm(p.p),3600);vChime([72,76,79])})}else v3Msg('🚪 '+n+' can’t let you in right now',3000)},
+  pinv(p){if(p.to!==LB.id||!PL_D[p.p])return;const n=String(p.n||'A friend').slice(0,24);plFetch();plAskShow('✉️ '+n+' invites you over to '+plNm(p.p),'Go there','Not now',ok=>{if(ok)plFetch().then(()=>plGo(p.p))})},
+  pkey(p){if(p.to!==LB.id||!PL_D[p.p])return;const n=String(p.n||'The owner').slice(0,24),R={guest:'a guest',roommate:'a roommate',owner:'a co-owner',none:null}[p.r];plFetch();
+    v3Msg(R?'🔑 '+n+' made you '+R+' at '+plNm(p.p):'🔑 '+n+' took back your key to '+plNm(p.p),4200);if(R)vChime([72,79])}};
+{const _mpOnPl=mpOn;mpOn=function(ev,p){if(PL_EV[ev]){if(p&&p.id&&p.id!==LB.id)try{PL_EV[ev](p)}catch(e){console.error(e)}return}const r=_mpOnPl.apply(this,arguments);if(ev==='hi'&&p&&p.id!==LB.id)setTimeout(plHi,300+Math.random()*700);return r}}
+/* ---- going inside: the shared house interior, opened for this plot ---- */
+function plEnter(id){const d=PL_D[id];if(!d||!plCan(id))return;if(V3.boat&&typeof tourReset==='function')tourReset();if(V3.inH)hsLeave(true);const p=PL.plots.get(id),own=p&&p.state!=='unclaimed'&&p.owner_name;
+  HS.plot=id;HS.owner='plot:'+id;HS.ownerN=own?p.owner_name:null;hsEnter();setTimeout(()=>{if(!V3.inH||HS.plot!==id)return;const tt=document.getElementById('vTitle');if(tt)tt.textContent=d.name+' · Lake Oswego';
+    v3Msg(plRole(id)==='owner'?'🏡 Home sweet home · '+d.name:plRole(id)?'🏡 '+d.name+(own?' · '+poss(p.owner_name)+' place':''):'🏡 Open house at '+d.name+' · have a look around',3600)},1100)}
+function plGo(id){const d=PL_D[id];if(!d)return;if(!V3.on){if(typeof v3Open==='function')v3Open();setTimeout(()=>plGo(id),2000);return}if(!plCan(id)){v3Msg('🔒 You need an invitation to go into '+d.name,2800);return}plEnter(id)}
+function plOut(id,why){const d=PL_D[id];V3.pos.set(d.gx,0,d.out);V3.yaw=d.side==='s'?0:Math.PI;V3.tgt=null;V3.path=null;V3.near=undefined;PL.lp={x:V3.pos.x,z:V3.pos.z};if(why)v3Msg(why,3600)}
+{const _hsLPl=hsLeave;hsLeave=function(quiet){const id=HS.plot;HS.plot=null;if(!id||quiet||!V3.inH)return _hsLPl.apply(this,arguments);const d=PL_D[id],s=d.side==='s';
+  const go=()=>{_hsLPl(true);V3.pos.set(d.dx,0,s?d.hz0-.75:d.hz1+.75);V3.yaw=s?0:Math.PI;V3.pitch=-.03;V3.gy=0;V3.tgt=null;V3.near=undefined;PL.lp={x:V3.pos.x,z:V3.pos.z};ambTown(true);murmur(true);v3Msg('🏡 '+d.name,2000)};
+  if(typeof tourFade==='function')tourFade(go);else go()}}
+{const _hsJPl=hsJoin;hsJoin=function(o,on){if(typeof o==='string'&&o.startsWith('plot:'))return plGo(o.slice(5));return _hsJPl.apply(this,arguments)}}
+{const _hsIPl=hsInvite;hsInvite=function(){if(HS.plot)return plPanel(HS.plot,'inv');return _hsIPl.apply(this,arguments)}}
+{const _ecDPl=ecDest;ecDest=function(a){if(a&&a.plid)return a.id==='pldoor'?null:'the mailbox at '+plNm(a.plid);return _ecDPl.apply(this,arguments)}}
+/* ---- the home panel: buy, list, style, keys and invites ---- */
+async function plDo(fn,args,ok){const e=document.querySelector('#plP .plErr');if(e)e.textContent='';try{const st=await ecRpc(fn,Object.assign(ecA(),args));if(st&&st.balance!=null)ecSet(st);await plFetch();mpSend('pupd',{id:LB.id});if(ok)ok()}catch(x){const m=x.message||'Something went wrong';const e2=document.querySelector('#plP .plErr');if(e2)e2.textContent=m;else v3Msg('⚠️ '+m,3000)}}
+function plPanel(id,focus){let P=document.getElementById('plP');if(!P){P=document.createElement('div');P.id='plP';document.body.appendChild(P);for(const ev of['pointerdown','pointerup','click','touchstart','wheel','keydown'])P.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'&&ev!=='keydown'})}
+  if(!id){P.classList.remove('show');PL.pid=null;return}PL.pid=id;const d=PL_D[id],p=PL.plots.get(id),st=p?p.state:'unclaimed',r=plRole(id),own=r==='owner',bal=EC.st?EC.st.balance:0,E=lbEsc;
+  const cost=st==='for_sale'?p.price:(p?p.list_price:d.price),cfg=(p&&p.house)||{},sty=PL_STY[cfg.s]?cfg.s:d.sty,col=/^#[0-9a-f]{6}$/i.test(cfg.c||'')?cfg.c:d.col;
+  const chip={unclaimed:['sale','New listing'],for_sale:['sale','For sale'],owned:['own','Owned'],for_rent:['rent','For rent']}[st];
+  let h='<div class="ecH"><b>🏡 '+E(d.name)+'</b><button class="ecX" aria-label="Close">✕</button></div><span class="plChip '+chip[0]+'">'+chip[1]+'</span> <span class="ecS">'+(d.lake?'Lakefront lot with a private dock':'Hillside lot by the green')+' · '+Math.round((d.x1-d.x0)*(d.z1-d.z0))+' m² · '+PL_STY[sty].n+'</span>';
+  if(st==='unclaimed'||st==='for_sale'){h+='<div class="plPrice">'+ecUSD(cost)+'</div><p class="ecS">'+(st==='for_sale'?'Offered by '+E(p.owner_name||'the owner'):'From Lakeside Realty · house included')+(own?'':' · you have '+ecUSD(bal))+'</p>';
+    if(!own)h+='<div class="ecBtns"><button class="go" data-a="buy"'+(EC.st&&bal>=cost?'':' disabled')+'>🔑 Buy for '+ecUSD(cost)+'</button>'+(V3.inH&&HS.plot===id?'':'<button data-a="look">🚪 Look inside</button>')+'</div>'+(EC.st&&bal<cost?'<p class="ecS">You need '+ecUSD(cost-bal)+' more. Mortgages with 20% down are coming to the bank soon.</p>':'')}
+  else h+='<p class="ecS">'+(st==='for_rent'?'For rent at '+ecUSD(p.rent)+' a day · ':'')+(own?'Your home':'Home of '+E(p.owner_name||'a neighbour'))+'</p>';
+  if(r&&!own){const a=PL.acc.find(x=>x.plot===id&&x.account===EC.acct);h+='<div class="ecRow">🔑 You’re '+({guest:'a guest',roommate:'a roommate',coowner:'a co-owner',tenant:'a tenant'}[r]||r)+' here'+(a&&a.expires_at?' until '+new Date(a.expires_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'')+'</div>'}
+  if(own){h+='<h4>Listing</h4>'+(st==='for_sale'?'<p class="ecS">Listed at '+ecUSD(p.price)+'. While it’s listed, anyone can come and look around.</p><div class="ecBtns"><button data-a="unlist">Take it off the market</button></div>':
+      '<div class="ecBtns" style="align-items:center"><input type="number" min="1" max="10000000" step="100" value="'+(p.list_price||d.price)+'" aria-label="Asking price"><button data-a="list">List for sale</button></div><p class="ecS">A sale pays you right away; any mortgage on it is paid off first.</p>');
+    h+='<h4>The house</h4><div class="ecBtns plSt">'+Object.keys(PL_STY).map(k=>'<button data-s="'+k+'"'+(k===sty?' class="on"':'')+'>'+PL_STY[k].n+'</button>').join('')+'</div><div class="plSw">'+PL_STY[sty].c.map(c=>'<button data-c="'+c+'" style="background:'+c+'"'+(c===col?' class="on"':'')+' aria-label="Colour '+c+'"></button>').join('')+'</div>'}
+  const acc=PL.acc.filter(x=>x.plot===id&&(!x.expires_at||Date.parse(x.expires_at)>Date.now()));
+  if(plAuth(id)){h+='<h4>Keys</h4><ul class="plPpl">'+(p&&p.owner_name?'<li><span>'+E(p.owner_name)+'<i>Owner</i></span></li>':'')+acc.map(x=>'<li><span>'+E(x.name||'Player')+'<i>'+({guest:'Guest',roommate:'Roommate',owner:'Co-owner',tenant:'Tenant'}[x.role]||x.role)+(x.expires_at?' · until '+new Date(x.expires_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'')+'</i></span>'+((own&&x.role!=='tenant')||(plAuth(id)&&x.role==='guest')?'<button data-rm="'+x.account+'">Remove</button>':'')+'</li>').join('')+'</ul>'}
+  if(plAuth(id)){const on=[...(MP.peers||new Map()).values()].filter(q=>performance.now()-(q.last||0)<30000&&PL.peers.has(q.id));
+    h+='<h4 id="plInv">Invite people online</h4>'+(!LB.on||!MP.ok?'<p class="ecS">Join a lobby to invite friends over.</p>':on.length?'<ul class="plPpl">'+on.map(q=>{const a=PL.peers.get(q.id).a;return '<li><span>'+E(q.n||'Player')+'</span><button data-inv="'+q.id+'">Invite over</button>'+(own?'<select data-key="'+q.id+'" aria-label="Give a key"><option value="">Key…</option><option value="guest">Guest · 24 h</option><option value="roommate">Roommate</option><option value="owner">Co-owner</option></select>':'')+'</li>'}).join('')+'</ul>':'<p class="ecS">No one else is online in your lobby right now.</p>')}
+  else if(st==='owned')h+='<p class="ecS">Private home. Ring the doorbell at the gate and whoever lives here can let you in.</p>';
+  h+='<p class="plErr"></p>';P.innerHTML=h;P.classList.add('show');
+  const Q=s=>P.querySelector(s);Q('.ecX').onclick=()=>plPanel(null);
+  const bt=Q('[data-a=buy]');if(bt)bt.onclick=()=>{bt.disabled=true;plDo('plot_buy',{p_plot:id,p_mortgage:false},()=>{vChime([72,76,79,84]);v3Msg('🔑 Congratulations! '+d.name+' is yours',4200);plPanel(id)})};
+  const lk=Q('[data-a=look]');if(lk)lk.onclick=()=>{plPanel(null);plEnter(id)};
+  const li=Q('[data-a=list]');if(li)li.onclick=()=>{const v=Math.round(+Q('input').value);if(!(v>=1))return;plDo('plot_set',{p_plot:id,p_state:'for_sale',p_price:v})};
+  const ul=Q('[data-a=unlist]');if(ul)ul.onclick=()=>plDo('plot_set',{p_plot:id,p_state:'owned'});
+  const look=(s,c)=>plDo('plot_set',{p_plot:id,p_state:st==='for_sale'?'for_sale':st==='for_rent'?'for_rent':'owned',p_price:st==='for_sale'?p.price:null,p_rent:st==='for_rent'?p.rent:null,p_house:{s,c}});
+  P.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const s=b.dataset.s;look(s,PL_STY[s].c[0])});P.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>look(sty,b.dataset.c));
+  P.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const t=b.dataset.rm,x=acc.find(y=>y.account===t);plDo('access_set',{p_plot:id,p_target:t,p_role:'none'},()=>{const pid=[...PL.peers].find(([k,v])=>v.a===t);if(pid)mpSend('pkey',{id:LB.id,to:pid[0],n:who,p:id,r:'none'});v3Msg('🔑 '+((x&&x.name)||'They')+' no longer has a key',2600)})});
+  P.querySelectorAll('[data-inv]').forEach(b=>b.onclick=()=>{const q=b.dataset.inv,a=PL.peers.get(q);if(!a)return;b.disabled=true;plDo('access_set',{p_plot:id,p_target:a.a,p_role:'guest',p_minutes:120},()=>{mpSend('pinv',{id:LB.id,to:q,n:who,p:id});v3Msg('✉️ Invitation sent to '+a.n+' · they can come in for two hours',3000)})});
+  P.querySelectorAll('[data-key]').forEach(s=>s.onchange=()=>{const q=s.dataset.key,a=PL.peers.get(q),role=s.value;if(!a||!role)return;plDo('access_set',{p_plot:id,p_target:a.a,p_role:role,p_minutes:role==='guest'?1440:null},()=>{mpSend('pkey',{id:LB.id,to:q,n:who,p:id,r:role});v3Msg('🔑 '+a.n+' is now '+({guest:'a guest',roommate:'a roommate',owner:'a co-owner'}[role])+' at '+d.name,3000)})});
+  if(focus==='inv'){const f=Q('#plInv');if(f)f.scrollIntoView({block:'start'})}}
+{const _ecPPl=ecPanel;ecPanel=function(on){const r=_ecPPl.apply(this,arguments);const p=document.getElementById('ecP');if(on&&p&&EC.st&&(EC.st.plots||[]).length){const row=[...p.querySelectorAll('.ecRow')].find(e=>e.textContent.startsWith('🔑'));
+    if(row){row.innerHTML='🔑 You own '+EC.st.plots.map(i=>'<a href="#" data-pl="'+lbEsc(i)+'" style="color:#e8c66e">'+lbEsc(plNm(i))+'</a>').join(', ');row.querySelectorAll('[data-pl]').forEach(a=>a.onclick=e=>{e.preventDefault();_ecPPl(false);plPanel(a.dataset.pl)})}}return r}}
+/* ---- per-frame: gates swing for the people allowed through, refresh, keep trespassers out ---- */
+function plTick(T,dt){if(!PL.built)return;const P=V3.pos,near=P.z>-30&&!V3.inH&&P.x<200;
+  for(const id of PL_IDS){const G=PL.g[id];if(!G||!G.leaf)continue;const d=PL_D[id],want=near&&plCan(id)&&Math.hypot(P.x-d.gx,P.z-d.gz)<5?(d.side==='s'?-1.45:1.45):0;if(Math.abs(G.ang-want)>.001){G.ang+=(want-G.ang)*Math.min(1,dt*3);G.leaf.rotation.y=G.ang}}
+  if(T>(PL.ct||0)){PL.ct=T+.5;
+    const iv=near||V3.inH&&HS.plot||document.getElementById('plP')?.classList.contains('show')?20000:90000;if(Date.now()-PL.last>iv&&V3.on)plFetch();
+    if(typeof MP!=='undefined'){if(MP.ok&&EC.acct&&!PL.hello){PL.hello=1;plHi()}if(!MP.ok)PL.hello=0}
+    if(V3.inH&&HS.plot&&!plCan(HS.plot)){const id=HS.plot;hsLeave();setTimeout(()=>v3Msg('🔒 Your visit to '+plNm(id)+' has ended',3600),1300)}
+    else if(!V3.inH&&near&&!V3.boat){const id=plAt(P);if(id&&!plCan(id)&&!PL_PUB.some(r=>plInR(r,P)))plOut(id,'🔒 '+plNm(id)+' is private · ring the doorbell')}
+    const k=PL_IDS.map(id=>plCan(id)?1:0).join('');if(k!==PL.sig){PL.sig=k;V3.near=undefined}}}
+{const _ecBPl=ecBuild;ecBuild=function(){_ecBPl.apply(this,arguments);try{plBuild()}catch(e){console.error('plots',e)}}}
+(function plLoop(){let t0=performance.now();(function f(){requestAnimationFrame(f);const t=performance.now(),dt=Math.min(.1,(t-t0)/1000);t0=t;if(V3.on)try{plTick(t/1000,dt)}catch(e){console.error(e)}})()})();
+addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('plP')?.classList.contains('show')){plPanel(null);e.stopImmediatePropagation()}},true);
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
