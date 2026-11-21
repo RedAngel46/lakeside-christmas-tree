@@ -1496,7 +1496,7 @@ let PGEO=null;function pGeo(){if(PGEO)return PGEO;const V2=(a,b)=>new THREE.Vect
     coatL:lathe([[0,-.6],[.255,-.6],[.24,-.38],[.21,-.12],[.19,.04],[.172,.18],[.165,.3],[.19,.42],[.205,.5],[.19,.57],[.13,.62],[.07,.645],[0,.65]]),
     coatS:lathe([[0,-.16],[.205,-.16],[.192,0],[.172,.16],[.165,.3],[.19,.42],[.205,.5],[.182,.565],[.122,.615],[.066,.642],[0,.65]]),
     thigh:lathe([[0,.03],[.072,.022],[.088,-.03],[.086,-.13],[.077,-.27],[.064,-.39],[.058,-.45],[0,-.46]]),shin:lathe([[0,.03],[.056,.022],[.063,-.06],[.062,-.15],[.052,-.27],[.042,-.37],[.044,-.42],[0,-.43]]),joint:new THREE.SphereGeometry(1,10,8),
-    uarm:lathe([[0,.035],[.05,.028],[.06,-.03],[.057,-.12],[.049,-.25],[.045,-.33],[0,-.345]]),farm:lathe([[0,.012],[.046,.005],[.049,-.06],[.042,-.17],[.033,-.27],[0,-.285]]),shorts:lathe([[0,.04],[.094,.03],[.093,-.1],[.089,-.22],[0,-.225]]),trunks:lathe([[0,.04],[.093,.03],[.091,-.09],[0,-.095]]),sleeve:lathe([[0,.04],[.066,.03],[.066,-.1],[.062,-.165],[0,-.17]]),torM:lathe([[0,-.16],[.19,-.16],[.182,0],[.174,.14],[.188,.28],[.204,.42],[.208,.5],[.18,.565],[.12,.612],[.062,.64],[0,.645]]),torF:(()=>{const g=lathe([[0,-.16],[.205,-.16],[.19,-.02],[.156,.13],[.165,.24],[.184,.33],[.18,.42],[.19,.5],[.17,.565],[.115,.612],[.06,.64],[0,.645]]),p=g.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i),z=p.getZ(i);if(z>0&&y>.24&&y<.46){const k=Math.sin(Math.PI*(y-.24)/.22);p.setZ(i,z+.05*k*Math.min(1,z/.12))}}g.computeVertexNormals();return g})(),skirt:lathe([[.16,.14],[.168,.06],[.196,-.1],[.232,-.28],[.262,-.44]]),
+    uarm:lathe([[0,.035],[.05,.028],[.06,-.03],[.057,-.12],[.049,-.25],[.045,-.33],[0,-.345]]),farm:lathe([[0,.012],[.046,.005],[.049,-.06],[.042,-.17],[.033,-.27],[0,-.285]]),shorts:lathe([[0,.04],[.094,.03],[.093,-.1],[.089,-.22],[0,-.225]]),trunks:lathe([[0,.04],[.093,.03],[.091,-.09],[0,-.095]]),sleeve:lathe([[0,.04],[.066,.03],[.066,-.1],[.062,-.165],[0,-.17]]),torM:lathe([[0,-.16],[.19,-.16],[.182,0],[.174,.14],[.188,.28],[.204,.42],[.208,.5],[.18,.565],[.12,.612],[.062,.64],[0,.645]]),torF:(()=>{const g=lathe([[0,-.16],[.205,-.16],[.19,-.02],[.156,.13],[.165,.24],[.184,.33],[.18,.42],[.19,.5],[.17,.565],[.115,.612],[.06,.64],[0,.645]]),p=g.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i),z=p.getZ(i);if(z>0&&y>.24&&y<.46){const k=Math.sin(Math.PI*(y-.24)/.22);p.setZ(i,z+.05*k*Math.min(1,z/.12))}}g.computeVertexNormals();return g})(),skirt:lathe([[.262,-.44],[.232,-.28],[.196,-.1],[.168,.06],[.16,.14]]),
     boot:new THREE.CylinderGeometry(.064,.058,.16,14).translate(0,-.37,0),sph:new THREE.SphereGeometry(1,14,10),tor:new THREE.TorusGeometry(1,.38,8,18),cone:new THREE.ConeGeometry(1,1,14),cyl:new THREE.CylinderGeometry(1,1,1,12),box:new THREE.BoxGeometry(1,1,1)};return PGEO}
 function mergeG(list){let n=0,ni=0;const gs=list.map(([geo,m])=>{const q=geo.clone();q.applyMatrix4(m);if(!q.index){const c=q.attributes.position.count,ix=new Uint32Array(c);for(let k=0;k<c;k++)ix[k]=k;q.setIndex(new THREE.BufferAttribute(ix,1))}n+=q.attributes.position.count;ni+=q.index.count;return q});const P=new Float32Array(n*3),N=new Float32Array(n*3),U=new Float32Array(n*2),I=n>65535?new Uint32Array(ni):new Uint16Array(ni);let o=0,ou=0,oi=0,base=0;for(const q of gs){P.set(q.attributes.position.array,o);N.set(q.attributes.normal.array,o);if(q.attributes.uv)U.set(q.attributes.uv.array,ou);const qi=q.index.array;for(let k=0;k<qi.length;k++)I[oi+k]=qi[k]+base;oi+=qi.length;base+=q.attributes.position.count;o+=q.attributes.position.array.length;ou+=q.attributes.position.count*2;q.dispose()}const b=new THREE.BufferGeometry();b.setAttribute('position',new THREE.BufferAttribute(P,3));b.setAttribute('normal',new THREE.BufferAttribute(N,3));b.setAttribute('uv',new THREE.BufferAttribute(U,2));b.setIndex(new THREE.BufferAttribute(I,1));b.computeBoundingSphere();return b}
 const MF={};let FABT=null;function matF(c,knit){const k=c+(knit?'k':'');if(MF[k])return MF[k];if(!FABT){FABT=[0,1].map(kn=>{const cv=cvs(128,128),q=cv.getContext('2d');q.fillStyle='#e6e6e6';q.fillRect(0,0,128,128);if(kn){for(let y=0;y<128;y+=8)for(let x=0;x<128;x+=8){q.fillStyle='rgba(0,0,0,.16)';q.beginPath();q.ellipse(x+2,y+4,2,3.5,.5,0,6.283);q.ellipse(x+6,y+4,2,3.5,-.5,0,6.283);q.fill()}}else{for(let i=-128;i<128;i+=4){q.strokeStyle='rgba(0,0,0,'+(.05+Math.random()*.07)+')';q.lineWidth=1.5;q.beginPath();q.moveTo(i,0);q.lineTo(i+128,128);q.stroke()}}noiseFill(q,128,128,.12,1600);const t=tex(cv,kn?[6,6]:[5,5]);return t})}MF[k]=new THREE.MeshLambertMaterial({color:c,map:FABT[knit?1:0]});return MF[k]}
@@ -1505,9 +1505,9 @@ function person(o){o=o||{};const L=o.look||null;if(L){o=Object.assign({},o,{skin
   const flush=(par)=>{for(const [m,l] of parts){const me=new THREE.Mesh(mergeG(l),m);par.add(me)}parts.clear()};
   const mk=(geo,m,sx,sy,sz,x,y,z,par)=>{const k=new THREE.Mesh(geo,m);k.scale.set(sx,sy,sz);k.position.set(x,y,z);(par||g).add(k);return k};
   /* legs: hip -> knee, boots */
-  const B=new THREE.Group();g.add(B);const legs=[],knees=[];for(const s of[-1,1]){const hp=new THREE.Group();hp.position.set(s*.092,.9,0);B.add(hp);const lg=L&&L.lg||'long',bare=lg!=='long';put(G.thigh,bare?sk:pants,1,1,1,0,0,0);if(lg==='shorts')put(G.shorts,pants,1,1,1,0,0,0);else if(lg==='swim')put(G.trunks,pants,1,1,1,0,0,0);flush(hp);const kn=new THREE.Group();kn.position.y=-.43;hp.add(kn);put(G.shin,bare?sk:pants,1,1,1,0,0,0);put(G.joint,bare?sk:pants,.052,.06,.054,0,.005,0);put(G.boot,sh,1,1,1,0,0,0);put(G.sph,sh,.06,.048,.125,0,-.45,.04);put(G.box,matC('#0e0b09'),.115,.022,.25,0,-.485,.035);flush(kn);legs.push(hp);knees.push(kn)}
+  const B=new THREE.Group();g.add(B);const legs=[],knees=[];for(const s of[-1,1]){const hp=new THREE.Group();hp.position.set(s*.092,.9,0);B.add(hp);const lg=L&&L.lg||'long',bare=lg!=='long',tg=L&&L.tg?matC(L.tg):sk;put(G.thigh,bare?tg:pants,1,1,1,0,0,0);if(lg==='shorts')put(G.shorts,pants,1,1,1,0,0,0);else if(lg==='swim')put(G.trunks,pants,1,1,1,0,0,0);flush(hp);const kn=new THREE.Group();kn.position.y=-.43;hp.add(kn);put(G.shin,bare?tg:pants,1,1,1,0,0,0);put(G.joint,bare?tg:pants,.052,.06,.054,0,.005,0);put(G.boot,sh,1,1,1,0,0,0);put(G.sph,sh,.06,.048,.125,0,-.45,.04);if(!(L&&L.sox))put(G.box,matC('#0e0b09'),.115,.022,.25,0,-.485,.035);flush(kn);legs.push(hp);knees.push(kn)}
   /* body: coat, hips, neck, head, face, hair */
-  const long=L?!!L.ln:o.long!==false&&Math.random()<.65;put(G.sph,pants,.165*wid,.1,.115,0,.9,0);flush(B);const tP=new THREE.Group();tP.position.y=.95;B.add(tP);const tI=new THREE.Group();tI.position.y=-.95;tP.add(tI);const hP=new THREE.Group();hP.position.y=1.56;tI.add(hP);const hI=new THREE.Group();hI.position.y=-1.56;hP.add(hI);const tf=L&&L.tor;put(tf==='f'?G.torF:tf==='m'?G.torM:long?G.coatL:G.coatS,coat,wid,1,.7,0,.9,0);if(L&&(L.lg==='skirt'||L.lg==='dress'))put(G.skirt,L.lg==='dress'?coat:matF(L.skc||L.pa),wid*(L.g==='f'?1:1.04),1,.78,0,.9,0);
+  const long=L?!!L.ln:o.long!==false&&Math.random()<.65;put(G.sph,pants,.165*wid,.1,.115,0,.9,0);flush(B);const tP=new THREE.Group();tP.position.y=.95;B.add(tP);const tI=new THREE.Group();tI.position.y=-.95;tP.add(tI);const hP=new THREE.Group();hP.position.y=1.56;tI.add(hP);const hI=new THREE.Group();hI.position.y=-1.56;hP.add(hI);const tf=L&&L.tor;put(tf==='f'?G.torF:tf==='m'?G.torM:long?G.coatL:G.coatS,coat,wid,1,.7,0,.9,0);if(L&&(L.lg==='skirt'||L.lg==='dress'))put(G.skirt,L.lg==='dress'?coat:matF(L.skc||L.pa),wid*(L.g==='f'?1:1.04),L.skl||1,.78,0,.9,0);
   
   if(L?L.bt!==0:Math.random()<.5){for(let i=0;i<4;i++)put(G.sph,matC('#1a1410'),.012,.012,.006,.035,1.36-i*.12,.142-Math.max(0,i-1)*.004)}
   put(G.cyl,sk,.043,.13,.043,0,1.552,-.004);flush(tI);put(G.head,sk,.1,.105,.102,0,1.67,0);
@@ -5038,22 +5038,34 @@ function hxSwitches(){const seen=new Set();for(const [a,b,pts] of HS.doors)for(c
 {const _k=hsLook;hsLook=function(on){const r=_k.apply(this,arguments);if(!on&&HS.off.size){HS.off.clear();hxGlowSet()}return r}}
 {const _o=lkOpen;lkOpen=function(){const r=_o.apply(this,arguments);if(LKE.d)LKE.d.fit='out';return r}}
 /* ---------- clothes for every season, a duvet over you in bed, Douglas firs on Lakeshore Lane ---------- */
-LK_O.fit=[['out','Coat & boots'],['sweater','Knit sweater'],['shirt','Flannel shirt'],['pyjamas','Pyjamas'],['robe','Bathrobe'],['bath','Bath'],['tee','T-shirt & shorts'],['linen','Linen shirt & chinos'],['dress','Summer dress'],['skirt','Blouse & skirt'],['swim','Swimwear']];
+LK_O.fit=[['out','Coat & boots'],['sweater','Knit sweater'],['shirt','Flannel shirt'],['pyjamas','Pyjamas'],['robe','Bathrobe'],['bath','Bath'],['tee','T-shirt & shorts'],['linen','Linen shirt & chinos'],['dress','Summer dress'],['skirt','Blouse & skirt'],['swim','Swimwear'],['in','Coat off'],['hoodie','Hoodie & joggers'],['jeans','Top & jeans'],['knit','Knit dress'],['wskirt','Sweater & wool skirt'],['tank','Tank top & shorts'],['maxi','Long summer dress'],['polo','Polo & shorts']];
 /* who can wear what: g = 'm', 'f' or both */
 const HX_W=[
-  ['Indoors',[['out','🧥','Coat & boots','Your outdoor look'],['sweater','🧶','Cream knit sweater','With trousers and wool socks'],['shirt','👕','Flannel shirt','Dark red check, sleeves down'],['pyjamas','🌙','Pyjamas','Navy cotton, with slippers'],['robe','🛁','Bathrobe','Soft white towelling']]],
-  ['Summer',[['tee','👕','T-shirt & shorts','Slate blue tee, khaki shorts, sneakers'],['linen','🌾','Linen shirt & chinos','Short sleeves, loafers'],['dress','👗','Summer dress','Terracotta, sleeveless, sandals','f'],['skirt','🌸','Blouse & skirt','White blouse, navy skirt, sandals','f'],['swim','🩱','Swimsuit','One-piece, navy','f'],['swim','🩳','Swim shorts','Bare-chested, for the lake','m']]]];
-hxDress=function(L){const f=L.fit||'out';if(f==='out')return L;const g=L.g==='f'?'f':'m',o=Object.assign({},L,{ht:'none',sc:'',gl:L.sk,bg:'none',bt:0,tor:g,sl:'long',lg:'long'});
-  if(f==='sweater')Object.assign(o,{co:'#d9cfbd',sh:'#5d554c'});
+  ['At home',[['out','🧥','Coat & boots','Your outdoor look'],['in','🧦','Coat and boots off','Your own clothes, in socks'],['sweater','🧶','Cream knit sweater','With trousers and wool socks'],['shirt','👕','Flannel shirt','Dark red check, sleeves down'],['hoodie','🩶','Hoodie & joggers','Grey, soft and warm, in socks'],['jeans','👖','Henley & jeans','Olive henley, dark denim','m'],['jeans','👖','Top & jeans','Wine-red fitted top, dark denim','f'],['knit','🧣','Knit dress & tights','Plum, knee-length, black tights','f'],['wskirt','🍂','Sweater & wool skirt','Oatmeal knit, brown skirt, tights','f'],['pyjamas','🌙','Pyjamas','Navy cotton, with slippers'],['robe','🛁','Bathrobe','Soft white towelling']]],
+  ['Summer',[['tee','👕','T-shirt & shorts','Slate blue tee, khaki shorts, sneakers'],['polo','🎽','Polo & shorts','Forest green polo, stone shorts','m'],['tank','🩳','Tank top & shorts','White tank, navy shorts','m'],['tank','🩳','Tank top & denim shorts','White tank, light denim shorts','f'],['linen','🌾','Linen shirt & chinos','Short sleeves, loafers'],['dress','👗','Summer dress','Terracotta, sleeveless, sandals','f'],['maxi','🌿','Long summer dress','Sage green, ankle-length, sandals','f'],['skirt','🌸','Blouse & skirt','White blouse, navy skirt, sandals','f'],['swim','🩱','Swimsuit','One-piece, navy','f'],['swim','🩳','Swim shorts','Bare-chested, for the lake','m']]]];
+/* your own outdoor colours, as a knit top under the coat */
+function hxMix(a,b,t){const p=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16));const A=p(a),B=p(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+hxDress=function(L){const f=L.fit||'out';if(f==='out')return L;const g=L.g==='f'?'f':'m',o=Object.assign({},L,{ht:'none',sc:'',gl:L.sk,bg:'none',bt:0,tor:g,sl:'long',lg:'long',sox:1});
+  if(f==='in')Object.assign(o,{co:hxMix(L.co||'#555555','#d8cfc0',.45),sh:'#4f4842'});
+  else if(f==='sweater')Object.assign(o,{co:'#d9cfbd',sh:'#5d554c'});
   else if(f==='shirt')Object.assign(o,{co:'#6e2622',sh:'#4a4440',bt:1});
-  else if(f==='pyjamas')Object.assign(o,{co:'#2b3a57',pa:'#2b3a57',sh:'#cfc5b4',bt:1});
-  else if(f==='robe')Object.assign(o,{tor:null,ln:1,co:'#ece6da',pa:L.sk,sh:'#ece6da'});
+  else if(f==='hoodie')Object.assign(o,{co:'#6b7178',pa:'#3a3d44',sh:'#d8d4cc'});
+  else if(f==='jeans')Object.assign(o,g==='f'?{co:'#7a2e3c',pa:'#2f3d58',sh:'#4a4440'}:{co:'#5b5a3c',pa:'#2f3d58',sh:'#4a4440',bt:1});
+  else if(f==='knit')Object.assign(o,{tor:'f',co:'#5e3a4e',lg:'dress',skl:1.2,tg:'#211d1f',sh:'#211d1f'});
+  else if(f==='wskirt')Object.assign(o,{tor:'f',co:'#d4c6ae',lg:'skirt',skc:'#5c4433',skl:1.12,tg:'#2b2527',sh:'#2b2527'});
+  else if(f==='pyjamas')Object.assign(o,{co:'#2b3a57',pa:'#2b3a57',sh:'#cfc5b4',bt:1,sox:0});
+  else if(f==='robe')Object.assign(o,{tor:null,ln:1,co:'#ece6da',pa:L.sk,sh:'#ece6da',sox:0});
   else if(f==='bath')Object.assign(o,g==='f'?{co:'#f4f1ea',sl:'none',lg:'skirt',skc:'#f4f1ea',sh:L.sk}:{co:L.sk,sl:'none',lg:'swim',pa:'#f4f1ea',sh:L.sk});
-  else if(f==='tee')Object.assign(o,{co:'#3f5a6e',sl:'short',lg:'shorts',pa:'#b8a47e',sh:'#e6e3dc'});
-  else if(f==='linen')Object.assign(o,{co:'#efe9dc',sl:'short',pa:'#a8916a',sh:'#6a4a30',bt:1});
-  else if(f==='dress')Object.assign(o,{tor:'f',co:'#b9604e',sl:'none',lg:'dress',sh:'#b98f66'});
-  else if(f==='skirt')Object.assign(o,{tor:'f',co:'#f3efe6',sl:'short',lg:'skirt',skc:'#2f3f5a',sh:'#b98f66'});
+  else if(f==='tee')Object.assign(o,{co:'#3f5a6e',sl:'short',lg:'shorts',pa:'#b8a47e',sh:'#e6e3dc',sox:0});
+  else if(f==='polo')Object.assign(o,{co:'#2c4a3a',sl:'short',lg:'shorts',pa:'#c8b994',sh:'#e6e3dc',sox:0});
+  else if(f==='tank')Object.assign(o,g==='f'?{tor:'f',co:'#f1ece2',sl:'none',lg:'shorts',pa:'#7c94b2',sh:'#e6e3dc',sox:0}:{co:'#ece7dc',sl:'none',lg:'shorts',pa:'#2f3b52',sh:'#e6e3dc',sox:0});
+  else if(f==='linen')Object.assign(o,{co:'#efe9dc',sl:'short',pa:'#a8916a',sh:'#6a4a30',bt:1,sox:0});
+  else if(f==='dress')Object.assign(o,{tor:'f',co:'#b9604e',sl:'none',lg:'dress',sh:'#b98f66',sox:0});
+  else if(f==='maxi')Object.assign(o,{tor:'f',co:'#7d9479',sl:'none',lg:'dress',skl:1.85,sh:'#b98f66',sox:0});
+  else if(f==='skirt')Object.assign(o,{tor:'f',co:'#f3efe6',sl:'short',lg:'skirt',skc:'#2f3f5a',sh:'#b98f66',sox:0});
   else if(f==='swim')Object.assign(o,g==='f'?{tor:'f',co:'#1f3550',sl:'none',lg:'swim',pa:'#1f3550',sh:L.sk}:{tor:'m',co:L.sk,sl:'none',lg:'swim',pa:'#2e5b7a',sh:L.sk});
+  /* skirts and dresses are the women's wardrobe; a man who has one saved gets the summer basics */
+  if(g==='m'&&['dress','maxi','skirt','knit','wskirt'].includes(f))Object.assign(o,{tor:'m',co:'#3f5a6e',sl:'short',lg:'shorts',pa:'#b8a47e',skl:null,tg:null,sox:0});
   if(o.gs==='sun'&&(f==='bath'||f==='pyjamas'))o.gs='none';return o};
 /* the older outfit builder added a towel and a belt by hand; the body now does it */
 lkPerson=function(L,extra){L=lkClean(L);const D=hxDress(L);return person(Object.assign({look:Object.assign({},D,{gl:D.gl||D.sk,sc:D.sc||null})},extra||{}))};
@@ -5063,11 +5075,11 @@ hxWardrobe=function(){let el=document.getElementById('hxW');if(!el){el=document.
   el.innerHTML='<div class="hxC"><div class="hxH"><b>👗 Wardrobe</b><button class="hxX" aria-label="Close">✕</button></div><div class="hxL">'+
     HX_W.map(([sec,items])=>'<h5>'+sec+(sec==='Summer'&&!hxWarm()?' <small>· for indoors until it’s warm out</small>':'')+'</h5>'+items.filter(x=>!x[4]||x[4]===g).map(([k,e,nm,d])=>{n++;return'<button data-f="'+k+'"'+(k===cur?' class="on" aria-pressed="true"':'')+'><span class="hxE">'+e+'</span><span><b>'+nm+'</b><small>'+(k===cur?'Wearing now':d)+'</small></span><i>'+(n<10?n:'')+'</i></button>'}).join('')).join('')+'</div></div>';
   el.classList.add('show');el.querySelector('.hxX').onclick=hxWardClose;
-  el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=b.dataset.f;hxWardClose();if(f===cur)return;hxWear(f,f==='out'?'🧥 Coat and boots back on':'👗 You change into '+b.querySelector('b').textContent.toLowerCase().replace(/^(t-shirt|linen|summer|blouse|swim|cream|flannel|pyjamas|bathrobe)/,m=>(/^(pyjamas|swim shorts)/.test(m)?'':'the ')+m))});
+  el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=b.dataset.f;hxWardClose();if(f===cur)return;hxWear(f,f==='out'?'🧥 Coat and boots back on':f==='in'?'🧦 Coat off, boots off · you’re in your socks':'👗 Now wearing: '+b.querySelector('b').textContent)});
   const b=el.querySelector('.on')||el.querySelector('button[data-f]');if(b)b.focus()};
 addEventListener('keydown',e=>{const el=document.getElementById('hxW');if(el&&el.classList.contains('show')&&/^[6-9]$/.test(e.key)){const b=el.querySelectorAll('[data-f]')[+e.key-1];if(b){b.click();e.stopPropagation()}}},true);
 /* going outside: the coat goes back on unless it's summer and you're dressed for it */
-{const _l=hsLeave;hsLeave=function(quiet){if(V3.inH&&LOOK&&LOOK.fit&&LOOK.fit!=='out'){const f=LOOK.fit,warm=hxWarm(),keep=warm&&['tee','linen','dress','skirt','swim','shirt'].includes(f);
+{const _l=hsLeave;hsLeave=function(quiet){if(V3.inH&&LOOK&&LOOK.fit&&LOOK.fit!=='out'){const f=LOOK.fit,warm=hxWarm(),keep=warm&&['tee','linen','dress','skirt','swim','shirt','tank','maxi','polo','jeans'].includes(f);
     if(!keep){hxWardClose();hxWear('out');setTimeout(()=>v3Msg(warm?'🧥 You get dressed to go out':'🧥 It’s cold out · you put your coat and boots back on',2600),quiet?0:900)}}
   return _l.apply(this,arguments)}}
 /* bed: you slide under the duvet */
@@ -5102,6 +5114,37 @@ function hxFir(x,z,k){const S=S3,H=10.5*k,snow=S.sea&&S.sea.snow,root=new THREE.
   IM.count=n;root.add(IM);{const cr=new THREE.Mesh(new THREE.ConeGeometry(2.15*k,H-1.9*k,12,1,true),new THREE.MeshLambertMaterial({color:'#1c2e1f'}));cr.position.y=1.9*k+(H-1.9*k)/2-.1;root.add(cr)}
   if(snow){const sm=new THREE.MeshLambertMaterial({color:'#f2f5f8'});for(let i=0;i<whorls;i+=2){const t=i/(whorls-1),y=y0+(H-.5-y0)*t,Lb=Math.pow(1-t,.85)*2.4*k+.3*k;const c=new THREE.Mesh(new THREE.ConeGeometry(Lb*.85,.18,9,1,true),sm);c.position.y=y+.12;root.add(c)}}
   S.scene.add(root);return root}
+
+/* ---------- the house together: lights and curtains are the same for everyone inside; coats come off at the door ---------- */
+const HX_ST={};
+const hxKey=()=>(typeof HS!=='undefined'&&HS.owner)||(typeof LB!=='undefined'&&LB.id)||'me';
+function hxState(){return{off:[...HS.off],cur:HS.cur.map(W=>W.t?1:0)}}
+function hxCurSnap(W){W.k=W.t;W.act.lab=W.t?'🪟 Open the curtains':'🪟 Close the curtains';const w=Math.max(.001,W.w*(.08+.92*W.k));W.ps.forEach(p=>{p.scale.x=w;p.visible=W.k>.001})}
+function hxApply(st,snap){if(!st)return;const ok=new Set(Object.values(HX_RN).length?Object.keys(HX_RN).map(hxR):[]);
+  HS.off=new Set((Array.isArray(st.off)?st.off:[]).filter(r=>typeof r==='string'&&ok.has(r)));
+  (Array.isArray(st.cur)?st.cur:[]).forEach((t,i)=>{const W=HS.cur[i];if(!W)return;W.t=t?1:0;if(snap)hxCurSnap(W);else W.act.lab=W.t?'🪟 Open the curtains':'🪟 Close the curtains'});
+  V3.lt=0;V3.near=undefined}
+function hxShare(what){if(!V3.inH)return;HX_ST[hxKey()]=hxState();if(typeof MP==='undefined'||!MP.ok)return;mpSend('hxs',Object.assign({id:LB.id,hs:hxKey(),n:who||'',w:what||null},hxState()))}
+/* my switch and my curtains tell everyone in the house */
+{const _s=hxSw;hxSw=function(r){const R=hxR(r),was=HS.off.has(R);const x=_s.apply(this,arguments);hxShare({t:'sw',r,on:was});return x}}
+{const _c=hxCurt;hxCurt=function(W){const x=_c.apply(this,arguments);hxShare({t:'cur',i:HS.cur.indexOf(W),on:W.t});return x}}
+/* theirs reach me */
+{const _o=mpOn;mpOn=function(ev,p){if(ev==='hxs'||ev==='hxq'){try{if(!p||!p.id||p.id===LB.id||!V3.inH||p.hs!==hxKey())return;
+      if(ev==='hxq'){clearTimeout(HS.hxqT);HS.hxqT=setTimeout(()=>{if(V3.inH&&p.hs===hxKey())mpSend('hxs',Object.assign({id:LB.id,hs:hxKey(),n:who||''},hxState()))},150+Math.random()*450);return}
+      hxApply(p,false);HX_ST[hxKey()]=hxState();const w=p.w,n=String(p.n||'Someone').slice(0,24);
+      if(w&&w.t==='sw'&&HX_RN[w.r])v3Msg((w.on?'💡 '+n+' turned the lights on in the ':'🌑 '+n+' turned the lights off in the ')+HX_RN[w.r],2200);
+      else if(w&&w.t==='cur')v3Msg('🪟 '+n+(w.on?' closed the curtains':' opened the curtains'),1800)}catch(e){console.error('house sync',e)}return}
+  return _o.apply(this,arguments)}}
+/* entering: the house as you left it, then as the people inside have it; the coat and boots come off at the door */
+function hxArrive(){let n=0;const t=setInterval(()=>{if(!V3.inH){if(++n>40)clearInterval(t);return}clearInterval(t);
+    hxApply(HX_ST[hxKey()]||{off:[],cur:[]},true);if(typeof MP!=='undefined'&&MP.ok)mpSend('hxq',{id:LB.id,hs:hxKey()});
+    if(LOOK&&LOOK.fit==='out')setTimeout(()=>{if(V3.inH&&LOOK.fit==='out'&&!V3.pose)hxWear('in','🧦 You hang up your coat and take off your boots')},1300)},100)}
+{const _e=hsEnter;hsEnter=function(){const r=_e.apply(this,arguments);hxArrive();return r}}
+{const _j=hsJoin;hsJoin=function(){const was=V3.inH;if(was)HX_ST[hxKey()]=hxState();const r=_j.apply(this,arguments);if(was)hxArrive();return r}}
+{const _l=hsLeave;hsLeave=function(){if(V3.inH)HX_ST[hxKey()]=hxState();return _l.apply(this,arguments)}}
+/* a coat hook by the front door */
+{const _b=hsBuild;hsBuild=function(){const r=_b.apply(this,arguments);try{ACTS.push({id:'hxHook',hl:0,p:new THREE.Vector3(HS.X+5.55,0,HS.Z+9.25),r:.6,get lab(){return LOOK&&LOOK.fit==='out'?'🧥 Hang up your coat, boots off':'🧥 Put your coat and boots on'},
+    go:()=>{if(LOOK.fit==='out')hxWear('in','🧦 You hang up your coat and take off your boots');else hxWear('out','🧥 Coat and boots back on')}})}catch(e){console.error('hook',e)}return r}}
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
