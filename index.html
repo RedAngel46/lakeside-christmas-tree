@@ -176,6 +176,32 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #seaP li .e{font-size:20px;width:26px;text-align:center}#seaP li .n{flex:1}#seaP li small{display:block;color:#9aa6b6;font-size:12px}#seaP li .w{font-size:12px;color:#c9d2de;white-space:nowrap}
 #seaP .sO{display:flex;flex-direction:column;gap:6px}#seaP .sPk{display:flex;gap:6px;padding-left:22px}#seaP input[type=date],#seaP input[type=time],#seaP select{font:14px -apple-system,system-ui,sans-serif;background:#232a3a;color:#fff;border:1px solid #445;border-radius:8px;padding:5px 7px}
 #seaP .sB{margin-top:12px;text-align:right}
+#vWal{position:absolute;top:10px;left:420px;font:600 14px -apple-system,system-ui,sans-serif;border:0;border-radius:999px;padding:9px 14px;color:#fff;background:rgba(20,26,40,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer;z-index:3;font-variant-numeric:tabular-nums}
+#vWal.up{animation:ecUp 1.2s}#vWal.dn{animation:ecDn 1.2s}@keyframes ecUp{0%{background:rgba(70,150,90,.9)}100%{background:rgba(20,26,40,.6)}}@keyframes ecDn{0%{background:rgba(160,60,60,.9)}100%{background:rgba(20,26,40,.6)}}
+@media(max-width:560px){#vWal{top:58px;left:auto;right:64px}}
+#ecP,#ecG{position:fixed;z-index:40;color:#f3ead6;background:rgba(14,20,34,.9);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(232,198,110,.25);border-radius:16px;font:14px -apple-system,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.45);display:none}
+#ecP{top:58px;left:10px;width:min(380px,calc(100vw - 20px));max-height:calc(100vh - 80px);overflow:auto;padding:14px 16px}
+#ecG{left:50%;bottom:88px;transform:translateX(-50%);width:min(460px,calc(100vw - 20px));padding:14px 16px}
+#ecP.show,#ecG.show{display:block}
+.ecH{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.ecH b{font:600 17px Georgia,serif;color:#f1dca6}
+.ecX{border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:999px;width:28px;height:28px;cursor:pointer}
+.ecT{font:600 13px system-ui;color:#e8c66e;font-variant-numeric:tabular-nums}
+.ecBal{font:600 34px Georgia,serif;color:#fff;margin:4px 0 8px;display:flex;align-items:baseline;gap:10px;font-variant-numeric:tabular-nums}.ecBal small{font:13px system-ui;color:#b9b2a2}
+.ecBar{height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}.ecBar i{display:block;height:100%;background:linear-gradient(90deg,#b8862a,#e8c66e)}
+.ecS{color:#b9b2a2;font-size:12.5px;margin:6px 0}.ecS a{color:#e8c66e}
+.ecRow{background:rgba(255,255,255,.06);border-radius:10px;padding:8px 10px;margin:6px 0;font-size:13px}
+#ecP h4{margin:12px 0 4px;font:600 13px system-ui;color:#d9cdb0;text-transform:uppercase;letter-spacing:.06em}
+.ecL{list-style:none;margin:0;padding:0}.ecL li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}.ecL i{display:block;font-style:normal;color:#8f897b;font-size:11.5px}
+.ecL b,.ecBal{font-variant-numeric:tabular-nums}.pos{color:#8fd19e}.neg{color:#ef9a8a}
+.ecO{font:italic 16px Georgia,serif;color:#fff;margin:6px 0 4px}
+.ecBtns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}.ecBtns.col{flex-direction:column}
+.ecBtns button,.ecJob button{border:0;border-radius:999px;padding:9px 14px;font:600 13.5px system-ui;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;text-align:left}
+.ecBtns button:hover{background:rgba(232,198,110,.3)}.ecBtns .kb{display:inline-block;min-width:18px;margin-right:7px;padding:0 5px;border-radius:5px;background:rgba(0,0,0,.35);font-size:11px;text-align:center}
+.ecJob{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(255,255,255,.08)}.ecJob div{flex:1}.ecJob b{display:block;font-size:15px}.ecJob span{display:block;color:#cfc6b2;font-size:12.5px;margin:2px 0}.ecJob i{font-style:normal;color:#e8c66e;font-size:12px}
+.ecJob button{background:linear-gradient(#e8c66e,#b8862a);color:#1a1208}.ecJob button:disabled{opacity:.45;cursor:default}
+#ecJ{position:fixed;top:148px;left:50%;transform:translateX(-50%);z-index:35;display:none;align-items:center;gap:10px;background:rgba(14,22,40,.78);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#f3e6c4;font:600 13px system-ui,sans-serif;padding:6px 8px 6px 14px;border-radius:999px;white-space:nowrap;max-width:calc(100vw - 20px)}
+#ecJ.show{display:flex}#ecJ span{overflow:hidden;text-overflow:ellipsis}#ecJ button{border:0;border-radius:999px;padding:5px 12px;font:700 12px system-ui;background:linear-gradient(#e8c66e,#b8862a);color:#1a1208;cursor:pointer}
+@media(max-width:560px){#ecG{bottom:150px}#ecJ{top:104px}}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="title">Lakeside living room · Lake Oswego</div>
@@ -4307,6 +4333,147 @@ function seaPanel(open){let p=document.getElementById('seaP');if(!open){if(p)p.c
 (()=>{const b=document.createElement('button');b.id='seaB';b.onclick=e=>{e.stopPropagation();if(SEA.stale){location.reload();return}const p=document.getElementById('seaP');seaPanel(!(p&&p.classList.contains('show')))};document.body.appendChild(b);seaChip();setInterval(()=>seaChip(),SEA.speed>1?1000:15000);
   /* the season changed under us (midnight, or a fast preview) */
   setInterval(()=>{if(!SEA.stale&&SEA.key(SEA.at(SEA.now()))!==SEA.key())seaChip(true)},SEA.speed>1?2000:60000)})();
+</script><script>
+/* ---------- economy: wallet, ledger and jobs (server-authoritative, Supabase RPC) ---------- */
+const EC={acct:null,tok:null,st:null,ok:null,busy:0,job:null,last:0,seen:new Set(),pT:0};
+try{const j=JSON.parse(localStorage.getItem('lakeTreeEcon')||'null');if(j&&j.tok){EC.acct=j.acct||null;EC.tok=j.tok}}catch(_){}
+function ecSave(){try{localStorage.setItem('lakeTreeEcon',JSON.stringify({acct:EC.acct,tok:EC.tok}))}catch(_){}}
+function ecTok(){const a=new Uint8Array(24);crypto.getRandomValues(a);return 'lk'+[...a].map(b=>b.toString(16).padStart(2,'0')).join('')}
+const ecUSD=n=>'$'+Math.round(+n||0).toLocaleString('en-US');
+async function ecRpc(fn,args){const r=await fetch(LB.url.replace(/players$/,'rpc/'+fn),{method:'POST',headers:lbH(1),body:JSON.stringify(args||{})});let j=null;try{j=await r.json()}catch(_){}
+  if(!r.ok){const e=new Error((j&&j.message)||'The bank is busy, try again');e.code=j&&j.code;throw e}return j}
+function ecA(o){return Object.assign({p_acct:EC.acct,p_token:EC.tok},o||{})}
+async function ecOpen(){if(EC.busy)return;EC.busy=1;try{if(!EC.tok){EC.tok=ecTok();EC.acct=null;ecSave()}
+    let st;try{st=await ecRpc('econ_open',{p_acct:EC.acct,p_token:EC.tok,p_name:(who||'').slice(0,24)||null,p_player:LB.id||null})}
+    catch(e){if(e.code==='28000'&&EC.acct){EC.tok=ecTok();EC.acct=null;ecSave();st=await ecRpc('econ_open',{p_acct:null,p_token:EC.tok,p_name:(who||'').slice(0,24)||null,p_player:LB.id||null})}else throw e}
+    if(!EC.acct){EC.acct=st.acct;ecSave()}EC.ok=true;ecSet(st)}catch(e){if(EC.ok==null||!navigator.onLine)EC.ok=false;ecChip()}finally{EC.busy=0}}
+function ecSet(st){const b0=EC.st?EC.st.balance:null;EC.st=st;EC.last=Date.now();ecChip(b0);
+  const nn=(st.notices||[]).filter(n=>!EC.seen.has(n.id));if(nn.length){nn.forEach(n=>EC.seen.add(n.id));nn.slice(0,3).reverse().forEach((n,i)=>setTimeout(()=>ecNote('📬 '+n.body,5200),i*5400))}
+  if(document.getElementById('ecP')?.classList.contains('show'))ecPanel(true)}
+function ecNote(m,ms){if(V3.on)v3Msg(m,ms||3200);else lbNote(m)}
+function ecChip(b0){let b=document.getElementById('vWal');if(!b)return;const st=EC.st;b.innerHTML=st?'💵 '+ecUSD(st.balance):EC.ok===false?'💵 Offline':'💵 …';
+  if(st&&b0!=null&&st.balance!==b0){b.classList.remove('up','dn');void b.offsetWidth;b.classList.add(st.balance>b0?'up':'dn')}}
+const EC_KIND={job:'💼',welcome:'🎁',rent:'🏠',rent_in:'🏠',mortgage:'🏦',down_payment:'🏦',purchase:'🔑',sale:'🔑',admin:'⚙️'};
+function ecPanel(on){let p=document.getElementById('ecP');if(!p){p=document.createElement('div');p.id='ecP';document.body.appendChild(p);for(const ev of['pointerdown','pointerup','click','touchstart','wheel'])p.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'})}
+  if(!on){p.classList.remove('show');return}const st=EC.st;
+  if(!st){p.innerHTML='<div class="ecH"><b>💵 Wallet</b><button class="ecX">✕</button></div><p class="ecS">'+(EC.ok===false?'The wallet and jobs need an internet connection. Open the online version: <a href="'+LB.link+'" target="_blank" rel="noopener">'+LB.link.replace(/^https:\/\//,'')+'</a>':'Opening your account…')+'</p>';p.classList.add('show');p.querySelector('.ecX').onclick=()=>ecPanel(false);if(EC.ok!==false)ecOpen();return}
+  const ld=(st.ledger||[]).map(l=>'<li><span>'+(EC_KIND[l.kind]||'•')+' '+lbEsc(l.memo||l.kind)+'<i>'+new Date(l.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+'</i></span><b class="'+(l.amount<0?'neg':'pos')+'">'+(l.amount<0?'−':'+')+ecUSD(Math.abs(l.amount))+'</b></li>').join('')||'<li><span>No transactions yet</span></li>';
+  const m=st.mortgage,l=st.lease,cap=st.cap||1500;
+  const home=[l?'<div class="ecRow">🏠 Renting '+lbEsc(l.room||l.plot)+' · '+ecUSD(l.rent)+'/day · next '+new Date(l.due_at).toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit'})+(l.missed?' · <b class="neg">payment missed</b>':'')+'</div>':'',
+    m?'<div class="ecRow">🏦 Mortgage on plot '+lbEsc(m.plot)+' · '+ecUSD(m.balance)+' left · '+ecUSD(m.installment)+' due '+new Date(m.next_due).toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit'})+(m.missed?' · <b class="neg">'+m.missed+' of 3 missed</b>':'')+'</div>':'',
+    (st.plots||[]).length?'<div class="ecRow">🔑 You own plot '+st.plots.map(lbEsc).join(', ')+'</div>':''].join('');
+  p.innerHTML='<div class="ecH"><b>💵 Wallet</b><button class="ecX" aria-label="Close">✕</button></div>'+
+    '<div class="ecBal">'+ecUSD(st.balance)+'<small>'+lbEsc(st.name||who||'')+'</small></div>'+
+    '<div class="ecBar"><i style="width:'+Math.min(100,(st.earned||0)/cap*100)+'%"></i></div><p class="ecS">Earned today '+ecUSD(st.earned)+' of '+ecUSD(cap)+' · resets at midnight, Lake Oswego time</p>'+home+
+    '<h4>Transactions</h4><ul class="ecL">'+ld+'</ul><p class="ecS">Your account lives on this device. Clearing the browser’s data starts a new one.</p>';
+  p.classList.add('show');p.querySelector('.ecX').onclick=()=>ecPanel(false);
+  if((st.notices||[]).length&&!EC.pT){EC.pT=1;ecRpc('econ_seen',ecA()).then(s=>{EC.pT=0;EC.st=s}).catch(()=>{EC.pT=0})}}
+setInterval(()=>{if(V3.on&&EC.ok&&!EC.busy&&Date.now()-EC.last>60000&&!document.hidden)ecOpen()},5000);
+
+/* --- jobs --- */
+const EC_JOBS={barista:{n:'Barista',e:'☕',pay:'$8 an order',max:40,unit:'orders'},shift:{n:'Visitor kiosk',e:'🗺️',pay:'$12 a minute',max:20,unit:'minutes'},courier:{n:'Courier',e:'📦',pay:'$30 a delivery',max:12,unit:'deliveries'}};
+const EC_POS={kiosk:{x:14.3,z:-84.6},cart:{x:14.3,z:-91.4}};
+function ecHud(){let h=document.getElementById('ecJ');const j=EC.job;if(!j){if(h)h.classList.remove('show');return}
+  if(!h){h=document.createElement('div');h.id='ecJ';h.innerHTML='<span></span><button type="button">Clock out</button>';document.body.appendChild(h);for(const ev of['pointerdown','pointerup','click','touchstart'])h.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'});h.querySelector('button').onclick=()=>{ac();ecEnd()}}
+  const J=EC_JOBS[j.job];let t=J.e+' '+J.n+' · '+j.units+' '+J.unit+' · ≈ '+ecUSD(j.units*({barista:8,shift:12,courier:30})[j.job]);
+  if(j.job==='courier'&&j.tg){const d=Math.hypot(j.tg.p.x-V3.pos.x,j.tg.p.z-V3.pos.z);t+=' · deliver to '+j.tg.nm+' · '+Math.round(d)+' m'}
+  if(j.job==='shift'){const m=Math.floor((performance.now()-j.t0)/60000);t=J.e+' '+J.n+' · '+m+' min on shift · '+j.miss+' missed'}
+  const s=h.querySelector('span');if(s.textContent!==t)s.textContent=t;h.classList.add('show')}
+async function ecStart(job){if(!EC.st){ecPanel(true);return}if(EC.job){ecNote('Finish your '+EC_JOBS[EC.job.job].n.toLowerCase()+' shift first',2400);return}if(EC.st.earned>=(EC.st.cap||1500)){ecNote('💤 You’ve earned the daily maximum. Come back tomorrow!',3400);return}
+  try{const r=await ecRpc('job_start',ecA({p_job:job}));EC.job={id:r.id,job,units:0,miss:0,t0:performance.now()};
+    if(job==='barista')ecBarista();else if(job==='courier'){ecNext();ecNote('📦 Parcels loaded · follow the gold beam and deliver each one',3600)}else{EC.job.next=performance.now()+9000;ecNote('🗺️ You’re on shift at the visitor kiosk · stay close and help visitors with their questions',4200)}ecHud()}
+  catch(e){ecNote('⚠️ '+e.message,3000)}}
+async function ecEnd(quiet){const j=EC.job;if(!j)return;EC.job=null;ecHud();ecGame(false);ecBeam(null);let u=j.units;if(j.job==='shift')u=Math.max(0,Math.floor((performance.now()-j.t0)/60000)-j.miss);
+  try{const r=await ecRpc('job_finish',ecA({p_job:j.id,p_units:u}));ecSet(r);const J=EC_JOBS[j.job];
+    ecNote(r.paid>0?'💵 +'+ecUSD(r.paid)+' · '+J.n+' · '+r.units+' '+(r.units===1?J.unit.replace(/ies$/,'y').replace(/s$/,''):J.unit)+(r.capped?' (daily maximum reached)':''):quiet||(u?'No pay this time: '+J.unit+' need a little time each':'Clocked out · no '+J.unit+' this time'),4200);if(r.paid>0)vChime([72,76,79])}
+  catch(e){ecNote('⚠️ '+e.message,3000)}}
+
+/* barista: an order mini-game at the coffee cart */
+const EC_DR=['Latte','Cappuccino','Americano','Mocha','Hot chocolate','Chai latte'],EC_EX=['Oat milk','Extra shot','Whipped cream','Cinnamon','No extras'],EC_SZ=['Small','Large'];
+const EC_WHO=['a jogger','a couple from Portland','a dog walker','a teacher','a student','a retired sailor','a nurse off her shift','a cyclist','a tourist with a map','a man in a rain jacket'];
+function ecOrder(){const r=a=>a[Math.random()*a.length|0];return{sz:r(EC_SZ),dr:r(EC_DR),ex:Math.random()<.35?'No extras':r(EC_EX.slice(0,4)),who:r(EC_WHO),t:performance.now()}}
+function ecGame(on){let g=document.getElementById('ecG');if(!on){if(g)g.classList.remove('show');return}
+  if(!g){g=document.createElement('div');g.id='ecG';document.body.appendChild(g);for(const ev of['pointerdown','pointerup','click','touchstart','wheel'])g.addEventListener(ev,e=>e.stopPropagation(),{passive:ev!=='click'})}g.classList.add('show');return g}
+function ecBarista(){const j=EC.job;if(!j||j.job!=='barista')return;const g=ecGame(true),o=j.o=ecOrder();j.pick=[];j.step=0;
+  const steps=[['Size',EC_SZ],['Drink',EC_DR],['Extra',EC_EX]];
+  const draw=()=>{const s=steps[j.step];g.innerHTML='<div class="ecH"><b>☕ Lakeside Coffee Co.</b><span class="ecT"></span></div><p class="ecO">'+(o.who[0].toUpperCase()+o.who.slice(1))+': “'+o.sz+' '+o.dr.toLowerCase()+(o.ex==='No extras'?', nothing else':', with '+o.ex.toLowerCase())+', please.”</p>'+
+      '<p class="ecS">'+(j.pick.length?'Cup: '+j.pick.join(' · '):'Make the order: size, drink, then the extra')+'</p><div class="ecBtns">'+s[1].map((x,i)=>'<button data-v="'+x+'"><span class="kb">'+(i+1)+'</span>'+x+'</button>').join('')+'</div>'+
+      '<p class="ecS">'+j.units+' served · '+ecUSD(j.units*8)+' so far</p>';g.querySelectorAll('.ecBtns button').forEach(b=>b.onclick=()=>pick(b.dataset.v))};
+  const pick=v=>{if(EC.job!==j)return;ac();j.pick.push(v);j.step++;if(j.step<3){draw();return}
+    const ok=j.pick[0]===o.sz&&j.pick[1]===o.dr&&j.pick[2]===o.ex;if(ok){j.units++;vChime([79,84]);ecNote('☕ Perfect · “Thanks, have a good one!”',1600)}else ecNote('😕 That’s not what they ordered · they walk off',2000);ecHud();
+    if(j.units>=EC_JOBS.barista.max){ecEnd();return}setTimeout(()=>{if(EC.job===j)ecBarista()},ok?500:900)};
+  j.pickFn=pick;j.steps=steps;draw()}
+function ecBaristaTick(){const j=EC.job;if(!j||j.job!=='barista'||!j.o)return;const left=Math.max(0,18-(performance.now()-j.o.t)/1000),el=document.querySelector('#ecG .ecT');if(el)el.textContent=Math.ceil(left)+' s';
+  if(left<=0){j.o=null;ecNote('⌛ Too slow · the customer gave up',1800);setTimeout(()=>{if(EC.job===j)ecBarista()},700)}}
+addEventListener('keydown',e=>{const j=EC.job;if(!j||j.job!=='barista'||!j.pickFn||e.metaKey||e.ctrlKey||e.altKey||e.repeat)return;const n=+e.key;if(!(n>=1&&n<=9))return;const s=j.steps[j.step];if(!s||!s[1][n-1])return;e.preventDefault();e.stopImmediatePropagation();j.pickFn(s[1][n-1])},true);
+
+/* visitor kiosk: a timed shift answering visitors */
+const EC_Q=[['Where can I ride the carousel?','On Millennium Plaza, by the water',['At the church','Up on the hill']],['Where does the riverboat cruise leave from?','The pier off Millennium Plaza',['Behind the church','From the farmers market']],
+  ['Is Lake Oswego a public lake?','No, it’s private · the plaza is the public spot by the water',['Yes, anyone can swim anywhere','It’s a national park']],['Where can I get something warm to drink?','At the coffee cart on the plaza',['At the church','On the dock']],
+  ['What river feeds the lake?','The Tualatin River, through a canal',['The Columbia','The Mississippi']],['Which mountain can I see on a clear day?','Mount Hood',['Mount Rainier','Mount Shasta']],
+  ['How do I get to the dock?','Walk west from the plaza to the water',['Take the bus up the hill','It’s behind the church']],['Where’s the big tree?','At the end of the main street',['Inside the church','On the riverboat']],
+  ['What was the lake called long ago?','Sucker Lake',['Swan Lake','Crater Lake']],['Where can I rent a dinghy?','At the boat docks by the water',['At the coffee cart','At the church']],
+  ['What city is Lake Oswego next to?','Portland',['Seattle','Boise']],['When do the Christmas Ships sail?','In December, in the evenings',['Every morning in July','Never']]];
+function ecShiftTick(T){const j=EC.job;if(!j||j.job!=='shift')return;const n=performance.now(),k=EC_POS.kiosk,d=Math.hypot(V3.pos.x-k.x+1.6,V3.pos.z-k.z);
+  if(!V3.on||V3.inH||V3.mode!=='walk'||d>7){ecEnd('You left the kiosk · shift over');return}
+  if(Math.floor((n-j.t0)/60000)>=EC_JOBS.shift.max){ecEnd();return}
+  if(!j.q&&n>j.next){const q=EC_Q[Math.random()*EC_Q.length|0],a=[q[1],...q[2]].sort(()=>Math.random()-.5);j.q={q,a,t:n};const g=ecGame(true);
+    g.innerHTML='<div class="ecH"><b>🗺️ A visitor asks</b><span class="ecT"></span></div><p class="ecO">“'+q[0]+'”</p><div class="ecBtns col">'+a.map((x,i)=>'<button data-v="'+i+'"><span class="kb">'+(i+1)+'</span>'+x+'</button>').join('')+'</div>';
+    g.querySelectorAll('.ecBtns button').forEach(b=>b.onclick=()=>ecAnswer(+b.dataset.v))}
+  if(j.q){const left=Math.max(0,14-(n-j.q.t)/1000),el=document.querySelector('#ecG .ecT');if(el)el.textContent=Math.ceil(left)+' s';if(left<=0){j.miss++;j.q=null;ecGame(false);j.next=n+15000+Math.random()*12000;ecNote('⌛ The visitor wandered off unanswered',2000)}}}
+function ecAnswer(i){const j=EC.job;if(!j||!j.q)return;ac();const ok=j.q.a[i]===j.q.q[1];if(ok){vChime([76,79]);ecNote('🙂 “Thank you so much!”',1500)}else{j.miss++;ecNote('🤨 That wasn’t right · the right answer: '+j.q.q[1],3200)}j.q=null;ecGame(false);j.next=performance.now()+15000+Math.random()*15000;ecHud()}
+addEventListener('keydown',e=>{const j=EC.job;if(!j||j.job!=='shift'||!j.q||e.metaKey||e.ctrlKey||e.altKey||e.repeat)return;const n=+e.key;if(n>=1&&n<=3){e.preventDefault();e.stopImmediatePropagation();ecAnswer(n-1)}},true);
+
+/* courier: carry parcels to stalls and landmarks around town */
+function ecDest(a){const L={cocoa:'the hot chocolate stall',cocoa2:'the hot chocolate stall',wine:'the wine stall',wine2:'the wine stall',nuts:'the chestnut stand',nuts2:'the chestnut stand',cider:'the cider stall',cider2:'the cider stall',pretz:'the pretzel stand',cand:'the candle stall',wool:'the scarf stall',ride:'the carousel',dock:'the dock',tour:'the riverboat pier',tree:'the big maple',bell:'the church',home:'the blue door on Main Street'};
+  if(L[a.id])return L[a.id];const m=/(?:Look at|Browse|Get)(?: a| an| the| some| roasted| a warm| a hot)* (.+)$/i.exec((a.lab||'').replace(/^[^A-Za-z]+/,''));return m?'the '+m[1].replace(/s$/,'')+' stall':null}
+function ecNext(){const j=EC.job;if(!j)return;const P=V3.pos,c=ACTS.filter(a=>a.p&&a.lv==null&&a.hl==null&&a.p.x<200&&a.p.z>-172&&!/^(kiosk|cart|hs)/.test(a.id)&&Math.hypot(a.p.x-P.x,a.p.z-P.z)>18&&ecDest(a));
+  const a=c[Math.random()*c.length|0];if(!a){ecEnd();return}j.tg={p:a.p.clone(),nm:ecDest(a)};ecBeam(j.tg.p);ecHud()}
+function ecBeam(p){const S=S3;if(!S||!S.scene)return;let b=EC.beam;if(!p){if(b)b.visible=false;return}
+  if(!b){b=EC.beam=new THREE.Group();const m=new THREE.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.28,depthWrite:false,blending:THREE.AdditiveBlending});const c=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,14,16,1,true),m);c.position.y=7;b.add(c);
+    const r=new THREE.Mesh(new THREE.RingGeometry(.55,.8,32),new THREE.MeshBasicMaterial({color:0xffd27a,transparent:true,opacity:.7,side:THREE.DoubleSide,depthWrite:false}));r.rotation.x=-Math.PI/2;r.position.y=.04;b.add(r);b.userData.r=r;S.scene.add(b)}
+  b.position.set(p.x,0,p.z);b.visible=true}
+function ecCourierTick(T){const j=EC.job;if(!j||j.job!=='courier'||!j.tg)return;if(EC.beam){EC.beam.userData.r.scale.setScalar(1+Math.sin(T*3)*.12)}
+  if(!V3.inH&&!V3.boat&&Math.hypot(j.tg.p.x-V3.pos.x,j.tg.p.z-V3.pos.z)<2.6){j.units++;vChime([72,79]);ecNote('📦 Delivered to '+j.tg.nm+' · '+ecUSD(30),1800);
+    if(j.units>=EC_JOBS.courier.max){ecEnd();return}ecNext()}}
+
+/* the kiosk and the coffee cart on Millennium Plaza */
+function ecSign(txt,sub,w,h,bg,fg){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,w,h);x.strokeStyle=fg;x.lineWidth=h*.05;x.strokeRect(h*.06,h*.06,w-h*.12,h-h*.12);
+  x.fillStyle=fg;x.textAlign='center';x.textBaseline='middle';x.font='600 '+Math.round(h*(sub?.36:.46))+'px Georgia,serif';x.fillText(txt,w/2,h*(sub?.4:.53));if(sub){x.font='italic '+Math.round(h*.2)+'px Georgia,serif';x.fillText(sub,w/2,h*.74)}return tex(c)}
+function ecBuild(){const S=S3;if(!S||S.ecB)return;S.ecB=1;const g=new THREE.Group();S.scene.add(g);
+  const M=(c,e)=>new THREE.MeshLambertMaterial(Object.assign({color:c},e||{})),wood=M('#2f3b33'),trim=M('#c9b48a'),dark=M('#1b1f24'),cork=M('#8a6a45'),paper=M('#efe8d8',{emissive:'#3a352a'}),metal=M('#9aa0a6'),awn=M('#6b2430');
+  const b=(m,sx,sy,sz,x,y,z,p)=>{const o=new THREE.Mesh(S.boxG,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);(p||g).add(o);return o};
+  /* jobs kiosk: a dark-green timber booth with a pitched roof, a counter and a notice board */
+  const K=new THREE.Group();K.position.set(EC_POS.kiosk.x,0,EC_POS.kiosk.z);K.rotation.y=-Math.PI/2;g.add(K);
+  b(wood,2.6,2.3,1.7,0,1.15,0,K);b(trim,2.7,.08,1.8,0,2.34,0,K);
+  for(const s of[-1,1]){const r=b(dark,2.9,.07,1.25,0,2.62,s*.48,K);r.rotation.x=s*.5}b(dark,.08,.6,1.75,-1.36,2.55,0,K);b(dark,.08,.6,1.75,1.36,2.55,0,K);
+  b(trim,2.4,.08,.42,0,1.05,.98,K);b(dark,2.2,.5,.04,0,1.5,.86,K);b(wood,2.4,.5,.05,0,2.0,.88,K);
+  const sg=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.4),new THREE.MeshBasicMaterial({map:ecSign('Lakeside Jobs','Work · Pay · Daily',512,94,'#1f2a24','#e8d6a8')}));sg.position.set(0,2.0,.915);K.add(sg);
+  b(cork,1.0,1.1,.05,1.9,1.35,.3,K);b(wood,.08,1.9,.08,1.45,.95,.3,K);b(wood,.08,1.9,.08,2.35,.95,.3,K);
+  for(let i=0;i<5;i++){const p=b(paper,.24,.3,.01,1.62+(i%3)*.27,1.55-(i>2?.42:0)+(i%2)*.05,.33,K);p.rotation.z=(i%2?.06:-.05)}
+  const kl=new THREE.PointLight(0xffd9a0,6,7,1.6);kl.position.set(0,2.1,1.3);K.add(kl);
+  /* coffee cart: a wheeled cart with a striped awning and an espresso machine */
+  const C=new THREE.Group();C.position.set(EC_POS.cart.x,0,EC_POS.cart.z);C.rotation.y=-Math.PI/2;g.add(C);
+  b(M('#e9e2d2'),2.0,.95,1.0,0,.75,0,C);b(dark,2.08,.06,1.08,0,1.25,0,C);for(const s of[-1,1]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.08,18),dark);w.rotation.x=Math.PI/2;w.position.set(s*.6,.3,.55);C.add(w)}
+  b(metal,.5,.42,.36,-.45,1.49,-.15,C);b(dark,.5,.08,.36,-.45,1.74,-.15,C);b(M('#3b2a1e'),.22,.26,.22,.35,1.41,-.2,C);
+  for(const x of[-.95,.95])b(metal,.04,1.3,.04,x,1.9,.45,C);for(let i=0;i<8;i++)b(i%2?awn:M('#efe6d6'),.26,.04,1.2,-.91+i*.26,2.58,.05,C).rotation.x=-.18;
+  const cs=new THREE.Mesh(new THREE.PlaneGeometry(1.8,.36),new THREE.MeshBasicMaterial({map:ecSign('Lakeside Coffee Co.','Est. 1912',512,102,'#efe6d6','#5a1e26')}));cs.position.set(0,1.0,.505);C.add(cs);
+  const cl=new THREE.PointLight(0xffe2b8,4,6,1.6);cl.position.set(0,2.2,.8);C.add(cl);
+  OBST.push({x:EC_POS.kiosk.x+.1,z:EC_POS.kiosk.z,r:1.55},{x:EC_POS.cart.x,z:EC_POS.cart.z,r:1.25});
+  const kp=new THREE.Vector3(EC_POS.kiosk.x-1.7,0,EC_POS.kiosk.z),cp=new THREE.Vector3(EC_POS.cart.x-1.5,0,EC_POS.cart.z);
+  const k={id:'kiosk',p:kp,r:2.6,lab:'📋 Lakeside Jobs',go:()=>ecJobs()};ACTS.push(k);
+  ACTS.push({id:'cart',p:cp,r:2.4,lab:'☕ Work the coffee cart · $8 an order',go:()=>{if(!(EC.job&&EC.job.job==='barista'))ecStart('barista')}})}
+function ecJobs(){if(!EC.st){ecPanel(true);return}const g=ecGame(true),st=EC.st,cap=st.cap||1500;
+  g.innerHTML='<div class="ecH"><b>📋 Lakeside Jobs</b><button class="ecX" aria-label="Close">✕</button></div><p class="ecS">Earned today '+ecUSD(st.earned)+' of '+ecUSD(cap)+'</p>'+
+    Object.entries(EC_JOBS).map(([k,J])=>'<div class="ecJob"><div><b>'+J.e+' '+J.n+'</b><span>'+({barista:'Make orders at the coffee cart before customers give up.',shift:'Stay at the kiosk and answer visitors’ questions. Up to 20 minutes.',courier:'Carry parcels to stalls and landmarks around town.'})[k]+'</span><i>'+J.pay+' · up to '+J.max+' '+J.unit+'</i></div><button data-j="'+k+'"'+(EC.job?' disabled':'')+'>'+(EC.job&&EC.job.job===k?'Working':'Start')+'</button></div>').join('');
+  g.querySelector('.ecX').onclick=()=>ecGame(false);g.querySelectorAll('.ecJob button').forEach(b=>b.onclick=()=>{ac();ecGame(false);const k=b.dataset.j;if(k==='barista'){const c=EC_POS.cart;V3.pos.set(c.x-1.5,0,c.z);V3.yaw=-Math.PI/2}ecStart(k)})}
+const _tbEc=tourBuild;tourBuild=function(){_tbEc.apply(this,arguments);try{ecBuild()}catch(e){console.error('econ',e)}};
+function ecTick(T){if(!EC.job)return;try{ecBaristaTick();ecShiftTick(T);ecCourierTick(T);if(!EC.ht||T>EC.ht){EC.ht=T+.25;ecHud()}
+  if(EC.job&&EC.job.job==='barista'){const c=EC_POS.cart;if(Math.hypot(V3.pos.x-c.x+1.5,V3.pos.z-c.z)>6||V3.inH)ecEnd('You walked away from the cart · shift over')}}catch(e){console.error(e)}}
+(()=>{const b=document.createElement('button');b.id='vWal';b.title='Wallet';b.textContent='💵 …';const l=document.getElementById('vLobB');(l&&l.parentNode||document.body).insertBefore(b,l?l.nextSibling:null);
+  b.addEventListener('pointerdown',e=>e.stopPropagation());b.onclick=e=>{e.stopPropagation();ac();const p=document.getElementById('ecP');ecPanel(!(p&&p.classList.contains('show')))};
+  addEventListener('keydown',e=>{if(e.key==='Escape'){const p=document.getElementById('ecP');if(p&&p.classList.contains('show')){ecPanel(false);e.stopImmediatePropagation()}else{const g=document.getElementById('ecG');if(g&&g.classList.contains('show')&&!EC.job){ecGame(false);e.stopImmediatePropagation()}}}},true);
+  const go=()=>{if(V3.on&&!EC.st&&!EC.busy&&EC.ok!==false)ecOpen()};setInterval(go,3000);(function loop(){requestAnimationFrame(loop);if(V3.on)ecTick(performance.now()/1000)})()})();
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
