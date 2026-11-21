@@ -1531,7 +1531,7 @@ function person(o){o=o||{};const L=o.look||null;if(L){o=Object.assign({},o,{skin
     flush(hI);if(L.bg&&L.bg!=='none'){const bm=matC(L.bg==='tan'?'#8a5a32':L.bg==='red'?'#6a1a1e':'#1c1a1a');put(G.box,bm,.06,.17,.21,.205*wid,1.0,.02);put(G.box,bm,.018,.52,.014,.04,1.23,.138,0,0,.45);put(G.box,bm,.018,.52,.014,.04,1.23,-.138,0,0,.45);put(G.box,matC('#c9a24a'),.012,.02,.03,.238*wid,1.05,.02)}}
   flush(tI);
   /* arms: shoulder -> elbow, gloves */
-  const arms=[],elbows=[],glove=matC(o.glove==='skin'?skc:o.glove||pick3(['#2a2420','#1a1a1c','#5a1a1c',skc]));for(const s of[-1,1]){const p=new THREE.Group();p.position.set(s*.178*wid,1.43,0);p.rotation.z=s*.05;tI.add(p);const sl=L&&L.sl||'long',am=sl==='long'?coat:sk;if(sl==='short')put(G.sleeve,coat,1,1,1,0,0,0);flush(p);const e=new THREE.Group();e.position.y=-.3;e.rotation.x=-.2;p.add(e);pHand(put,G,glove,s);if(sl==='long')put(G.cyl,coat,.036,.03,.036,0,-.268,0);flush(e);p.userData.sk=[am,e];arms.push(p);elbows.push(e)}
+  const arms=[],elbows=[],glove=matC(o.glove==='skin'?skc:o.glove||pick3(['#2a2420','#1a1a1c','#5a1a1c',skc]));for(const s of[-1,1]){const cl=new THREE.Group();cl.position.set(s*.18*wid,1.43,0);cl.userData.cl=s;cl.rotation.z=s*.16;tI.add(cl);const p=new THREE.Group();cl.add(p);const sl=L&&L.sl||'long',am=sl==='long'?coat:sk;if(sl==='short')put(G.sleeve,coat,1,1,1,0,0,0);flush(p);const e=new THREE.Group();e.position.y=-.3;e.rotation.x=-.2;p.add(e);pHand(put,G,glove,s);if(sl==='long')put(G.cyl,coat,.036,.03,.036,0,-.268,0);flush(e);p.userData.sk=[am,e];arms.push(p);elbows.push(e)}
   pArms(tI,arms,wid);let mug=null;if(o.mug){mug=mk(S.cylG,matC(pick3(['#f4efe6','#a3121c','#2e4a3a'])),.035,.085,.035,0,-.33,.05,elbows[1]);arms[1].rotation.x=-.5;elbows[1].rotation.x=-1.1;arms[1].rotation.z=.15}
   else if(!o.idle&&!L&&Math.random()<.22){const bc=matC(pick3(['#5a3a24','#2a2020','#7a1a1e','#3a3a40']));mk(S.boxG,bc,.06,.2,.27,0,-.47,0,elbows[0]);mk(S.torG,bc,.07,.07,.07,0,-.34,0,elbows[0]).rotation.y=Math.PI/2}
   if(S.shadow)S.shadow(g,0,0,.85,.7);
@@ -3575,8 +3575,8 @@ function dgUpd(dt,T){const m=DG.m;if(!DG.on||!m)return;
       if(d<2.6){DG.par.lock=true;v3Msg('✨ You’re in the Christmas Ships parade · steer or use the throttle to break away',4400);if(AC&&AC.state==='running')vChime([72,76,79,84]);dgHud(true)}}
     else{const f=Math.min(1,dt*1.6);x+=(tx-x)*f;z+=(tz-z)*f;const e=wr(hT-DG.h);DG.h+=e*f;DG.st+=(Math.max(-1,Math.min(1,e*3))-DG.st)*f;DG.v=sp}}
   else{DG.st+=(inp-DG.st)*Math.min(1,dt*(inp?2:3.2));
-    if(thr)DG.v=Math.min(5,DG.v+dt*(DG.v<0?2.4:1.1));else if(brk)DG.v=Math.max(-1.5,DG.v-dt*(DG.v>0?2:.9));else DG.v*=1-Math.min(1,dt*(.18+Math.abs(DG.v)*.035));
-    const dh=DG.st*.75*Math.min(1,(Math.abs(DG.v)+.8)/2)*(DG.v<-.05?-1:1)*dt;if(dh){if(dgFree(x,z,DG.h+dh,false))DG.h+=dh;else for(const [ox,oz] of[[.12,0],[-.12,0],[0,.12],[0,-.12],[.12,.12],[-.12,.12],[.12,-.12],[-.12,-.12]])if(dgFree(x+ox,z+oz,DG.h+dh,false)){x+=ox;z+=oz;DG.h+=dh;break}}}
+    if(DG.anc&&(thr||brk))dgAncNag(T);if(thr&&!DG.anc)DG.v=Math.min(DG_MAX,DG.v+dt*(DG.v<0?2.4:DG.v<8?3.4:DG.v<18?2.4:2.0));else if(brk&&!DG.anc)DG.v=Math.max(-2.5,DG.v-dt*(DG.v>0?(DG.v>10?4.5:2.6):.9));else DG.v*=1-Math.min(1,dt*(.12+Math.abs(DG.v)*.014));
+    const dh=DG.st*.75*Math.min(1,(Math.abs(DG.v)+.8)/2)*(1-.35*Math.min(1,Math.abs(DG.v)/25.7))*(DG.v<-.05?-1:1)*dt;if(dh){if(dgFree(x,z,DG.h+dh,false))DG.h+=dh;else for(const [ox,oz] of[[.12,0],[-.12,0],[0,.12],[0,-.12],[.12,.12],[-.12,.12],[.12,-.12],[-.12,-.12]])if(dgFree(x+ox,z+oz,DG.h+dh,false)){x+=ox;z+=oz;DG.h+=dh;break}}}
   if(!(DG.par&&DG.par.lock)){const fx=-Math.sin(DG.h),fz=-Math.cos(DG.h),nx=x+fx*DG.v*dt,nzz=z+fz*DG.v*dt,pr=!!DG.par;
     if(dgFree(nx,nzz,DG.h,pr)){x=nx;z=nzz}else if(dgFree(nx,z,DG.h,pr)){x=nx;DG.v*=.8}else if(dgFree(x,nzz,DG.h,pr)){z=nzz;DG.v*=.8}else{const hit=Math.abs(DG.v)>.8;DG.v*=-.25;if(hit&&AC&&AC.state==='running')ksPlay('landW',.32,{rate:.6});if(hit&&T>DG.bt){DG.bt=T+3;v3Msg('💥 Bump! Ease off and steer clear',1500)}if(DG.par)dgLeave('🛥️ Blocked · you’ve left the parade')}}
   V3.yaw+=wr(DG.h-h0);dgPlace(m,x,z,DG.h,T,DG.v,DG.st);m.g.updateMatrixWorld();
@@ -3604,7 +3604,7 @@ function dgSound(on){if(!AC)return;const t=AC.currentTime;if(on&&!DG.au){const a
     const nb=a.createBufferSource();nb.buffer=noise(a);nb.loop=true;const nf=a.createBiquadFilter();nf.type='bandpass';nf.frequency.value=800;nf.Q.value=.5;const ng=a.createGain();ng.gain.value=0;nb.connect(nf).connect(ng).connect(bus);nb.start();
     DG.au={bus,o1,o2,ng,lp,nb};bus.gain.linearRampToValueAtTime(.7,t+1)}
   else if(!on&&DG.au){const A=DG.au;DG.au=null;A.bus.gain.cancelScheduledValues(t);A.bus.gain.setValueAtTime(A.bus.gain.value,t);A.bus.gain.linearRampToValueAtTime(0,t+.5);setTimeout(()=>{try{A.o1.stop();A.o2.stop();A.nb.stop();A.bus.disconnect()}catch(_){}},800)}}
-function dgSoundUpd(){const A=DG.au;if(!A||!AC)return;const t=AC.currentTime,v=Math.abs(DG.v),th=V3.keys.f||V3.keys.b||(DG.par&&!DG.par.lock)?1:0,f=28+v*6+th*6;A.o1.frequency.setTargetAtTime(f,t,.3);A.o2.frequency.setTargetAtTime(f*2.01,t,.3);A.lp.frequency.setTargetAtTime(300+v*90+th*160,t,.3);A.ng.gain.setTargetAtTime(Math.min(.12,v*.025),t,.3)}
+function dgSoundUpd(){const A=DG.au;if(!A||!AC)return;const t=AC.currentTime,v=Math.abs(DG.v),th=V3.keys.f||V3.keys.b||(DG.par&&!DG.par.lock)?1:0,f=28+Math.min(v,8)*6+Math.max(0,v-8)*2.2+th*6;A.o1.frequency.setTargetAtTime(f,t,.3);A.o2.frequency.setTargetAtTime(f*2.01,t,.3);A.lp.frequency.setTargetAtTime(300+v*90+th*160,t,.3);A.ng.gain.setTargetAtTime(Math.min(.12,v*.025),t,.3)}
 /* a friend out in a boat: a white boat under them */
 function dgPeer(q,show,T){if(q.dg&&q.dgReal&&S3.boats[q.di]!==q.dgReal)dgRel(q);
   if(q.dg&&show){if(!q.dgM){const W=S3.boats&&S3.boats[q.di];if(W&&!W.userData.peer&&!(DG.on&&DG.m.g===W)){W.userData.peer=q.id;q.dgReal=W;q.dgM=W.userData.m;carUncull(W)}else{const L=Math.max(4.6,Math.min(6.6,q.dl||5.6));q.dgM=dgWrap(benchy(L,{tree:true,dec:true}),L);S3.scene.add(q.dgM.g)}}const m=q.dgM,h=q.ry;m.g.visible=true;const x=q.wx-m.sz*Math.sin(h),z=q.wz-m.sz*Math.cos(h);dgPlace(m,x,z,h,T,Math.hypot(q.vx||0,q.vz||0),0);m.g.updateMatrixWorld();
@@ -5242,6 +5242,133 @@ function pLegs(B,legs,wid){const k=wid>1?1.02:.97,mat=legs[0].userData.sk[0];
   return pSkinned(B,bones,D,mat)}
 /* hands: palm, four fingers and a thumb, palm turned toward the leg */
 function pHand(put,G,m,s){put(G.sph,m,.016,.04,.03,0,-.318,.004);const F=[[-.019,.026],[-.006,.03],[.007,.029],[.019,.024]];for(const [z,l] of F)put(G.sph,m,.0078,l,.0082,-s*.001,-.352-l*.62,z+.005,.12);put(G.sph,m,.0085,.024,.009,-s*.007,-.332,.03,.55,0,s*.25)}
+/* v87: arms hang a little away from the body (more when they hang down, less when they reach forward) */
+function pClav(a){if(!a||!a.arms)return;for(const A of a.arms){const c=A.parent;if(!c||!c.userData.cl)continue;const s=c.userData.cl,k=Math.max(0,1-Math.abs(A.rotation.x)/1.4);c.rotation.z=s*(.05+.11*k)}}
+{const _a=animPerson;animPerson=function(p){const r=_a.apply(this,arguments);pClav(p);return r}}
+{const _p=poseApply;poseApply=function(a){const r=_p.apply(this,arguments);pClav(a);return r}}
+/* ===== v87: Birchwood Lane · a free starter home of your own for every player ===== */
+const SR={list:[],mine:null,built:0,root:null,hs:new Map(),busy:0,last:0,claim:0,x0:42,xE:62,obst:[],acts:[],sig:''};
+const SR_W=10,SR_NAME='Birchwood Lane';
+function srLot(k){const i=k>>1,north=!(k&1),x0=SR.x0+i*SR_W,x1=x0+SR_W,cx=(x0+x1)/2,sty=['cra','cab','mod'][(k*5+i)%3],cs=PL_STY[sty].c,col=cs[(k*3+1)%cs.length],num=2*i+(north?2:1);
+  const d={id:'SR-'+(k+1),n:num,sr:1,slot:k,name:num+' '+SR_NAME,sty,col,x0,x1,cx,hw:7.0,dlx:-1.6};
+  if(north)Object.assign(d,{side:'n',z0:6.2,z1:19.8,hz0:10.2,hz1:16.4,gz:19.9});else Object.assign(d,{side:'s',z0:24.6,z1:37.2,hz0:28.2,hz1:34.4,gz:24.5});
+  d.dx=north?cx+d.dlx:cx-d.dlx;d.dz=north?d.hz1:d.hz0;d.fx=d.dx;d.fz=north?d.hz1+1.1:d.hz0-1.1;d.H=[cx-d.hw/2-.3,d.hz0-.3,cx+d.hw/2+.3,d.hz1+.3];return d}
+/* the door plate: house number and the owner's name */
+{const _pp=plPlate;plPlate=function(d){if(!d||!d.sr)return _pp.apply(this,arguments);const c=cvs(128,64),g=c.getContext('2d');g.fillStyle='#1d1f22';g.fillRect(0,0,128,64);g.strokeStyle='#b9975a';g.lineWidth=3;g.strokeRect(4,4,120,56);g.fillStyle='#e8d6a8';g.textAlign='center';g.font='700 28px Georgia,serif';g.fillText(String(d.n),64,34);g.font='600 11px system-ui';g.fillText((d.owner||'BIRCHWOOD LN').slice(0,16),64,53);return tex(c)}}
+function srOwn(r){return r&&LB.id&&r.player===LB.id}
+function srMaxX(){let m=-1;for(const r of SR.list)m=Math.max(m,r.slot);if(SR.mine!=null)m=Math.max(m,SR.mine);return SR.x0+SR_W*Math.max(3,Math.ceil((m+2)/2)+1)}
+/* the street: the lane carries on east past Lakeshore Lane, lawns on both sides, a house on every claimed lot */
+function srBuild(){const S=S3;if(!S||!PL.built)return;const T=plTexs(),snow=!!S.sea.snow,L=(c,o)=>new THREE.MeshLambertMaterial(Object.assign({color:c},o||{}));const xE=srMaxX();
+  if(SR.root&&SR.xE===xE&&SR.built){srHouses();return}
+  if(SR.root){S.scene.remove(SR.root);SR.root.traverse(o=>{if(o.isMesh&&o.geometry!==S.boxG&&o.geometry!==S.planeG&&o.geometry!==PL.prism)o.geometry.dispose()});SR.hs.clear()}
+  const root=new THREE.Group();S.scene.add(root);SR.root=root;SR.xE=xE;SR.built=1;
+  const B=(m,sx,sy,sz,x,y,z)=>{const o=new THREE.Mesh(S.boxG,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);root.add(o);return o};
+  const flat=(m,x0,z0,x1,z1,y)=>{const o=new THREE.Mesh(S.planeG,m);o.rotation.x=-Math.PI/2;o.scale.set(x1-x0,z1-z0,1);o.position.set((x0+x1)/2,y,(z0+z1)/2);root.add(o);return o};
+  const asp=T.asp.clone();asp.needsUpdate=true;asp.repeat.set(Math.max(2,(xE-38.9)/4),1);flat(L('#ffffff',{map:asp}),38.9,20.45,xE,24.0,.012);
+  const curb=L('#9a968e');B(curb,xE-SR.x0,.12,.2,(xE+SR.x0)/2,.06,20.35);B(curb,xE-SR.x0,.12,.2,(xE+SR.x0)/2,.06,24.1);
+  const lawn=snow?L('#e6ebf2'):(()=>{const t=T.gra.clone();t.needsUpdate=true;t.repeat.set((xE-38.9)/3.3,9);return L('#ffffff',{map:t})})();flat(lawn,38.9,5.6,xE+6,20.3,.008);flat(lawn,38.9,24.2,xE+6,38.2,.008);
+  const pav=(()=>{const t=T.pav.clone();t.needsUpdate=true;t.repeat.set(1,3);return L('#ffffff',{map:t})})(),hedge=L(snow?'#c9d3cf':'#2f4a2c'),post=L('#4a3626'),blk=L('#1d1f22'),wht=L('#efe9dc');
+  /* a street sign at the corner */
+  {const c=cvs(256,64),g=c.getContext('2d');g.fillStyle='#1f4a2c';g.fillRect(0,0,256,64);g.strokeStyle='#efe9dc';g.lineWidth=3;g.strokeRect(4,4,248,56);g.fillStyle='#efe9dc';g.textAlign='center';g.font='700 30px Georgia,serif';g.fillText(SR_NAME,128,43);
+    B(L('#3a3a3a'),.08,2.6,.08,40.6,1.3,19.9);for(const ry of[0,Math.PI]){const p=new THREE.Mesh(S.planeG,new THREE.MeshLambertMaterial({map:tex(c),emissive:'#1a1a1a'}));p.scale.set(1.5,.38,1);p.position.set(40.6,2.45,19.9+(ry?-.01:.01));p.rotation.y=ry;root.add(p)}}
+  const n=Math.ceil((xE-SR.x0)/SR_W)*2;SR.lots=[];
+  for(let k=0;k<n;k++){const d=srLot(k);if(d.x1>xE)continue;SR.lots.push(d);const north=d.side==='n';
+    flat(pav,d.dx-.5,north?d.hz1:24.2,d.dx+.5,north?20.3:d.hz0,.016);
+    /* low hedges between the lots and along the back */
+    B(hedge,.5,.8,(north?19.6-6.4:37-24.7),d.x1-.25,.4,north?13:30.85);B(hedge,SR_W,.8,.5,(d.x0+d.x1)/2,.4,north?6.1:37.3);
+    /* mailbox by the path */
+    B(post,.08,1.05,.08,d.dx+.9,.52,north?19.4:24.9);B(blk,.22,.22,.42,d.dx+.9,1.15,north?19.4:24.9)}
+  SR.walls=[];for(const d of SR.lots){const north=d.side==='n';SR.walls.push(north?[d.x1-.5,6.3,d.x1,19.6]:[d.x1-.5,24.7,d.x1,37])}SR.obst=[];for(const d of SR.lots)SR.obst.push({x:d.dx+.9,z:d.side==='n'?19.4:24.9,r:.22});
+  try{v3Bake(root)}catch(e){}
+  srHouses()}
+function srHouses(){if(!SR.root)return;const want=new Map();for(const r of SR.list)want.set(r.slot,r);
+  for(const [slot,h] of SR.hs){const r=want.get(slot);if(!r||h.k!==r.name+'|'+r.player){SR.root.remove(h.g);h.g.traverse(o=>{if(o.isMesh&&o.geometry!==S3.boxG&&o.geometry!==S3.planeG&&o.geometry!==PL.prism)o.geometry.dispose()});SR.hs.delete(slot)}}
+  for(const [slot,r] of want){if(SR.hs.has(slot))continue;const d=srLot(slot);if(d.x1>SR.xE)continue;d.owner=r.name;const g=plHouse(d);g.userData.nobake=1;SR.root.add(g);SR.hs.set(slot,{g,d,r,k:r.name+'|'+r.player})}
+  srActs()}
+/* the front doors: yours lets you in; a friend's rings their doorbell */
+function srActs(){for(const a of SR.acts){const i=ACTS.indexOf(a);if(i>=0)ACTS.splice(i,1)}SR.acts=[];
+  for(const [slot,h] of SR.hs){const d=h.d,r=h.r,mine=srOwn(r),nm=String(r.name||'A neighbour').slice(0,24);
+    const a=mine?{id:'srHome',p:new THREE.Vector3(d.fx,0,d.fz),r:1.6,lab:'🏠 Go inside',go:()=>srEnter()}
+      :{id:'srDoor',p:new THREE.Vector3(d.fx,0,d.fz),r:1.6,get lab(){return srOn(r.player)?'🔔 Ring '+poss(nm)+' doorbell':'🏠 '+poss(nm)+' home · nobody’s in'},go:()=>srRing(r)};
+    ACTS.push(a);SR.acts.push(a)}
+  V3.near=undefined;
+  /* your own front door replaces the shared house on Main Street */
+  if(SR.mine!=null){const i=ACTS.findIndex(a=>a.id==='home');if(i>=0){SR.oldHome=ACTS[i];ACTS.splice(i,1)}const d=srLot(SR.mine);S3.homeOut=new THREE.Vector3(d.fx,0,d.fz)}}
+function srOn(pid){return !!(pid&&typeof MP!=='undefined'&&MP.ok&&MP.peers&&MP.peers.has(pid))}
+function srEnter(){HS.plot=null;HS.owner=null;HS.ownerN=null;hsEnter()}
+function srRing(r){if(!srOn(r.player)){v3Msg('🏠 '+poss(r.name||'Their')+' home · nobody’s in right now',2600);return}mpSend('srring',{id:LB.id,n:who,to:r.player});v3Msg('🔔 Ding-dong · waiting for '+(r.name||'them')+' to open the door',3200);if(AC&&AC.state==='running')vChime([79,76])}
+/* someone at your door: let them in (they come into your house) */
+function srRung(p){const n=String(p.n||'A friend').slice(0,24);let el=document.getElementById('hsInv');if(!el){hsInvited({id:p.id,n,o:LB.id,on:who});el=document.getElementById('hsInv')}
+  el.innerHTML='';const t=document.createElement('span');t.textContent='🔔 '+n+' is at your front door';el.appendChild(t);
+  const go=document.createElement('button');go.textContent='Let them in';go.style.cssText='border:0;border-radius:999px;padding:7px 14px;font:700 13px system-ui;background:linear-gradient(#e8c66e,#b8862a);color:#1a1208;cursor:pointer';
+  const no=document.createElement('button');no.textContent='Not now';no.style.cssText='border:0;border-radius:999px;padding:7px 12px;font:600 13px system-ui;background:rgba(255,255,255,.12);color:#f3ead8;cursor:pointer';
+  go.onclick=()=>{el.style.display='none';mpSend('srlet',{id:LB.id,n:who,to:p.id,o:LB.id,on:who})};no.onclick=()=>{el.style.display='none';mpSend('srno',{id:LB.id,n:who,to:p.id})};el.appendChild(go);el.appendChild(no);el.style.display='flex';clearTimeout(HS.invT);HS.invT=setTimeout(()=>{el.style.display='none'},25000);if(AC&&AC.state==='running')vChime([79,76,79])}
+{const _m=mpOn;mpOn=function(ev,p){if(ev==='srring'||ev==='srlet'||ev==='srno'){if(!p||p.to!==LB.id||p.id===LB.id)return;if(ev==='srring')srRung(p);else if(ev==='srlet')hsJoin(String(p.o),String(p.on||p.n||'').slice(0,24));else v3Msg('🚪 '+String(p.n||'They').slice(0,24)+' can’t open the door right now',2800);return}return _m.apply(this,arguments)}}
+/* leaving a friend's house puts you on their doorstep, your own house on yours */
+{const _l=hsLeave;hsLeave=function(quiet){const o=HS.owner,keep=S3.homeOut;if(V3.inH&&!quiet&&!HS.plot){let d=null;if(o){for(const h of SR.hs.values())if(h.r.player===o)d=h.d}else if(SR.mine!=null)d=srLot(SR.mine);
+    if(d){S3.homeOut=new THREE.Vector3(d.fx,0,d.fz);const r=_l.apply(this,arguments);setTimeout(()=>{if(!V3.inH){V3.yaw=d.side==='n'?Math.PI:0}if(!o||SR.mine==null)return;S3.homeOut=keep},1400);return r}}return _l.apply(this,arguments)}}
+/* walking: the road, the lawns and the paths of Birchwood Lane; houses and mailboxes are solid */
+{const _w=walkClamp;walkClamp=function(p){const me=p===V3.pos;if(!SR.built||p.x<38.9||p.x>200||p.z<=5||(me&&(V3.boat||V3.ovl||V3.inH)))return _w.apply(this,arguments);
+  p.x=Math.min(SR.xE-.3,p.x);p.z=Math.max(6.5,Math.min(37,p.z));if(p.x<SR.x0)p.z=Math.max(20.2,Math.min(24.2,p.z));
+  for(const b of [...[...SR.hs.values()].map(h=>h.d.H),...(SR.walls||[])]){if(p.x>b[0]&&p.x<b[2]&&p.z>b[1]&&p.z<b[3]){const o=[[b[0],p.z],[b[2],p.z],[p.x,b[1]],[p.x,b[3]]].sort((a,c)=>Math.hypot(a[0]-p.x,a[1]-p.z)-Math.hypot(c[0]-p.x,c[1]-p.z))[0];p.x=o[0];p.z=o[1]}}
+  for(const o of SR.obst){const dx=p.x-o.x,dz=p.z-o.z,dd=Math.hypot(dx,dz);if(dd<o.r&&dd>1e-4){p.x=o.x+dx/dd*o.r;p.z=o.z+dz/dd*o.r}}
+  if(me&&typeof PL!=='undefined')PL.lp={x:Math.min(p.x,38.8),z:Math.max(20.2,Math.min(24.2,p.z))}}}
+/* the server hands out the lots: yours is claimed the first time you come to town */
+async function srFetch(){if(SR.busy||!LB.url)return;SR.busy=1;try{
+    if(SR.mine==null&&EC.acct&&EC.tok&&Date.now()>SR.claim&&!/HeadlessChrome/.test(navigator.userAgent)){SR.claim=Date.now()+60000;try{const n=await ecRpc('starter_claim',ecA());if(typeof n==='number'){SR.mine=n;try{localStorage.setItem('lakeTreeStarter',String(n))}catch(_){}}}catch(e){console.warn('starter home',e.message)}}
+    const l=await ecRpc('starter_list',{});if(Array.isArray(l)){SR.list=l;const me=l.find(srOwn);if(me)SR.mine=me.slot}SR.last=Date.now();
+    const sig=JSON.stringify([SR.mine,SR.list.map(r=>[r.slot,r.name,r.player])]);if(sig!==SR.sig){SR.sig=sig;srBuild()}}catch(e){SR.last=Date.now()}finally{SR.busy=0}}
+function srTick(){if(!V3.on||!PL.built)return;const P=V3.pos,near=!V3.inH&&P.x>20&&P.x<200&&P.z>0;if(!SR.built&&!SR.busy&&Date.now()-SR.last>5000){srFetch();return}if(Date.now()-SR.last>(near?20000:90000))srFetch()}
+setInterval(()=>{try{srTick()}catch(e){console.error('starter',e)}},1000);
+/* the world map knows the street too: tap your home to walk there */
+function srGo(){if(SR.mine==null){v3Msg('🏠 Your starter home is being set up · try again in a moment',2600);return}if(V3.inH)hsLeave(true);const d=srLot(SR.mine);V3.pos.set(d.fx,0,d.side==='n'?21.4:23.2);V3.yaw=d.side==='n'?0:Math.PI;V3.tgt=null;V3.path=null;V3.near=undefined;if(typeof PL!=='undefined')PL.lp={x:V3.pos.x,z:V3.pos.z};v3Msg('🏡 '+d.name+' · your starter home',2600)}
+
+/* a button to walk to your own home */
+(function srBtn(){const side=document.getElementById('vSide');if(!side){setTimeout(srBtn,1000);return}if(document.getElementById('vMyHome'))return;const b=document.createElement('button');b.id='vMyHome';b.title='Go to your house on '+SR_NAME;b.textContent='🏡';b.onclick=e=>{e.stopPropagation();srGo()};side.insertBefore(b,side.firstChild)})();
+/* ===== v88: the dinghy · up to 50 knots, an anchor on Space, a lake current, stepping ashore ===== */
+const DG_MAX=25.7;/* m/s ≈ 50 kn */
+/* the lake current: a slow, swirling flow, the same for everyone (seeded by the day, driven by the clock) */
+const LC=(()=>{let s=(Math.floor(Date.now()/864e5)*2654435761)>>>0;const r=()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296};
+  const k=[];for(let i=0;i<5;i++){const lam=55+r()*170,a=r()*Math.PI*2,kk=Math.PI*2/lam,sp=.08+r()*.16;k.push({kx:Math.cos(a)*kk,kz:Math.sin(a)*kk,a:sp/kk,w:(r()-.5)*.012,ph:r()*Math.PI*2})}
+  return{k,th:r()*Math.PI*2,m:.16+r()*.2}})();
+function lkCur(x,z){const t=Date.now()/1000;let u=0,w=0;for(const c of LC.k){const cs=Math.cos(c.kx*x+c.kz*z+c.w*t+c.ph)*c.a;u+=cs*c.kz;w-=cs*c.kx}
+  const th=LC.th+.5*Math.sin(t*.0021+1.3)+.25*Math.sin(t*.0057),m=LC.m*(1+.35*Math.sin(t*.0013+.4));u+=Math.sin(th)*m;w+=Math.cos(th)*m;
+  const sd=typeof lkSD==='function'?lkSD(x,z):-20,f=Math.max(0,Math.min(1,(-sd-1)/10));return[u*f,w*f]}
+function dgCurTxt(x,z){const [u,w]=lkCur(x,z),v=Math.hypot(u,w)*1.944;if(v<.15)return '';const a=(Math.atan2(u,-w)*180/Math.PI+360)%360,d=['N','NE','E','SE','S','SW','W','NW'][Math.round(a/45)%8];return ' · 🌊 '+v.toFixed(1)+' kn '+d}
+/* the anchor: Space throws it out or hauls it in; the boat swings on its line and lies to the current */
+const DG_RODE=8;
+function dgAnchor(){if(!DG.on)return;const m=DG.m,g=m.g.position;
+  if(DG.anc){const a=DG.anc;DG.anc=null;if(a.obj){S3.scene.remove(a.obj);a.obj.traverse(o=>{if(o.geometry&&o.geometry!==S3.sphG)o.geometry.dispose()})}v3Msg('⚓ Anchor up · you’re free to go',2000);if(AC&&AC.state==='running')nz('bandpass',1800,.05,.9);dgHud(true);return}
+  const fx=-Math.sin(DG.h),fz=-Math.cos(DG.h),bx=g.x+fx*m.L*.45,bz=g.z+fz*m.L*.45;const a={x:bx,z:bz};
+  const grp=new THREE.Group();const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,0,0,0],3));const ln=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0xd9cfb8}));ln.frustumCulled=false;grp.add(ln);
+  const bu=new THREE.Mesh(S3.sphG||new THREE.SphereGeometry(1,10,8),new THREE.MeshLambertMaterial({color:'#d8402c',emissive:'#3a0a06'}));bu.scale.set(.16,.13,.16);grp.add(bu);a.obj=grp;a.ln=ln;a.bu=bu;S3.scene.add(grp);DG.anc=a;
+  const fast=Math.abs(DG.v)>4;v3Msg(fast?'⚓ Anchor out at speed · the line snaps taut and drags you to a stop':'⚓ Anchor down · Space to haul it back in',2600);if(AC&&AC.state==='running'){ksPlay('landW',.35,{rate:.7});nz('bandpass',2600,.06,.7,0,AC.currentTime+.15)}dgHud(true)}
+function dgAncNag(T){if(T>(DG.ancNag||0)){DG.ancNag=T+3;v3Msg('⚓ You’re at anchor · press Space to haul it in first',2000)}}
+/* where can you step off? a dock, a jetty or the shore within a few metres of the boat */
+function dgShorePt(){const m=DG.m,g=m.g.position;let best=null,bd=1e9;
+  for(let r=1.2;r<=5.2;r+=.5)for(let i=0;i<24;i++){const a=i/24*Math.PI*2,q={x:g.x+Math.cos(a)*(r+m.beam*.3),z:g.z+Math.sin(a)*(r+m.beam*.3)};const q0={x:q.x,z:q.z};try{walkClamp(q)}catch(_){continue}
+    if(Math.hypot(q.x-q0.x,q.z-q0.z)>.05)continue;const d=Math.hypot(q.x-g.x,q.z-g.z);if(d<bd){bd=d;best=q}}
+  return best}
+function dgAshore(){const p=DG.shore;if(!DG.on||!p)return;tourFade(()=>{dgEndNow(true);V3.pos.set(p.x,0,p.z);V3.gy=0;V3.near=undefined;if(typeof PL!=='undefined')PL.lp={x:p.x,z:p.z};if(typeof mpPos==='function'&&typeof MP!=='undefined'&&MP.ok)mpPos(true);v3Msg('🚶 You step ashore · the harbour crew takes the boat back to her berth',3000)},'🚶 Stepping ashore…')}
+/* every frame at the helm: drift with the current, swing on the anchor, look for somewhere to step off */
+{const _u=dgUpd;dgUpd=function(dt,T){if(DG.on&&DG.anc){DG.v*=1-Math.min(1,dt*(Math.abs(DG.v)>3?2.2:1.2))}const r=_u.apply(this,arguments);if(!DG.on||!DG.m)return r;
+  const m=DG.m,g=m.g.position,lock=DG.par&&DG.par.lock;
+  if(!lock){const [u,w]=lkCur(g.x,g.z),nx=g.x+u*dt,nz=g.z+w*dt;if(dgFree(nx,nz,DG.h,!!DG.par)){g.x=nx;g.z=nz}
+    if(DG.anc){const a=DG.anc,fx=-Math.sin(DG.h),fz=-Math.cos(DG.h),bx=g.x+fx*m.L*.45,bz=g.z+fz*m.L*.45,dx=bx-a.x,dz=bz-a.z,d=Math.hypot(dx,dz);
+      if(d>DG_RODE){const k=(d-DG_RODE)/d;const px=g.x-dx*k,pz=g.z-dz*k;if(dgFree(px,pz,DG.h,false)){g.x=px;g.z=pz}DG.v*=.9}
+      if(d>DG_RODE*.55){const hT=Math.atan2(-(a.x-g.x),-(a.z-g.z)),e=((hT-DG.h+Math.PI*3)%(Math.PI*2))-Math.PI,dh=e*Math.min(1,dt*.35);if(dgFree(g.x,g.z,DG.h+dh,false)){DG.h+=dh;V3.yaw+=dh;m.g.rotation.y=DG.h}}
+      m.g.updateMatrixWorld();const bow=new THREE.Vector3(0,.35,-m.L*.47);m.B.localToWorld(bow);const P=a.ln.geometry.attributes.position;P.setXYZ(0,bow.x,bow.y,bow.z);P.setXYZ(1,a.x,LK.WL+.02,a.z);P.needsUpdate=true;a.bu.position.set(a.x,LK.WL+.04+Math.sin(T*1.3)*.02,a.z)}}
+  if(T>(DG.shT||0)){DG.shT=T+.35;const p=Math.abs(DG.v)<3?dgShorePt():null,had=!!DG.shore;DG.shore=p;if(had!==!!p)dgHud(true)}
+  return r}}
+{const _e=dgEndNow;dgEndNow=function(){if(DG.anc){const a=DG.anc;DG.anc=null;if(a.obj)S3.scene.remove(a.obj)}DG.shore=null;return _e.apply(this,arguments)}}
+/* the helm buttons: stepping ashore or heading back is always E; the anchor is Space */
+{const _h=dgHud;dgHud=function(on){const r=_h.apply(this,arguments);if(!on||!DG.on||!DG.m)return r;vAct.innerHTML='';const L=[];
+  if(DG.shore)L.push(['🚶 Step ashore here',dgAshore,0]);
+  if(DG.par)L.push(['🛥️ Leave the parade',()=>dgLeave(),L.length?1:0]);else if(dgParDist(DG.m.g.position.x,DG.m.g.position.z)<70)L.push(['✨ Join the light parade',dgJoin,1]);
+  L.push([DG.anc?'⚓ Haul in the anchor':'⚓ Drop anchor',dgAnchor,1,'Space']);L.push([ME.view==='third'?'👀 Helm view':'🎥 Outside view',()=>{meView();dgHud(true)},1]);L.push(['🏁 Back to the dock',dgEnd,L.some(b=>!b[2])?1:0]);
+  let eUsed=false;L.forEach((b,i)=>{const isE=!b[2]&&!eUsed;if(isE)eUsed=true;vBtn(b[0],isE?'E':b[3]||String(i+1),b[1],!isE)});return r}}
+{const _hu=dgHudUpd;dgHudUpd=function(){_hu.apply(this,arguments);const h=document.getElementById('dgHud');if(!h||!DG.on||!DG.m)return;const nx=h.querySelector('.nx'),g=DG.m.g.position;if(!DG.cT||performance.now()>DG.cT){DG.cT=performance.now()+700;DG.cTx=dgCurTxt(g.x,g.z)}const t=nx.textContent.split(' · 🌊')[0].split(' · ⚓')[0]+(DG.anc?' · ⚓ At anchor':'')+(DG.cTx||'');if(nx.textContent!==t)nx.textContent=t}}
+window.addEventListener('keydown',e=>{if(!V3.on||V3.mode!=='dinghy'||!DG.on)return;if(e.key===' '||e.code==='Space'){const t=e.target;if(t&&/INPUT|TEXTAREA/.test(t.tagName))return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)dgAnchor()}},true);
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
