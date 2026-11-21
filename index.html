@@ -216,6 +216,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #plAsk{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:41;background:rgba(28,20,14,.95);color:#f3ead8;padding:12px 16px;border-radius:16px;font:600 14px -apple-system,system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.5);display:none;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:92vw}
 #plAsk.show{display:flex}#plAsk button{border:0;border-radius:999px;padding:7px 14px;font:700 13px system-ui;cursor:pointer;background:rgba(255,255,255,.12);color:#f3ead8}#plAsk button.go{background:linear-gradient(#e8c66e,#b8862a);color:#1a1208}
 @media(max-width:560px){#plP{top:auto;bottom:10px;right:10px;max-height:62vh}}
+.plPpl button.go{background:linear-gradient(#e8c66e,#b8862a);color:#1a1208}.plPpl button:disabled{opacity:.45;cursor:default}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="title">Lakeside living room · Lake Oswego</div>
@@ -4715,6 +4716,83 @@ function plTick(T,dt){if(!PL.built)return;const P=V3.pos,near=P.z>-30&&!V3.inH&&
 {const _ecBPl=ecBuild;ecBuild=function(){_ecBPl.apply(this,arguments);try{plBuild()}catch(e){console.error('plots',e)}}}
 (function plLoop(){let t0=performance.now();(function f(){requestAnimationFrame(f);const t=performance.now(),dt=Math.min(.1,(t-t0)/1000);t0=t;if(V3.on)try{plTick(t/1000,dt)}catch(e){console.error(e)}})()})();
 addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('plP')?.classList.contains('show')){plPanel(null);e.stopImmediatePropagation()}},true);
+/* ---------- Room rentals: rooms and whole houses for rent, leases, private rooms ---------- */
+const PL_RM=[{k:'B2',hs:'bed2',n:'Small bedroom',def:40,door:[5.9,3.75]},{k:'MB',hs:'master',n:'Main bedroom',def:60,door:[5.9,5.45]},{k:'B3',hs:'bed3',n:'Garden bedroom',def:45,door:[7.9,9.15]}];
+PL.rooms=new Map();
+const plRmN=rid=>{const r=PL.rooms.get(rid),k=PL_RM.find(x=>rid&&rid.endsWith('-'+x.k));return r?r.name:k?k.n:rid};
+const plWhen=t=>new Date(t).toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit'});
+function plUnit(l){return l.room?'the '+plRmN(l.room).toLowerCase()+' at '+plNm(l.plot):plNm(l.plot)}
+/* places someone could move into right now */
+function plVac(id){const p=PL.plots.get(id);if(!p||!p.owner)return[];const L=PL.leases.filter(l=>l.plot===id);if(L.some(l=>!l.room))return[];
+  if(p.state==='for_rent')return L.length?[]:[{unit:id,rent:p.rent,n:'The whole house'}];
+  return PL_RM.map(k=>PL.rooms.get(id+'-'+k.k)).filter(r=>r&&r.rent&&!L.some(l=>l.room===r.id)).map(r=>({unit:r.id,rent:r.rent,n:r.name}))}
+function plAllVac(){const o=[];for(const id of PL_IDS)for(const v of plVac(id))if(PL.plots.get(id).owner!==EC.acct)o.push(Object.assign({plot:id},v));return o.sort((a,b)=>a.rent-b.rent)}
+{const _f=plFetch;plFetch=async function(){const r=await _f.apply(this,arguments);if(!LB.url)return r;
+  try{const j=await fetch(LB.url.replace(/players$/,'')+'plot_rooms?select=id,plot,name,rent',{headers:lbH()}).then(x=>x.ok?x.json():Promise.reject(x.status));PL.rooms=new Map(j.map(x=>[x.id,x]));plApply()}catch(e){}return r}}
+/* the realtor sign also advertises rooms */
+{const _s=plSign;plSign=function(d){const p=PL.plots.get(d.id),v=plVac(d.id);if(!p||p.state!=='owned'||!v.length)return _s.apply(this,arguments);
+  const c=PL.g[d.id].sc,g=c.getContext('2d');g.fillStyle='#f4efe4';g.fillRect(0,0,256,176);g.fillStyle='#2c3e5e';g.fillRect(0,0,256,58);g.fillStyle='#fff';g.textAlign='center';g.font=(v.length>1?'700 25px':'700 30px')+' Georgia,serif';
+  g.fillText(v.length>1?'ROOMS FOR RENT':'ROOM FOR RENT',128,40);g.fillStyle='#1f1a14';g.font='700 30px Georgia,serif';g.fillText((v.length>1?'from ':'')+ecUSD(Math.min(...v.map(x=>x.rent)))+' a day',128,100);
+  g.font='600 18px system-ui,sans-serif';g.fillStyle='#4a4035';g.fillText('Ask '+(p.owner_name||'the owner')+' · at the gate',128,134);g.font='600 15px system-ui,sans-serif';g.fillText(d.name,128,160);PL.g[d.id].st.needsUpdate=true}}
+{const _a=plApply;plApply=function(){_a.apply(this,arguments);if(!PL.built)return;for(const id of PL_IDS){const G=PL.g[id];if(!G)continue;const p=PL.plots.get(id),v=plVac(id),k=JSON.stringify(v);
+    if(p&&p.state==='owned')G.sign.visible=v.length>0;if(G.rk!==k){G.rk=k;plSign(PL_D[id])}}}}
+/* at the gate: rooms for rent can be taken without ringing */
+{const _l=plGateLab;plGateLab=function(id){const p=PL.plots.get(id),v=plVac(id);if(p&&p.state==='for_rent'&&!plRole(id)&&v.length)return '🏡 '+PL_D[id].name+' · for rent at '+ecUSD(p.rent)+' a day';if(p&&p.state==='owned'&&!plRole(id)&&v.length)return '🛏️ '+(v.length>1?'Rooms':'A room')+' for rent at '+PL_D[id].n+' · '+(v.length>1?'from ':'')+ecUSD(Math.min(...v.map(x=>x.rent)))+' a day';return _l.apply(this,arguments)}}
+{const _m=plGateMore;plGateMore=function(id){const p=PL.plots.get(id);if(p&&p.state==='owned'&&!plRole(id)&&plVac(id).length)return[{lab:'🔔 Ring the doorbell',go:()=>plRing(id)}];return _m.apply(this,arguments)}}
+{const _g=plGateGo;plGateGo=function(id){const p=PL.plots.get(id);if(p&&p.state==='owned'&&!plRole(id)&&plVac(id).length)return plPanel(id,'rent');return _g.apply(this,arguments)}}
+/* a rented room is private: only its tenant goes in */
+function plRmLock(hs){if(!HS.plot||!hs)return null;const k=PL_RM.find(x=>x.hs===hs);if(!k)return null;const l=PL.leases.find(x=>x.room===HS.plot+'-'+k.k);return l&&l.tenant!==EC.acct?l:null}
+{const _w=walkClamp;walkClamp=function(p){const r=_w.apply(this,arguments);if(p!==V3.pos||!V3.inH||!HS.plot||p.x<200)return r;const lv=V3.hl||0,rm=hsRoom(p.x,p.z,lv),lk=plRmLock(rm),q=PL.ip;
+  if(lk&&q&&hsRoom(q.x,q.z,q.l)!==rm){p.x=q.x;p.z=q.z;const t=performance.now();if(!PL.lkT||t-PL.lkT>2600){PL.lkT=t;v3Msg('🔒 The '+plRmN(lk.room).toLowerCase()+' is '+(lk.tenant_name||'a tenant')+'’s room · it’s private',2400)}return r}
+  PL.ip={x:p.x,z:p.z,l:lv};return r}}
+function plRmActs(){for(const k of PL_RM)ACTS.push({id:'plroom',hl:1,p:new THREE.Vector3(HS.X+k.door[0],0,HS.Z+k.door[1]),get r(){return HS.plot&&plRmLab(k)?1.15:0},get lab(){return plRmLab(k)||''},go:()=>plRmGo(k)})}
+function plRmLab(k){const id=HS.plot;if(!id)return null;const rid=id+'-'+k.k,l=PL.leases.find(x=>x.room===rid),rm=PL.rooms.get(rid),r=plRole(id),own=r==='owner'||r==='coowner';
+  if(l)return l.tenant===EC.acct?'🛏️ Your room · '+plRmN(rid):'🔒 '+plRmN(rid)+' · '+(l.tenant_name||'a tenant')+'’s room';
+  if(own)return '🛏️ '+plRmN(rid)+(rm&&rm.rent?' · for rent at '+ecUSD(rm.rent)+' a day':' · rent it out');
+  if(rm&&rm.rent&&plVac(id).some(v=>v.unit===rid))return '🛏️ Rent the '+plRmN(rid).toLowerCase()+' · '+ecUSD(rm.rent)+' a day';return null}
+function plRmGo(k){const id=HS.plot,rid=id+'-'+k.k,l=PL.leases.find(x=>x.room===rid);if(l&&l.tenant!==EC.acct){v3Msg('🔒 Knock first: this room is rented to '+(l.tenant_name||'someone'),2400);return}plPanel(id,'rent')}
+{const _b=plBuild;plBuild=function(){const was=PL.built;_b.apply(this,arguments);if(!was&&PL.built)plRmActs()}}
+/* the home panel gets a lease section */
+function plRentHTML(id){const p=PL.plots.get(id);if(!p||!p.owner)return '';const r=plRole(id),own=r==='owner'||r==='coowner',E=lbEsc,L=PL.leases.filter(l=>l.plot===id),hl=L.find(l=>!l.room),me=L.find(l=>l.tenant===EC.acct),myL=EC.st&&EC.st.lease,bal=EC.st?EC.st.balance:0;let h='';
+  const due=l=>l.state==='ending'?'moving out '+plWhen(l.due_at):'next rent '+plWhen(l.due_at),miss=l=>l.missed?' · <b class="neg">rent missed</b>':'';
+  if(me){h+='<h4 id="plRent">Your lease</h4><div class="ecRow">🔑 You rent '+(me.room?'the '+E(plRmN(me.room).toLowerCase()):'the whole house')+' for '+ecUSD(me.rent)+' a day · '+(me.state==='ending'?'your landlord ended the lease, you can stay until '+plWhen(me.due_at):'next rent '+plWhen(me.due_at))+'</div>'+
+      (me.state==='ending'?'<p class="ecS">No more rent is charged. Your key stops working when the lease ends.</p>':me.missed?'<p class="ecS"><b class="neg">You missed a rent payment.</b> Keep at least '+ecUSD(me.rent)+' in your wallet: it’s tried again within 12 hours, and a second miss means eviction.</p>':'<p class="ecS">Rent comes out of your wallet automatically every 24 hours.</p>')+
+      '<div class="ecBtns"><button data-a="out" data-l="'+me.id+'">Move out</button></div>'}
+  if(own){h+='<h4 id="plRent">Renting out</h4>';
+    if(hl)h+='<ul class="plPpl"><li><span>The whole house<i>Rented by '+E(hl.tenant_name||'a tenant')+' · '+ecUSD(hl.rent)+' a day · '+due(hl)+miss(hl)+'</i></span>'+(hl.state==='ending'?'':'<button data-end="'+hl.id+'">End lease</button>')+'</li></ul>';
+    else if(p.state==='for_rent')h+='<p class="ecS">The whole house is listed for rent at '+ecUSD(p.rent)+' a day. Anyone can look around until someone moves in.</p><div class="ecBtns"><button data-a="unrent">Stop renting it out</button></div>';
+    else{h+='<ul class="plPpl">'+PL_RM.map(k=>{const rid=id+'-'+k.k,rm=PL.rooms.get(rid);if(!rm)return '';const l=L.find(x=>x.room===rid);
+        return '<li><span>'+E(rm.name)+'<i>'+(l?'Rented by '+E(l.tenant_name||'a tenant')+' · '+ecUSD(l.rent)+' a day · '+due(l)+miss(l):rm.rent?'For rent at '+ecUSD(rm.rent)+' a day · empty':'Not for rent')+'</i></span>'+
+          (l?(l.state==='ending'?'':'<button data-end="'+l.id+'">End lease</button>'):rm.rent?'<button data-rs="'+rid+'" data-v="0">Stop</button>':'<input type="number" min="1" max="5000" step="5" value="'+k.def+'" aria-label="Rent a day for the '+E(rm.name)+'" style="width:72px"><button data-rs="'+rid+'">Rent out</button>')+'</li>'}).join('')+'</ul>';
+      if(!L.length&&p.state==='owned')h+='<p class="ecS">Or rent out the whole house:</p><div class="ecBtns" style="align-items:center"><input type="number" min="1" max="5000" step="10" value="150" aria-label="Rent a day for the house" id="plHR"><button data-a="hrent">Rent out the house</button></div>';
+      h+='<p class="ecS">Rent is paid to you every 24 hours. A tenant who misses rent gets 12 hours to pay; after a second miss they’re evicted and lose their key.</p>'}}
+  else if(!me){const v=plVac(id);if(v.length){h+='<h4 id="plRent">'+(p.state==='for_rent'?'For rent':v.length>1?'Rooms for rent':'Room for rent')+'</h4><ul class="plPpl">'+v.map(x=>'<li><span>'+E(x.n)+'<i>'+ecUSD(x.rent)+' a day · from '+E(p.owner_name||'the owner')+'</i></span><button class="go" data-take="'+x.unit+'"'+(!EC.st||myL||bal<x.rent?' disabled':'')+'>Rent it</button></li>').join('')+'</ul>'+
+      '<p class="ecS">'+(myL?'You already rent '+E(plUnit(myL))+'. Move out there first.':!EC.st?'Opening your wallet…':bal<x0(v)?'You need '+ecUSD(x0(v)-bal)+' more for the first day’s rent. Take a job at the plaza to earn it.':'The first day is paid when you move in, then rent comes out of your wallet every 24 hours. You get a key to the house'+(p.state==='for_rent'?'':' and the room is yours alone')+'.')+'</p>'}}
+  return h}
+const x0=v=>Math.min(...v.map(x=>x.rent));
+{const _p=plPanel;plPanel=function(id,focus){_p.apply(this,arguments);const P=document.getElementById('plP');if(!id||!P||!P.classList.contains('show')||PL.pid!==id)return;const h=plRentHTML(id);if(!h)return;
+  const er=P.querySelector('.plErr');er.insertAdjacentHTML('beforebegin',h);const Q=s=>P.querySelector(s),d=PL_D[id],sync=()=>mpSend('pupd',{id:LB.id,p:id,o:1});
+  P.querySelectorAll('[data-take]').forEach(b=>b.onclick=()=>{b.disabled=true;const u=b.dataset.take;plDo('lease_take',{p_unit:u},()=>{sync();vChime([72,76,79]);v3Msg('🔑 Welcome home! You now rent '+(u===id?d.name:'the '+plRmN(u).toLowerCase()+' at '+d.name),4200);plPanel(id)})});
+  P.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{const i=b.previousElementSibling,v=b.dataset.v==='0'?0:Math.round(+(i&&i.value));if(b.dataset.v!=='0'&&!(v>=1&&v<=5000)){er.textContent='Pick a rent between $1 and $5,000 a day';return}
+    b.disabled=true;plDo('room_set',{p_room:b.dataset.rs,p_rent:v},()=>{sync();v3Msg(v?'🛏️ The '+plRmN(b.dataset.rs).toLowerCase()+' is up for rent at '+ecUSD(v)+' a day':'🛏️ The '+plRmN(b.dataset.rs).toLowerCase()+' is off the market',3000)})});
+  P.querySelectorAll('[data-end]').forEach(b=>b.onclick=()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent='Tap again to end it';return}b.disabled=true;plDo('lease_end',{p_lease:b.dataset.end},()=>{sync();v3Msg('📄 Lease ended · they can stay until the rent they paid runs out',3600)})});
+  const o=Q('[data-a=out]');if(o)o.onclick=()=>{if(!o.dataset.ok){o.dataset.ok=1;o.textContent='Tap again to move out now';return}o.disabled=true;plDo('lease_end',{p_lease:o.dataset.l},()=>{sync();v3Msg('📦 You moved out of '+d.name,3200);if(EC.st)EC.st.lease=null})};
+  const hr=Q('[data-a=hrent]');if(hr)hr.onclick=()=>{const v=Math.round(+Q('#plHR').value);if(!(v>=1&&v<=5000)){er.textContent='Pick a rent between $1 and $5,000 a day';return}hr.disabled=true;plDo('plot_set',{p_plot:id,p_state:'for_rent',p_rent:v},()=>{sync();v3Msg('🏡 '+d.name+' is up for rent at '+ecUSD(v)+' a day',3000)})};
+  const ur=Q('[data-a=unrent]');if(ur)ur.onclick=()=>{ur.disabled=true;plDo('plot_set',{p_plot:id,p_state:'owned'},sync)};
+  if(focus==='rent'){const f=Q('#plRent');if(f)f.scrollIntoView({block:'start'})}}}
+/* landlords hear about it right away */
+{const _u=PL_EV.pupd;PL_EV.pupd=function(p){_u.apply(this,arguments);if(p&&p.o&&PL_D[p.p]){const q=PL.plots.get(p.p);if(q&&q.owner===EC.acct||(EC.st&&EC.st.lease&&EC.st.lease.plot===p.p))setTimeout(()=>{if(!EC.busy)ecOpen()},900)}}}
+/* every place for rent in town */
+function plRentals(){const v=plAllVac(),P=document.getElementById('plP')||(plPanel('LL-1'),plPanel(null),document.getElementById('plP'));PL.pid=null;
+  P.innerHTML='<div class="ecH"><b>🏠 For rent in Lake Oswego</b><button class="ecX" aria-label="Close">✕</button></div>'+(v.length?'<ul class="plPpl">'+v.map(x=>'<li><span>'+lbEsc(x.n)+'<i>'+lbEsc(plNm(x.plot))+' · '+ecUSD(x.rent)+' a day · '+lbEsc(PL.plots.get(x.plot).owner_name||'')+'</i></span><button data-see="'+x.plot+'">Show me</button></li>').join('')+'</ul>':'<p class="ecS">Nothing’s for rent right now. Homeowners on Lakeshore Lane can rent out rooms or their whole house.</p>')+'<p class="ecS">Each place opens up at its gate, where you can sign the lease.</p>';
+  P.classList.add('show');P.querySelector('.ecX').onclick=()=>plPanel(null);P.querySelectorAll('[data-see]').forEach(b=>b.onclick=()=>{const id=b.dataset.see;plPanel(null);if(V3.inH)hsLeave(true);if(V3.boat&&typeof tourReset==='function')tourReset();plOut(id);V3.yaw=PL_D[id].side==='s'?Math.PI:0;V3.pitch=-.05;setTimeout(()=>plPanel(id,'rent'),300)})}
+/* the wallet shows the lease by name, and a way to find a place */
+{const _e=ecPanel;ecPanel=function(on){const r=_e.apply(this,arguments);const p=document.getElementById('ecP');if(!on||!p||!EC.st)return r;const l=EC.st.lease,rows=[...p.querySelectorAll('.ecRow')];
+  const lr=rows.find(e=>e.textContent.startsWith('🏠'));if(l&&lr&&PL_D[l.plot]){lr.innerHTML='🏠 You rent '+lbEsc(plUnit(l))+' · '+ecUSD(l.rent)+' a day · '+(l.state==='ending'?'until ':'next rent ')+plWhen(l.due_at)+(l.missed?' · <b class="neg">payment missed</b>':'')+' · <a href="#" style="color:#e8c66e">Go home</a>';lr.querySelector('a').onclick=e=>{e.preventDefault();_e(false);plGo(l.plot)}}
+  if(!l&&!(EC.st.plots||[]).length){const n=plAllVac().length,el=document.createElement('div');el.className='ecRow';el.innerHTML='🏠 '+(n?n+(n>1?' places':' place')+' for rent':'Looking for a place?')+' · <a href="#" style="color:#e8c66e">See rentals</a>';el.querySelector('a').onclick=e=>{e.preventDefault();_e(false);plRentals()};const h4=p.querySelector('h4');if(h4)h4.before(el)}
+  p.querySelectorAll('.ecL li span').forEach(s=>{const t=s.firstChild;if(t&&t.nodeType===3)t.textContent=t.textContent.replace(/\b(?:plot )?(LL-\d+)(-[A-Z0-9]+)?\b/g,(m,a,b)=>b?plRmN(a+b)+' · '+plNm(a):plNm(a))});return r}}
+/* lease_take answers with the new lease's id in place of the lease itself: fetch the full state instead */
+{const _s=ecSet;ecSet=function(st){if(st&&typeof st.lease==='string'){st=Object.assign({},st,{lease:EC.st&&EC.st.lease||null});setTimeout(()=>{EC.busy||ecOpen()},300)}return _s.call(this,st)}}
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
