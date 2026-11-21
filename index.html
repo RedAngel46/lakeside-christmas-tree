@@ -217,6 +217,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #plAsk.show{display:flex}#plAsk button{border:0;border-radius:999px;padding:7px 14px;font:700 13px system-ui;cursor:pointer;background:rgba(255,255,255,.12);color:#f3ead8}#plAsk button.go{background:linear-gradient(#e8c66e,#b8862a);color:#1a1208}
 @media(max-width:560px){#plP{top:auto;bottom:10px;right:10px;max-height:62vh}}
 .plPpl button.go{background:linear-gradient(#e8c66e,#b8862a);color:#1a1208}.plPpl button:disabled{opacity:.45;cursor:default}
+#vWal.warn{box-shadow:0 0 0 2px #e0645a;background:rgba(120,30,30,.75)}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="title">Lakeside living room · Lake Oswego</div>
@@ -4793,6 +4794,39 @@ function plRentals(){const v=plAllVac(),P=document.getElementById('plP')||(plPan
   p.querySelectorAll('.ecL li span').forEach(s=>{const t=s.firstChild;if(t&&t.nodeType===3)t.textContent=t.textContent.replace(/\b(?:plot )?(LL-\d+)(-[A-Z0-9]+)?\b/g,(m,a,b)=>b?plRmN(a+b)+' · '+plNm(a):plNm(a))});return r}}
 /* lease_take answers with the new lease's id in place of the lease itself: fetch the full state instead */
 {const _s=ecSet;ecSet=function(st){if(st&&typeof st.lease==='string'){st=Object.assign({},st,{lease:EC.st&&EC.st.lease||null});setTimeout(()=>{EC.busy||ecOpen()},300)}return _s.call(this,st)}}
+/* ---------- Mortgages: buy with 20% down, daily payments, warnings and repossession ---------- */
+const MG={r:.004,n:30};
+function mgTerms(cost){const down=Math.ceil(cost*.2),loan=cost-down,inst=Math.ceil(loan*MG.r/(1-Math.pow(1+MG.r,-MG.n)));return{down,loan,inst,total:down+inst*MG.n}}
+function mgNext(m){return Math.min(m.installment,Math.ceil(m.balance*(1+(+m.rate||MG.r))))}
+const mgTxt=s=>String(s||'').replace(/\bplot (LL-\d+)\b/g,(x,a)=>PL_D[a]?PL_D[a].name:x);
+/* the server writes plot ids in its notices: show street addresses */
+{const _s=ecSet;ecSet=function(st){if(st&&st.notices)st.notices=st.notices.map(n=>Object.assign({},n,{body:mgTxt(n.body)}));return _s.apply(this,arguments)}}
+/* the wallet button turns red while a payment is overdue */
+{const _c=ecChip;ecChip=function(){const r=_c.apply(this,arguments),b=document.getElementById('vWal'),st=EC.st;if(b&&st){const w=(st.mortgage&&st.mortgage.missed)||(st.lease&&st.lease.missed);b.classList.toggle('warn',!!w);if(w)b.innerHTML+=' ⚠️'}return r}}
+function mgBuyHTML(id,cost){const t=mgTerms(cost),st=EC.st,bal=st?st.balance:0,n=st?(st.plots||[]).length:0,why=!st?'Opening your wallet…':st.mortgage?'You already have a mortgage. Pay it off before taking another.':n>=2?'You can own at most 2 homes.':bal<t.down?'You need '+ecUSD(t.down-bal)+' more for the down payment. Take a job at the plaza to save up.':'';
+  return '<h4 id="plMort">Or buy with a mortgage</h4><div class="ecRow">🏦 Lakeside Savings Bank: pay <b>'+ecUSD(t.down)+'</b> down (20%) and borrow '+ecUSD(t.loan)+'. Then '+ecUSD(t.inst)+' a day for '+MG.n+' days, '+ecUSD(t.total)+' in all.</div>'+
+    '<p class="ecS">Payments come out of your wallet every 24 hours. If one can’t be paid you get a warning, and after 3 missed payments the bank repossesses the house and puts it back up for sale. You can pay extra or pay it off any time.</p>'+
+    '<div class="ecBtns"><button class="go" data-a="mort"'+(why?' disabled':'')+'>🏦 Buy with '+ecUSD(t.down)+' down</button></div>'+(why?'<p class="ecS">'+why+'</p>':'')}
+function mgOwnHTML(m){const nx=mgNext(m),bal=EC.st.balance,left=Math.ceil(m.balance);
+  return '<h4 id="plMort">Mortgage</h4><div class="ecRow">🏦 '+ecUSD(left)+' left to pay · next payment '+ecUSD(nx)+' '+plWhen(m.next_due)+(m.missed?' · <b class="neg">'+m.missed+' of 3 missed</b>':'')+'</div>'+
+    (m.missed?'<p class="ecS"><b class="neg">'+(m.missed>=2?'Last warning: one more missed payment and the bank takes the house.':'You missed a payment.')+'</b> Keep at least '+ecUSD(nx)+' in your wallet, or pay '+ecUSD(nx)+' now to clear the warning.</p>':'<p class="ecS">Payments come out of your wallet automatically every 24 hours. Paying extra lowers what’s left and the interest.</p>')+
+    '<div class="ecBtns" style="align-items:center"><input type="number" min="1" step="10" value="'+Math.min(left,Math.max(nx,1))+'" aria-label="Amount to pay" id="mgAmt"><button data-a="mpay">Pay now</button><button class="go" data-a="mall"'+(bal<left?' disabled':'')+'>Pay it all off · '+ecUSD(left)+'</button></div>'}
+{const _p=plPanel;plPanel=function(id,focus){_p.apply(this,arguments);const P=document.getElementById('plP');if(!id||!P||!P.classList.contains('show')||PL.pid!==id)return;const d=PL_D[id],p=PL.plots.get(id),st=p?p.state:'unclaimed',er=P.querySelector('.plErr');
+  P.querySelectorAll('p.ecS').forEach(e=>{if(/Mortgages with 20% down/.test(e.textContent))e.textContent=e.textContent.replace(/ Mortgages with.*$/,'').replace('more.','more to pay in full.')});
+  const bt=P.querySelector('[data-a=buy]'),m=EC.st&&EC.st.mortgage;let at=null;
+  if(bt&&(st==='unclaimed'||st==='for_sale')){const cost=st==='for_sale'?p.price:(p?p.list_price:d.price);at=bt.closest('.ecBtns');const nx=at.nextElementSibling;(nx&&nx.matches('p.ecS')?nx:at).insertAdjacentHTML('afterend',mgBuyHTML(id,cost));
+    const mb=P.querySelector('[data-a=mort]');mb.onclick=()=>{mb.disabled=true;plDo('plot_buy',{p_plot:id,p_mortgage:true},()=>{mpSend('pupd',{id:LB.id,p:id,o:1});vChime([72,76,79,84]);v3Msg('🔑 Congratulations! '+d.name+' is yours · the bank holds the mortgage',4600);plPanel(id,'mort')})}}
+  else if(m&&m.plot===id&&p&&p.owner===EC.acct){const h4=P.querySelector('h4');(h4||er).insertAdjacentHTML('beforebegin',mgOwnHTML(m));
+    const pay=v=>plDo('mortgage_pay',{p_amount:v},()=>{const left=EC.st.mortgage;vChime(left?[72,76]:[72,76,79,84]);v3Msg(left?'🏦 Paid '+ecUSD(v)+' · '+ecUSD(Math.ceil(left.balance))+' left':'🎉 Mortgage paid off! '+d.name+' is all yours',4200);plPanel(id,'mort')});
+    const a=P.querySelector('[data-a=mpay]');a.onclick=()=>{const v=Math.round(+P.querySelector('#mgAmt').value);if(!(v>=1)){er.textContent='Enter an amount';return}if(m.missed&&v<mgNext(m)){er.textContent='Pay at least '+ecUSD(mgNext(m))+' to cover the missed payment';return}if(v>EC.st.balance){er.textContent='You have '+ecUSD(EC.st.balance)+' in your wallet';return}a.disabled=true;pay(v)};
+    const b=P.querySelector('[data-a=mall]');b.onclick=()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent='Tap again to pay '+ecUSD(Math.ceil(m.balance));return}b.disabled=true;pay(Math.ceil(m.balance))}}
+  if(focus==='mort'){const f=P.querySelector('#plMort');if(f)f.scrollIntoView({block:'start'})}}}
+/* the wallet links the mortgage to its house */
+{const _e=ecPanel;ecPanel=function(on){const r=_e.apply(this,arguments);const p=document.getElementById('ecP'),m=EC.st&&EC.st.mortgage;if(!on||!p||!m||!PL_D[m.plot])return r;const row=[...p.querySelectorAll('.ecRow')].find(e=>e.textContent.startsWith('🏦'));
+  if(row){row.innerHTML='🏦 Mortgage on '+lbEsc(plNm(m.plot))+' · '+ecUSD(Math.ceil(m.balance))+' left · '+ecUSD(mgNext(m))+' due '+plWhen(m.next_due)+(m.missed?' · <b class="neg">'+m.missed+' of 3 missed</b>':'')+' · <a href="#" style="color:#e8c66e">Manage</a>';row.querySelector('a').onclick=e=>{e.preventDefault();_e(false);plPanel(m.plot,'mort')}}return r}}
+/* a repossessed house is sold by the bank */
+{const _s=plSign;plSign=function(d){const p=PL.plots.get(d.id);if(!p||p.state!=='for_sale'||p.owner)return _s.apply(this,arguments);_s.apply(this,arguments);const g=PL.g[d.id].sc.getContext('2d');g.fillStyle='#f4efe4';g.fillRect(0,116,256,26);g.fillStyle='#4a4035';g.textAlign='center';g.font='600 16px system-ui,sans-serif';g.fillText('Bank-owned · Lakeside Savings',128,134);PL.g[d.id].st.needsUpdate=true}}
+{const _p=plPanel;plPanel=function(id){_p.apply(this,arguments);const p=id&&PL.plots.get(id),P=document.getElementById('plP');if(p&&p.state==='for_sale'&&!p.owner&&P)P.querySelectorAll('p.ecS').forEach(e=>{if(e.textContent.startsWith('Offered by the owner'))e.firstChild.textContent=e.firstChild.textContent.replace('Offered by the owner','Repossessed and offered by Lakeside Savings Bank')})}}
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
