@@ -5241,7 +5241,7 @@ function pLegs(B,legs,wid){const k=wid>1?1.02:.97,mat=legs[0].userData.sk[0];
   const D={pos:[],nor:[],uv:[],si:[],sw:[],idx:[]},bones=[B];legs.forEach((hp,i)=>{bones.push(hp,hp.userData.sk[1]);pLimbGeo(prof,y=>{const t=y>-.07?pSS(-.07,.05,y)*.85:0,q=pSS(-.39,-.47,y);return[t,1-t-q,q]},1,1,0,pRel(B,hp),1+i*2,D)});
   return pSkinned(B,bones,D,mat)}
 /* hands: palm, four fingers and a thumb, palm turned toward the leg */
-function pHand(put,G,m,s){put(G.sph,m,.016,.04,.03,0,-.318,.004);const F=[[-.019,.026],[-.006,.03],[.007,.029],[.019,.024]];for(const [z,l] of F)put(G.sph,m,.0078,l,.0082,-s*.001,-.352-l*.62,z+.005,.12);put(G.sph,m,.0085,.024,.009,-s*.007,-.332,.03,.55,0,s*.25)}
+function pHand(put,G,m,s){put(G.sph,m,.016,.04,.03,0,-.318,.004);const F=[[-.019,.026],[-.006,.03],[.007,.029],[.019,.024]];for(const [z,l] of F)put(G.sph,m,.0078,l,.0082,-s*.001,-.352-l*.62,z+.005,.12);put(G.sph,m,.011,.021,.012,-s*.004,-.32,.022,-.12,0,0);put(G.sph,m,.0082,.021,.0088,-s*.007,-.35,.035,-.3,0,-s*.12)}
 /* v87: arms hang a little away from the body (more when they hang down, less when they reach forward) */
 function pClav(a){if(!a||!a.arms)return;for(const A of a.arms){const c=A.parent;if(!c||!c.userData.cl)continue;const s=c.userData.cl,k=Math.max(0,1-Math.abs(A.rotation.x)/1.4);c.rotation.z=s*(.05+.11*k)}}
 {const _a=animPerson;animPerson=function(p){const r=_a.apply(this,arguments);pClav(p);return r}}
@@ -5251,15 +5251,18 @@ function pClav(a){if(!a||!a.arms)return;for(const A of a.arms){const c=A.parent;
 function pHem(tI){const B=tI.parent&&tI.parent.parent;if(!B)return;const legs=B.children.filter(c=>c.userData&&c.userData.sk);if(legs.length!==2)return;
   const laps=legs.map(hp=>{const l=new THREE.Group();l.position.copy(hp.position);B.add(l);return l}),seat=new THREE.Group();seat.position.set(0,legs[0].position.y,0);B.add(seat);laps.push(seat);
   const ms=tI.children.filter(m=>m.isMesh&&!m.isSkinnedMesh&&m.geometry&&m.geometry.attributes.position);const out=[];
-  for(const m of ms){const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();if(g.boundingBox.min.y>.86)continue;const P=g.attributes.position,n=P.count,si=new Uint16Array(n*4),sw=new Float32Array(n*4);
-    for(let i=0;i<n;i++){const x=P.getX(i),y=P.getY(i),z=P.getZ(i),lo=pSS(1.0,.84,y),wb=lo*(1-pSS(-.15,-.07,z))*(1-pSS(.07,.15,Math.abs(x))),w=lo-wb,f=pSS(-.06,.06,x);si[i*4+1]=1;si[i*4+2]=2;si[i*4+3]=3;sw[i*4]=1-lo;sw[i*4+1]=w*(1-f);sw[i*4+2]=w*f;sw[i*4+3]=wb}
+  for(const m of ms){const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();if(g.boundingBox.min.y>.86)continue;const P=g.attributes.position,n=P.count,si=new Uint16Array(n*4),sw=new Float32Array(n*4);pHemOpen(g,m);
+    for(let i=0;i<n;i++){const x=P.getX(i),y=P.getY(i),z=P.getZ(i),lo=pSS(1.0,.84,y),wb=lo*(1-pSS(-.09,.02,z)),w=lo-wb,f=pSS(-.1,.1,x);si[i*4+1]=1;si[i*4+2]=2;si[i*4+3]=3;sw[i*4]=1-lo;sw[i*4+1]=w*(1-f);sw[i*4+2]=w*f;sw[i*4+3]=wb}
     g.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(si,4));g.setAttribute('skinWeight',new THREE.Float32BufferAttribute(sw,4));
     const k=new THREE.SkinnedMesh(g,m.material);k.position.copy(m.position);k.quaternion.copy(m.quaternion);k.scale.copy(m.scale);k.frustumCulled=false;tI.remove(m);tI.add(k);out.push(k)}
   if(!out.length){laps.forEach(l=>B.remove(l));return}
   B.updateWorldMatrix(true,true);const sk=new THREE.Skeleton([tI,...laps]);for(const k of out){k.updateMatrixWorld(true);k.bind(sk)}tI.userData.laps=laps}
-function pLap(a){const tI=a&&a.torso&&a.torso.children[0],L=tI&&tI.userData.laps;if(!L||!a.legs)return;for(let i=0;i<2;i++){L[i].rotation.x=Math.min(0,a.legs[i].rotation.x);L[i].rotation.z=a.legs[i].rotation.z*.5;const q=Math.min(1,-L[i].rotation.x/1.2);L[i].scale.set(1+.25*q,1,1+.3*q)}
+function pLap(a){const tI=a&&a.torso&&a.torso.children[0],L=tI&&tI.userData.laps;if(!L||!a.legs)return;const sq=Math.min(1,Math.max(0,(-(a.legs[0].rotation.x+a.legs[1].rotation.x)/2-.2)/.9)),av=Math.min(0,(a.legs[0].rotation.x+a.legs[1].rotation.x)/2);for(let i=0;i<2;i++){const lx=Math.min(0,a.legs[i].rotation.x);L[i].rotation.x=sq*lx+(1-sq)*(av*.5+lx*.55);L[i].rotation.z=a.legs[i].rotation.z*.5;const q=Math.min(1,-L[i].rotation.x/1.2);L[i].scale.set(1+.25*q,1,1+.3*q)}
   /* sitting: the back of the hem gathers up on the seat instead of hanging through it */
-  if(L[2]){const F=Math.max(0,-(a.legs[0].rotation.x+a.legs[1].rotation.x)/2-.25),q=Math.min(1,F/1.1);L[2].scale.set(1+.08*q,1-.25*q,1+.12*q)}}
+  if(L[2]){const F=Math.max(0,-(a.legs[0].rotation.x+a.legs[1].rotation.x)/2-.25),q=Math.min(1,F/1.1);L[2].scale.set(1+.1*q,1-.06*q,1+.3*q)}}
+/* v91: the hem is an open tube (no cap stretched between the legs like a nappy), and you see the inside of the sweater from below */
+function pHemOpen(g,m){const P=g.attributes.position,I=g.index;if(!I)return;g.computeBoundingBox();const y0=g.boundingBox.min.y+.004,cap=i=>P.getY(i)<y0&&Math.hypot(P.getX(i),P.getZ(i))<.02,a=I.array,o=[];for(let t=0;t<a.length;t+=3){if(cap(a[t])||cap(a[t+1])||cap(a[t+2]))continue;o.push(a[t],a[t+1],a[t+2])}if(o.length<a.length){g.setIndex(o)}
+  if(m.material&&m.material.side!==THREE.DoubleSide){m.material=m.material.clone();m.material.side=THREE.DoubleSide}}
 {const _a=animPerson;animPerson=function(p){const r=_a.apply(this,arguments);pLap(p);return r}}
 /* at the table and the island your forearms rest on the top, in bed your arms lie flat under the duvet */
 let pV=null;
@@ -5622,6 +5625,64 @@ function pkBtn(){if(PK.mine){pkPop('🧺 Your picnic',[['✉️ Invite someone',
   pkPop('🧺 Spread out the picnic here?',[['🧺 Classic picnic',()=>pkSpread(false)],['❤️ Romantic picnic for two',()=>pkSpread(true)]])}
 (function pkB(){const side=document.getElementById('vSide');if(!side){setTimeout(pkB,1000);return}if(document.getElementById('vPk'))return;const b=document.createElement('button');b.id='vPk';b.title='Picnic';b.textContent='🧺';b.style.display='none';b.onclick=e=>{e.stopPropagation();pkBtn()};side.insertBefore(b,side.firstChild)})();
 {const _o=mpOn;mpOn=function(ev,p){if(p&&p.id&&typeof LB!=='undefined'&&p.id!==LB.id){try{if(ev==='pk'){pkRemote(p);return}if(ev==='pkinv'){pkInvited(p);return}if(ev==='pkyes'){if(p.to===LB.id)v3Msg('🧺 '+String(p.n||'Someone').slice(0,24)+' is on the way to your picnic',2600);return}if((ev==='hi'||ev==='tq')&&PK.mine)setTimeout(pkSend,800)}catch(e){console.error('picnic',e)}}return _o.apply(this,arguments)}}
+
+/* ---------- v91: a mug held in the hand and lifted to the lips, coffee sipped from the cup at breakfast, palms down on the table ---------- */
+const P4={v:null,w:null,q:null,e:null,m:null};
+function p4V(){if(!P4.v){P4.v=new THREE.Vector3();P4.w=new THREE.Vector3();P4.q=new THREE.Quaternion();P4.e=new THREE.Euler();P4.m=new THREE.Vector3(0,.056,.1)}}
+/* two-bone reach: shoulder forward/sideways and elbow bend so that a point in the forearm's space lands on a world target */
+function p4IK(a,i,T,end,warm){const A=a.arms[i],E=a.elbows[i],s=i?1:-1,v=new THREE.Vector3();a.g.updateMatrixWorld(true);
+  const R=[[A.rotation,'x',-3.1,.4],[A.rotation,'z',s>0?-.9:-.25,s>0?.25:.9],[E.rotation,'x',-2.5,0]];
+  const f=()=>{A.updateMatrixWorld(true);return E.localToWorld(v.copy(end)).distanceToSquared(T)};let best=f();
+  for(const st of warm?[.06,.025,.01,.004]:[.3,.15,.07,.03,.012,.005])for(let k=0;k<3;k++){let imp=false;
+    for(const [o,ax,lo,hi] of R)for(const d of [st,-st]){const old=o[ax],nv=Math.min(hi,Math.max(lo,old+d));if(nv===old)continue;o[ax]=nv;const c=f();if(c<best-1e-9){best=c;imp=true}else o[ax]=old}
+    if(!imp)break}
+  return Math.sqrt(best)}
+/* the mouth, in world space */
+function p4Mouth(a,out){p4V();a.head.updateMatrixWorld(true);return a.head.localToWorld(out.copy(P4.m))}
+
+/* standing or walking: the mug rests in your hand in front of you and comes up to your lips when you drink */
+{const _h=meHeld;meHeld=function(third,a){const h=V3.held;if(!third||!h||!S3.hand||V3.pose||!a||!a.arms||!a.head)return _h.apply(this,arguments);
+  try{p4V();h.g.visible=true;const E=a.elbows[1];if(h.g.parent!==E){E.add(h.g);h.g.traverse(c=>{if(c.userData.glove)c.visible=false})}
+    const I=ITEMS[h.id]||[],drink=I[2]==='drink',e=h.e||0,q=a.g.getWorldQuaternion(new THREE.Quaternion()),fw=new THREE.Vector3(0,0,1).applyQuaternion(q),up=new THREE.Vector3(0,1,0);
+    a.g.updateMatrixWorld(true);const rest=a.g.localToWorld(new THREE.Vector3(.1,1.06,.3));
+    {const hd=(drink?-.16:.06)*e;a.head.rotation.x+=hd-(a._p4hd||0);a._p4hd=hd}
+    const m=p4Mouth(a,new THREE.Vector3()).addScaledVector(fw,drink?.045:.05).addScaledVector(up,drink?-.055:-.015),T=rest.lerp(m,e);
+    /* the mug sits against the palm, the fingers round it */
+    const end=new THREE.Vector3(-.052,-.352,.004),A=a.arms[1],S=a._p4s;if(S){A.rotation.x=S[0];A.rotation.z=S[1];E.rotation.x=S[2]}p4IK(a,1,T,end,!!S);a._p4s=[A.rotation.x,A.rotation.z,E.rotation.x];a._p4w=1;
+    h.g.position.copy(end);P4.e.set(drink?-.8*e:-.3*e,0,0);const want=q.clone().multiply(new THREE.Quaternion().setFromEuler(P4.e));
+    h.g.quaternion.copy(E.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(want))}catch(err){console.error(err);return _h.apply(this,arguments)}}}
+/* walking again: your arm swings freely once your hands are empty */
+{const _a=animPerson;animPerson=function(p){const r=_a.apply(this,arguments);if(p&&p===ME.av){if(p._p4w&&!V3.held){p._p4w=0;p._p4s=null;if(p.head&&p._p4hd){p.head.rotation.x-=p._p4hd;p._p4hd=0}}if(!V3.pose&&p.elbows)for(const E of p.elbows)if(E.rotation.y)E.rotation.y=Math.abs(E.rotation.y)<.01?0:E.rotation.y*.85}return r}}
+
+/* breakfast: the coffee step lifts the cup off its saucer to your lips and puts it back */
+function p4Cup(po,a){const b=po.bf;if(!b||b.cupG)return b&&b.cupG;const g=b.g,body=g.children.find(c=>c.isMesh&&Math.abs(c.position.x+.2)<.001&&Math.abs(c.position.z+.1)<.001&&Math.abs(c.scale.y-.08)<.001);if(!body||!b.cf)return null;
+  const G=new THREE.Group();G.position.copy(body.position);g.add(G);G.attach(body);G.attach(b.cf);
+  /* a handle on the side facing you */
+  const hd=new THREE.Mesh(new THREE.TorusGeometry(.022,.006,8,16),body.material);hd.position.set(0,.0,.042);hd.rotation.y=Math.PI/2;G.add(hd);
+  b.cupG=G;b.cup0=G.position.clone();return G}
+{const _b=hsBite;hsBite=function(){const po=V3.pose;if(po&&po.sip&&V3T-po.sip<2.8)return;const cof=!!(po&&po.bf&&po.bf.n===2&&!po.eat);const r=_b.apply(this,arguments);
+  if(cof&&po.eat){po.eat=null;po.sip=V3T}return r}}
+{const _p=poseApply;poseApply=function(a,k,dt,T,eat){const r=_p.apply(this,arguments);const po=V3.pose;if(a!==ME.av||!po)return r;
+  try{p4V();const st=po.s;
+    /* palms down when your forearms rest on the table or the counter */
+    const top=k==='sit'&&st&&!po.tub&&(st.dine||(st.sh>=.7&&st.up));for(let i=0;i<2;i++){const E=a.elbows[i],s=i?1:-1,want=top?-s*1.3*(a._pw||0):0;E.rotation.y+=(want-E.rotation.y)*Math.min(1,dt*6)}
+    if(po.sip&&po.bf){const u=(V3T-po.sip)/2.6;const G=p4Cup(po,a);if(!G||u>=1){po.sip=null;if(G&&po.bf.cup0){G.position.copy(po.bf.cup0);G.rotation.set(0,0,0)}if(a.fork)a.fork.visible=true;return r}
+      const bg=po.bf.g;bg.updateMatrixWorld(true);const home=bg.localToWorld(po.bf.cup0.clone()),i=1,A=a.arms[i],E=a.elbows[i];if(a.fork)a.fork.visible=false;
+      const toMe=new THREE.Vector3().subVectors(a.g.getWorldPosition(new THREE.Vector3()),home);toMe.y=0;toMe.normalize();
+      const off=toMe.clone().multiplyScalar(.06),mouth=p4Mouth(a,new THREE.Vector3());const lip=mouth.clone().addScaledVector(toMe,-.065).add(new THREE.Vector3(0,-.065,0));
+      const sm=x=>{x=Math.min(1,Math.max(0,x));return x*x*(3-2*x)};
+      /* where the cup is: on the saucer, then on its way up, at your lips, and back down */
+      const lift=u<.25?0:u<.45?sm((u-.25)/.2):u<.66?1:u<.86?1-sm((u-.66)/.2):0,tilt=u<.42?0:u<.5?sm((u-.42)/.08):u<.62?1:u<.7?1-sm((u-.62)/.08):0;
+      const cupW=home.clone().lerp(lip,lift);G.position.copy(bg.worldToLocal(cupW.clone()));G.rotation.set(.95*tilt,0,0);
+      /* your hand reaches for the handle, carries it and lets go */
+      const w=u<.22?sm(u/.22):u<.88?1:1-sm((u-.88)/.12);const base=[A.rotation.x,A.rotation.z,E.rotation.x],warm=!!po.sipR;
+      if(warm){A.rotation.x=po.sipR[0];A.rotation.z=po.sipR[1];E.rotation.x=po.sipR[2]}
+      p4IK(a,i,cupW.clone().add(off),new THREE.Vector3(-.02,-.35,0),warm);po.sipR=[A.rotation.x,A.rotation.z,E.rotation.x];
+      A.rotation.x=base[0]+(po.sipR[0]-base[0])*w;A.rotation.z=base[1]+(po.sipR[1]-base[1])*w;E.rotation.x=base[2]+(po.sipR[2]-base[2])*w;E.rotation.y*=1-w;
+      if(a.head)a.head.rotation.x+=-.14*tilt}
+    if(!po.sip&&a.fork&&!a.fork.visible)a.fork.visible=true
+    else if(po.sipR&&!po.sip)po.sipR=null}catch(err){console.error(err)}
+  return r}}
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
