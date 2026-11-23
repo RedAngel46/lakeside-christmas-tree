@@ -1,0 +1,4 @@
+Textures from Poly Haven (https://polyhaven.com), CC0 licence:
+grass=leafy_grass, asphalt=clean_asphalt, plaster=plastered_wall, flag=stone_tiles_02,
+boards=plank_flooring_04, lap=weathered_plank_siding, bat=white_planks_clean,
+roof=bitumen, bark=bark_brown_02, deck=worn_planks
