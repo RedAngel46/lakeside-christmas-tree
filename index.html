@@ -1437,10 +1437,10 @@ function house(lib,f,x,z,rot,depth,tint,mine){const S=S3,gp=new THREE.Group();gp
    else{const n=Math.round(w*3);for(let i=0;i<=n;i++){const x=-w/2+.1+i*(w-.2)/n;pts.push(V(x,wh-.04,.52));const d=1+((i*7)%3);for(let j=1;j<=d;j++)pts.push(V(x,wh-.04-j*.13,.52))}}
    if(multi){for(const p of pts)S.addBulbs([p],pick3([0xff4a4a,0x4be37a,0x4aa8ff,0xffd23f,0xffe2b0]))}else S.addBulbs(pts,0xffe2b0);
    /* evergreen swags with red bows and lights above the shop windows */
-   const gy=3.72,gpts=[],sw=Math.max(1,Math.round(w/3.2));for(let i=0;i<=sw*10;i++){const u=i/(sw*10);gpts.push(new THREE.Vector3(-w/2+.3+u*(w-.6),gy-.32*Math.abs(Math.sin(u*Math.PI*sw)),.2))}
+   if(!S3.sea||S3.sea.xmas){const gy=3.72,gpts=[],sw=Math.max(1,Math.round(w/3.2));for(let i=0;i<=sw*10;i++){const u=i/(sw*10);gpts.push(new THREE.Vector3(-w/2+.3+u*(w-.6),gy-.32*Math.abs(Math.sin(u*Math.PI*sw)),.2))}
    const gar=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(gpts),sw*24,.11,7),S.garM);gp.add(gar);
    const gb=[];for(let i=0;i<gpts.length;i+=2){const p=gpts[i].clone();p.y-=.06;p.z+=.1;gb.push(V(p.x,p.y,p.z))}S.addBulbs(gb,0xffd9a0);
-   for(let i=0;i<=sw;i++){const x=-w/2+.3+i*(w-.6)/sw;if(!S.bowG){const L=[],E=new THREE.Euler(),Q=new THREE.Quaternion(),M=(p,r,sc)=>new THREE.Matrix4().compose(p,Q.clone().setFromEuler(E.set(0,0,r)),sc);for(const s of[-1,1]){L.push([S.sphG,M(new THREE.Vector3(s*.1,0,0),s*.35,new THREE.Vector3(.13,.08,.04))]);L.push([S.boxG,M(new THREE.Vector3(s*.05,-.16,0),s*.25,new THREE.Vector3(.05,.28,.015))])}L.push([S.sphG,M(new THREE.Vector3(),0,new THREE.Vector3(.05,.05,.05))]);S.bowG=mergeG(L)}const b=new THREE.Mesh(S.bowG,S.bowM);b.position.set(x,gy+.04,.3);gp.add(b)}}
+   for(let i=0;i<=sw;i++){const x=-w/2+.3+i*(w-.6)/sw;if(!S.bowG){const L=[],E=new THREE.Euler(),Q=new THREE.Quaternion(),M=(p,r,sc)=>new THREE.Matrix4().compose(p,Q.clone().setFromEuler(E.set(0,0,r)),sc);for(const s of[-1,1]){L.push([S.sphG,M(new THREE.Vector3(s*.1,0,0),s*.35,new THREE.Vector3(.13,.08,.04))]);L.push([S.boxG,M(new THREE.Vector3(s*.05,-.16,0),s*.25,new THREE.Vector3(.05,.28,.015))])}L.push([S.sphG,M(new THREE.Vector3(),0,new THREE.Vector3(.05,.05,.05))]);S.bowG=mergeG(L)}const b=new THREE.Mesh(S.bowG,S.bowM);b.position.set(x,gy+.04,.3);gp.add(b)}}}
   if(mine){const v=new THREE.Vector3(w/2-1.2+.6,0,1.6);gp.localToWorld(v);ACTS.push({id:'home',p:v,r:2.6,lab:'🏠 Go inside',go:()=>hsEnter()});S3.homeOut=v.clone().add(new THREE.Vector3(.5,0,0))}
   return gp}
 function chalet(x,z,rot,name,kind,opt){if(S3.sea&&!S3.sea.xmas){const r=seaStall(name,kind,opt);if(!r)return;[name,kind,opt]=r;if(name==='Willamette Pinot Noir'&&opt&&opt.act)opt={act:Object.assign({},opt.act,{lab:'🍷 Get a glass of Pinot Noir'})}}S3.bulbAny=1;try{return chalet0(x,z,rot,name,kind,opt)}finally{S3.bulbAny=0}}
@@ -1454,7 +1454,7 @@ function chalet0(x,z,rot,name,kind,opt){const S=S3,gp=new THREE.Group();gp.userD
   const sg=cvs(256,56),g=sg.getContext('2d');g.fillStyle='#2a1a10';g.fillRect(0,0,256,56);g.strokeStyle='#c9a46a';g.lineWidth=3;g.strokeRect(4,4,248,48);g.fillStyle='#f3dfa8';g.font='italic 600 28px Georgia,serif';g.textAlign='center';g.fillText(name,128,38);
   const sm=new THREE.MeshBasicMaterial({map:tex(sg)});const so=new THREE.Mesh(S.planeG,sm);so.scale.set(2.4,.52,1);so.position.set(0,H+.25,.05);gp.add(so);
   const gpts=[];for(let i=0;i<=20;i++){const u=i/20,xx=-W/2-.3+u*(W+.6),yy=H+.05-Math.sin(u*Math.PI)*.12;gpts.push(new THREE.Vector3(xx,yy,.25))}
-  const gar=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(gpts),30,.13,6),S.firM);gp.add(gar);
+  if(!S3.sea||S3.sea.xmas){const gar=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(gpts),30,.13,6),S.firM);gp.add(gar)}
   const bul=[];for(let i=0;i<14;i++){const p=gpts[1+Math.round(i*18/13)].clone();p.y-=.08;p.z+=.12;gp.localToWorld(p);bul.push(p)}S.addBulbs(bul,0xffd9a0);
   for(let i=0;i<2;i++){const r=new THREE.Mesh(S.sphG,S.berryM);r.scale.setScalar(.12);r.position.set(i?W/2-.1:-W/2+.1,H-.1,.28);gp.add(r)}
   const L=new THREE.Vector3(0,1.6,.4);gp.localToWorld(L);S.glowAt(L,2.2,0xffb060,.45);
@@ -1474,7 +1474,7 @@ function chalet0(x,z,rot,name,kind,opt){const S=S3,gp=new THREE.Group();gp.userD
 function lampPost(x,z){const S=S3;const p=new THREE.Mesh(S.cylG,S.ironM);p.scale.set(.08,3.6,.08);p.position.set(x,1.8,z);S.scene.add(p);const b=new THREE.Mesh(S.cylG,S.ironM);b.scale.set(.18,.3,.18);b.position.set(x,.15,z);S.scene.add(b);
   const l=new THREE.Mesh(S.boxG,S.lampM);l.scale.set(.32,.45,.32);l.position.set(x,3.85,z);S.scene.add(l);const cap=new THREE.Mesh(S.coneG,S.ironM);cap.scale.set(.3,.25,.3);cap.position.set(x,4.2,z);S.scene.add(cap);
   if(S.sea.xmas){const wr=new THREE.Mesh(S.torG,S.firM);wr.scale.setScalar(.22);wr.position.set(x,3.2,z);wr.rotation.y=Math.PI/2;S.scene.add(wr)}
-  {const sp=[],bp=[];for(let i=0;i<=60;i++){const u=i/60,a=u*6.28*5,y=.45+u*2.6;sp.push(new THREE.Vector3(x+Math.cos(a)*.11,y,z+Math.sin(a)*.11));if(i%2==0)bp.push(new THREE.Vector3(x+Math.cos(a)*.17,y,z+Math.sin(a)*.17))}S.scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(sp),90,.07,5),S.garM));S.addBulbs(bp,0xffe2b0);
+  if(S.sea.xmas){const sp=[],bp=[];for(let i=0;i<=60;i++){const u=i/60,a=u*6.28*5,y=.45+u*2.6;sp.push(new THREE.Vector3(x+Math.cos(a)*.11,y,z+Math.sin(a)*.11));if(i%2==0)bp.push(new THREE.Vector3(x+Math.cos(a)*.17,y,z+Math.sin(a)*.17))}S.scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(sp),90,.07,5),S.garM));S.addBulbs(bp,0xffe2b0);
    const bw=new THREE.Group();bw.position.set(x,3.08,z);bw.rotation.y=Math.PI/2;S.scene.add(bw);for(const sd of[-1,1]){const l=new THREE.Mesh(S.sphG,S.bowM);l.scale.set(.12,.07,.035);l.position.x=sd*.09;l.rotation.z=sd*.35;bw.add(l);const t=new THREE.Mesh(S.boxG,S.bowM);t.scale.set(.045,.3,.012);t.position.set(sd*.05,-.17,0);t.rotation.z=sd*.25;bw.add(t)}}
   S.glowAt(new THREE.Vector3(x,3.85,z),2.6,0xffc070,.9);S.pool(x,z,4.2,.55);const lc=new THREE.Mesh(S.lconeG,S.coneLM);lc.position.set(x,3.7/2+.02,z);S.scene.add(lc);V3LAMPS.push(new THREE.Vector3(x,3.7,z));OBST.push({x,z,r:.35})}
 function stringLights(x1,z1,x2,z2,h,sag,n){const pts=[];for(let i=1;i<n;i++){const u=i/n;pts.push(new THREE.Vector3(x1+(x2-x1)*u,h-Math.sin(u*Math.PI)*sag,z1+(z2-z1)*u))}S3.addBulbs(pts,0xffe2b0);
@@ -1692,7 +1692,7 @@ function v3Build(){gqInit();const cv=document.getElementById('v3c');const ren=ne
   S.built=true}
 function randSpot(){const r=Math.random();let x,z;if(r<.45){z=rnd(-54,1);x=rnd(-2.2,2.2)}else if(r<.75){z=rnd(-100,-60);x=rnd(-15,15)}else{z=rnd(-168,-106);x=rnd(-2.6,2.6)}const p={x,z};walkClamp(p);return new THREE.Vector3(p.x,0,p.z)}
 /* the square */
-function v3Tree(){const S=S3,x=0,z=-80;const tr=new THREE.Mesh(S.cylG,S.woodDM);tr.scale.set(.45,2,.45);tr.position.set(x,1,z);S.scene.add(tr);
+function v3TreeOld(){const S=S3,x=0,z=-80;const tr=new THREE.Mesh(S.cylG,S.woodDM);tr.scale.set(.45,2,.45);tr.position.set(x,1,z);S.scene.add(tr);
   const H=14,R=y=>Math.max(.22,4.75*(1-(y-1.3)/(H+.4-1.3)));
   const bc=cvs(256,128),bg=bc.getContext('2d'),SH=['#173d25','#1d4a2c','#245a35','#2f6b3f','#13331f','#3a7647'];bg.lineCap='round';
   const ndl=(x,y,a,l)=>{bg.strokeStyle=SH[Math.random()*SH.length|0];bg.lineWidth=rnd(1.1,1.8);bg.beginPath();bg.moveTo(x,y);bg.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);bg.stroke()};
@@ -7230,6 +7230,96 @@ function sfBuild(){const S=S3;if(!S||!S.scene)return;const M=sfMats();
       if(!SF.lapN){try{const c=document.createElement('canvas');c.width=c.height=512;c.getContext('2d').drawImage(TXU.img.lap_n,0,0,512,512);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;SF.lapN=t}catch(e){r.nm=1;continue}}
       const n=SF.lapN.clone();n.repeat.set(r.f.FL.w/1.9,r.f.FL.H/1.9);m.normalMap=n;m.normalScale=new THREE.Vector2(.55,.55);m.needsUpdate=true;r.nm=1}if(!left)clearInterval(SF.nmT)},2000);
   for(const o of out)S.scene.add(o);SF.built=out;SF.n=glass.length}
+
+/* ---------- v97: the town Christmas tree, rebuilt as a real fir ----------
+   Whorls of drooping fir branches (curved, folded fronds drawn needle by needle), a bark trunk, warm-white bulbs
+   draped in rows that glow at dusk, restrained ornaments (red glass, brass, champagne, satin gold) with caps,
+   velvet bows, a brass star, snow on the branches when it snows, a stone planter with wrapped presents.
+   ?oldtree brings back the old tree. */
+const TR3={on:false};
+function trFrondTex(){const W=512,H=256,c=cvs(W,H),g=c.getContext('2d');g.lineCap='round';
+  const G=['#0f2a1a','#143421','#173d26','#1c462c','#21502f','#1a4a36','#284f2e'],T=['#2f6a3a','#3a7a44','#447e47','#3f7552'];
+  const ndl=(x,y,a,l,tip)=>{g.strokeStyle=tip?T[Math.random()*T.length|0]:G[Math.random()*G.length|0];g.lineWidth=rnd(1.3,2.1);g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);g.stroke()};
+  const twig=(x0,y0,x1,y1,nl,dens)=>{const a=Math.atan2(y1-y0,x1-x0),L=Math.hypot(x1-x0,y1-y0);g.strokeStyle='#3a2a1a';g.lineWidth=1.6;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();
+    for(let s=0;s<L;s+=dens){const u=s/L,px=x0+(x1-x0)*u,py=y0+(y1-y0)*u,l=nl*(1-u*.35),tip=u>.72;for(const sd of[-1,1])ndl(px,py,a+sd*rnd(.95,1.35)-.12,l*rnd(.85,1.1),tip)}};
+  /* the central twig and its side shoots, shorter toward the tip, pointing forward */
+  twig(0,H/2,W-6,H/2+rnd(-3,3),13,2.6);
+  for(let x=10;x<W-40;x+=rnd(26,34)){const len=(1-x/W)*95+24;for(const sd of[-1,1]){const ex=x+len*.72,ey=H/2+sd*len*.78;twig(x,H/2,ex,ey,10,2.8);
+    if(len>60){const mx=x+len*.36,my=H/2+sd*len*.39;twig(mx,my,mx+len*.32,my+sd*len*.12,8,3)}}}
+  /* soft dark core so the fronds read as dense, not as single needles */
+  const gr=g.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(10,28,16,.55)');gr.addColorStop(.7,'rgba(10,28,16,.15)');gr.addColorStop(1,'rgba(10,28,16,0)');
+  g.globalCompositeOperation='destination-over';g.fillStyle=gr;g.beginPath();g.ellipse(W*.38,H/2,W*.38,H*.22,0,0,6.28);g.fill();g.globalCompositeOperation='source-over';
+  const t=tex(c);t.anisotropy=8;return t}
+function trSnowTex(){const W=256,H=128,c=cvs(W,H),g=c.getContext('2d');
+  for(let i=0;i<110;i++){const x=rnd(0,W*.9),y=H/2+rnd(-1,1)*H*.32*(1-x/W*.6),r=rnd(3,9)*(1-x/W*.5);g.fillStyle='rgba(244,248,252,'+rnd(.7,1)+')';g.beginPath();g.ellipse(x,y,r*1.6,r,rnd(-.3,.3),0,6.28);g.fill()}
+  return tex(c)}
+/* one frond: a strip along +x that droops toward its tip, its sides folding down a little */
+function trFrondGeo(droop){const g=new THREE.PlaneGeometry(1,1,8,2);g.translate(.5,0,0);g.rotateX(-Math.PI/2);const P=g.attributes.position,C=[];
+  for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i);P.setY(i,-droop*x*x+.06*x-Math.abs(z)*.28);const k=.5+.5*Math.min(1,x*1.3);C.push(k,k,k)}
+  g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.computeVertexNormals();return g}
+function trNight(){const d=typeof LTX!=='undefined'&&LTX.dl?LTX.dl:null;return d?Math.max(0,Math.min(1,1-(d.intensity-.15)/.85)):0}
+function trNew(){const S=S3,x=0,z=-80,H=14,y0=1.55,Rb=4.7,snow=!!S.sea.snow,d=new THREE.Object3D(),cc=new THREE.Color();d.rotation.order='YZX';
+  const R=y=>Rb*Math.pow(Math.max(0,1-(y-y0)/(H-y0)),.92);
+  /* trunk with real bark, flaring at the root */
+  const bark=typeof seaBarkM==='function'?seaBarkM():S.woodDM,tg=new THREE.CylinderGeometry(.09,.36,H+.4,12,6);tg.translate(0,(H+.4)/2,0);{const P=tg.attributes.position;for(let i=0;i<P.count;i++){const yy=P.getY(i);if(yy<.6){const k=1+(.6-yy)*.45;P.setX(i,P.getX(i)*k);P.setZ(i,P.getZ(i)*k)}}tg.computeVertexNormals()}
+  const tr=new THREE.Mesh(tg,bark);tr.position.set(x,0,z);S.scene.add(tr);
+  /* a dark needled core so no daylight shows through the middle */
+  const ft=trFrondTex(),core=new THREE.Mesh(new THREE.ConeGeometry(Rb*.6,H-y0-.4,20,6,true),new THREE.MeshStandardMaterial({color:'#3a6a46',map:ft,roughness:.9}));ft.wrapS=ft.wrapT=THREE.RepeatWrapping;
+  core.material.map=ft.clone();core.material.map.repeat.set(9,7);core.material.map.wrapS=core.material.map.wrapT=THREE.RepeatWrapping;core.position.set(x,y0+(H-y0-.4)/2,z);S.scene.add(core);
+  /* the branches: a whorl every ~30 cm, each branch built from overlapping fronds along its outer 3.3 m plus side fronds at the tip */
+  const L=[],TIPS=[];for(let y=y0;y<H-.15;y+=rnd(.24,.32)){const r=R(y),n=Math.max(5,Math.round(r*4+3)),ph=rnd(0,6.28),hk=(y-y0)/(H-y0);
+    for(let k=0;k<n;k++){const a=ph+k/n*6.28+rnd(-.18,.18),Lb=r*rnd(.86,1.07),pitch=-.32+hk*.62+rnd(-.08,.08),dr=.5-hk*.25,seg=Math.max(.7,Math.min(1.25,Lb*.42));
+      const cs=Math.cos(pitch);for(let s=Math.max(0,Lb-3.3);s<Lb-seg*.55;s+=seg*.5){const px=x+Math.cos(a)*s*cs,pz=z-Math.sin(a)*s*cs,py=y+Math.sin(pitch)*s;L.push([px,py,pz,a,pitch,seg*1.2,seg*rnd(.85,1.05),dr,0]);if(s>Lb-2.2)L.push([px,py+.07,pz,a+rnd(-.2,.2),pitch+rnd(.05,.15),seg*1.05,seg*rnd(.7,.9),dr,0])}
+      const ex=x+Math.cos(a)*Lb*cs,ez=z-Math.sin(a)*Lb*cs,ey=y+Math.sin(pitch)*Lb-dr*.25;TIPS.push([ex,ey,ez,a,hk]);
+      const ms=Lb-seg*.9;for(const sd of[-1,1])L.push([x+Math.cos(a)*ms*cs,y+Math.sin(pitch)*ms,z-Math.sin(a)*ms*cs,a+sd*rnd(.45,.65),pitch+.05,seg*.8,seg*.55,dr,1])}}
+  const fm=new THREE.MeshStandardMaterial({map:ft,vertexColors:true,alphaTest:.5,side:THREE.DoubleSide,roughness:.78,metalness:0});
+  const U={uT:{value:0}};fm.onBeforeCompile=sh=>{sh.uniforms.uT=U.uT;sh.vertexShader='uniform float uT;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n#ifdef USE_INSTANCING\n float sw=sin(uT*1.1+instanceMatrix[3].x*.6+instanceMatrix[3].y*.9)*.035*uv.x*uv.x; transformed.y+=sw; transformed.z+=sw*.6;\n#endif')};
+  const gA=trFrondGeo(.16),gB=trFrondGeo(.3),IA=new THREE.InstancedMesh(gA,fm,L.length),IB=new THREE.InstancedMesh(gB,fm,L.length);let na=0,nb=0;
+  const IS=snow?new THREE.InstancedMesh(gA,new THREE.MeshStandardMaterial({map:trSnowTex(),alphaTest:.5,roughness:.92,color:'#f2f6fb'}),L.length):null;let ns=0;
+  for(const [px,py,pz,a,p,ln,wd,dr,side] of L){d.position.set(px,py,pz);d.rotation.set(rnd(-.18,.18),a,p);d.scale.set(ln,1,wd);d.updateMatrix();const useB=dr>.4||side;const M=useB?IB:IA,i=useB?nb++:na++;M.setMatrixAt(i,d.matrix);
+    cc.setHSL(rnd(.36,.42),rnd(.3,.5),rnd(.72,.98));M.setColorAt(i,cc);
+    if(IS&&!side&&Math.random()<.8){d.position.y+=.05;d.scale.set(ln*.92,1,wd*.85);d.updateMatrix();IS.setMatrixAt(ns++,d.matrix)}}
+  IA.count=na;IB.count=nb;for(const M of[IA,IB]){M.frustumCulled=false;S.scene.add(M)}if(IS){IS.count=ns;IS.frustumCulled=false;S.scene.add(IS)}
+  /* warm-white bulbs draped in rows round the tree, tucked a little into the branches */
+  const BP=[];for(let y=y0+.35;y<H-.5;y+=.44){const r=R(y)*.93,n=Math.max(6,Math.round(r*6.28/.38)),ph=rnd(0,6.28);for(let k=0;k<n;k++){const u=k/n,a=ph+u*6.28,sag=-.1*Math.abs(Math.sin(u*n*Math.PI/4)),rr=r*rnd(.9,1.02);BP.push([x+Math.cos(a)*rr,y+sag+rnd(-.05,.05),z-Math.sin(a)*rr])}}
+  const bm=new THREE.MeshBasicMaterial({color:'#ffd9a0'}),IBu=new THREE.InstancedMesh(new THREE.SphereGeometry(.03,6,4),bm,BP.length);BP.forEach(([px,py,pz],i)=>{d.position.set(px,py,pz);d.rotation.set(0,0,0);d.scale.set(1,1.3,1);d.updateMatrix();IBu.setMatrixAt(i,d.matrix)});IBu.frustumCulled=false;S.scene.add(IBu);
+  const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.Float32BufferAttribute(BP.flat(),3));const gm=new THREE.PointsMaterial({size:.34,map:S.GT,color:'#ffc77a',transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});const glow=new THREE.Points(gg,gm);glow.frustumCulled=false;S.scene.add(glow);
+  /* ornaments: hung just inside the branch tips */
+  const OM=[new THREE.MeshPhysicalMaterial({color:'#8e1420',metalness:.1,roughness:.1,clearcoat:1,clearcoatRoughness:.06}),new THREE.MeshStandardMaterial({color:'#b8913f',metalness:.95,roughness:.26}),
+    new THREE.MeshStandardMaterial({color:'#d8cfbc',metalness:.85,roughness:.16}),new THREE.MeshStandardMaterial({color:'#8c6f30',metalness:.75,roughness:.55})];S.ornM=OM;
+  const sg=new THREE.SphereGeometry(1,18,12),cap=new THREE.InstancedMesh(new THREE.CylinderGeometry(.22,.22,.3,8),OM[1],400);let nc=0;const pk=TIPS.filter(t=>t[1]>y0+.4&&t[1]<H-1.2).sort(()=>Math.random()-.5);let ti=0;
+  const W=[.34,.28,.22,.16];OM.forEach((m,mi)=>{const n=Math.round(pk.length*.55*W[mi]),IM=new THREE.InstancedMesh(sg,m,n);let k=0;
+    for(let i=0;i<n&&ti<pk.length;i++,ti++){const [ex,ey,ez,a,hk]=pk[ti],rr=.9,px=x+(ex-x)*rr,pz=z+(ez-z)*rr,s=(Math.random()<.65?rnd(.1,.13):rnd(.15,.2))*(1.1-hk*.35),py=ey-.08-s;
+      d.position.set(px,py,pz);d.rotation.set(0,0,0);d.scale.setScalar(s);d.updateMatrix();IM.setMatrixAt(k++,d.matrix);d.position.y=py+s*1.02;d.scale.setScalar(s);d.updateMatrix();if(nc<400)cap.setMatrixAt(nc++,d.matrix)}
+    IM.count=k;IM.frustumCulled=false;S.scene.add(IM)});cap.count=nc;cap.frustumCulled=false;S.scene.add(cap);
+  /* velvet bows */
+  const bowL=[];{const lp=new THREE.TorusGeometry(.1,.032,6,14),M4=new THREE.Matrix4(),E=new THREE.Euler(),Q=new THREE.Quaternion(),V=new THREE.Vector3();
+    for(const sd of[-1,1]){Q.setFromEuler(E.set(0,0,sd*.35));bowL.push([lp,M4.clone().compose(V.set(sd*.1,0,0),Q,new THREE.Vector3(1,.62,.7))])}
+    bowL.push([new THREE.SphereGeometry(.045,8,6),new THREE.Matrix4()]);const tl=new THREE.BoxGeometry(.05,.2,.012);for(const sd of[-1,1]){Q.setFromEuler(E.set(0,0,sd*.3));bowL.push([tl,M4.clone().compose(V.set(sd*.05,-.11,0),Q,new THREE.Vector3(1,1,1))])}}
+  const bowG=mergeG(bowL),bows=pk.slice(ti,ti+46),BW=new THREE.InstancedMesh(bowG,new THREE.MeshStandardMaterial({color:'#6e0b14',roughness:.62}),bows.length);
+  bows.forEach(([ex,ey,ez,a,hk],i)=>{d.position.set(x+(ex-x)*.9,ey+.04,z+(ez-z)*.9);d.rotation.set(0,a+Math.PI/2,0);d.scale.setScalar(1.25-hk*.4);d.updateMatrix();BW.setMatrixAt(i,d.matrix)});BW.frustumCulled=false;S.scene.add(BW);
+  /* the brass star on its spike */
+  const shp=new THREE.Shape();for(let i=0;i<10;i++){const r=i%2?.34:.82,an=Math.PI/2+i*Math.PI/5;shp[i?'lineTo':'moveTo'](Math.cos(an)*r,Math.sin(an)*r)}shp.closePath();
+  const stg=new THREE.ExtrudeGeometry(shp,{depth:.1,bevelEnabled:true,bevelThickness:.07,bevelSize:.05,bevelSegments:2});stg.center();
+  const stM=new THREE.MeshStandardMaterial({color:'#d6a84a',metalness:.9,roughness:.24,emissive:'#ffcf70',emissiveIntensity:.1}),star=new THREE.Mesh(stg,stM);star.position.set(x,H+.95,z);S.scene.add(star);
+  const sp=new THREE.Mesh(S.cylG,stM);sp.scale.set(.05,1.1,.05);sp.position.set(x,H+.15,z);S.scene.add(sp);
+  S.star=new THREE.Object3D();S.starG=S.glowAt(new THREE.Vector3(x,H+.95,z),5,0xffd070,.95);const sgm=S.starG;sgm.onBeforeRender=()=>{sgm.material.opacity=Math.min(sgm.material.opacity,.04+.9*TR3.n)};
+  /* the warm light on the square and the ground glow */
+  const tl=new THREE.PointLight(0xffc070,60,16,1.4);tl.position.set(x,7,z+5.5);S.scene.add(tl);const tl2=tl.clone();tl2.position.set(x+5,5,z-3);S.scene.add(tl2);S.pool(x,z,9,.45);
+  /* stone planter, mulch or snow, and wrapped presents */
+  const stone=new THREE.MeshStandardMaterial({color:'#8a837a',roughness:.9}),pw=new THREE.Mesh(new THREE.CylinderGeometry(3.55,3.65,.5,48,1,true),stone);pw.position.set(x,.25,z);S.scene.add(pw);
+  const rim=new THREE.Mesh(new THREE.RingGeometry(3.25,3.62,48),stone);rim.rotation.x=-Math.PI/2;rim.position.set(x,.5,z);S.scene.add(rim);
+  const iw=new THREE.Mesh(new THREE.CylinderGeometry(3.25,3.25,.5,48,1,true),stone);iw.material.side=THREE.BackSide;iw.position.set(x,.25,z);S.scene.add(iw);
+  const fill=new THREE.Mesh(new THREE.CircleGeometry(3.26,48),new THREE.MeshStandardMaterial({color:snow?'#e9eef4':'#3a2a1e',roughness:.95}));fill.rotation.x=-Math.PI/2;fill.position.set(x,.44,z);S.scene.add(fill);
+  const PC=[['#7a1018','#c9a24a'],['#1f3d2a','#c9a24a'],['#e8e0cf','#7a1018'],['#1e2a44','#d8cfbc'],['#a8865a','#7a1018'],['#5a0f16','#e8e0cf']];
+  for(let i=0;i<12;i++){const a=i/12*6.28+rnd(-.15,.15),r=rnd(1.2,2.4),s=rnd(.38,.7),[pc,rc]=pick3(PC),b=new THREE.Group();b.position.set(x+Math.cos(a)*r,.44,z+Math.sin(a)*r);b.rotation.y=-a+rnd(-.4,.4);
+    const bx=new THREE.Mesh(S.boxG,new THREE.MeshStandardMaterial({color:pc,roughness:.6}));bx.scale.set(s,s*rnd(.6,.9),s*rnd(.8,1));bx.position.y=bx.scale.y/2;b.add(bx);const rb=new THREE.MeshStandardMaterial({color:rc,roughness:.35,metalness:rc==='#c9a24a'?.6:0});
+    const r1=new THREE.Mesh(S.boxG,rb);r1.scale.set(bx.scale.x+.01,bx.scale.y+.01,.07);r1.position.y=bx.position.y;b.add(r1);const r2=r1.clone();r2.scale.set(.07,bx.scale.y+.01,bx.scale.z+.01);b.add(r2);
+    const kb=new THREE.Mesh(bowG,rb);kb.scale.setScalar(.8);kb.position.y=bx.scale.y+.04;kb.rotation.x=-.4;b.add(kb);S.scene.add(b)}
+  /* day and night: bulbs glow, the star warms up, the branches sway */
+  IA.onBeforeRender=()=>{const n=trNight();TR3.n=n;U.uT.value=performance.now()/1000;gm.opacity=.62*n;glow.visible=n>.03;bm.color.setRGB(1,.82,.55).multiplyScalar(.3+n*1.6);stM.emissiveIntensity=.08+n*1.4};
+  OBST.push({x,z,r:4.6});ACTS.push({id:'tree',p:new THREE.Vector3(x,0,z+5.2),r:3,lab:'⭐ Make a wish at the tree',go:()=>{v3Msg('✨ You make a wish under the big tree');S.starBoost=VIL3T()+3;vChime([76,79,84,88])}});S.clk.push([tr,'tree']);TR3.on=true}
+function v3Tree(){if(/[?&]oldtree/.test(location.search))return v3TreeOld();try{return trNew()}catch(e){console.error('tree',e);return v3TreeOld()}}
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
