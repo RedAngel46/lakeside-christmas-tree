@@ -8172,14 +8172,16 @@ function p6Heels(a,skHex){const G=P6.heel||(P6.heel={cup:new THREE.SphereGeometr
 /* the lift is added after the game's own animation each frame and taken off before the next, so it never accumulates */
 {const _a=animPerson;animPerson=function(p){if(p&&p.body){p.body.position.y-=p._lift||0;p._lift=0}const r=_a.apply(this,arguments);if(p&&p.body&&p.p6H){p.body.position.y+=p.p6H;p._lift=p.p6H}return r}}
 {const _p=poseApply;poseApply=function(a){if(a&&a.body){a.body.position.y-=a._lift||0;a._lift=0}return _p.apply(this,arguments)}}
-function p6Ling(a,sk){const tI=a.torso&&a.torso.children[0];if(!tI)return;
+function p6Ling(a,sk,map){const tI=a.torso&&a.torso.children[0];if(!tI)return;
   /* the torso is the mesh reaching lowest (it may carry a fabric copy of the skin colour, not sk itself) */
   const base=tI.children.find(o=>o.isMesh&&o.geometry&&(o.geometry.boundingBox||(o.geometry.computeBoundingBox(),o.geometry.boundingBox)).min.y<.8);if(!base)return;
   const g=base.geometry.clone(),P=g.attributes.position,uv=g.attributes.uv;if(!uv)return;
   for(let i=0;i<P.count;i++){const y=P.getY(i)-.9,r=Math.hypot(P.getX(i)/.94,P.getZ(i)/.7);uv.setY(i,y>.66||(y>.54&&r<.065)?2:(y+.16)/.81)}/* the neck pieces share this mesh: keep them bare */uv.needsUpdate=true;
-  const m=new THREE.MeshStandardMaterial({map:p6LingTex(),transparent:true,alphaTest:.02,roughness:.42,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4});
+  const m=new THREE.MeshStandardMaterial(map?{map,alphaTest:.5,roughness:.55,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4}:{map:p6LingTex(),transparent:true,alphaTest:.02,roughness:.42,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4});
   if(a.p6J)a.p6J.hook(m);
   const o=base.isSkinnedMesh?new THREE.SkinnedMesh(g,m):new THREE.Mesh(g,m);if(base.isSkinnedMesh)o.bind(base.skeleton,base.bindMatrix);o.position.copy(base.position);o.quaternion.copy(base.quaternion);o.scale.copy(base.scale);o.frustumCulled=false;base.parent.add(o);
+  if(map){/* swimwear: bare feet instead of the boot shape */const fm=a.legs[0].userData.sk[0],FG=P6.foot||(P6.foot=new THREE.SphereGeometry(1,16,10));
+    for(const kn of a.knees){for(const c of kn.children)if(c.isMesh)c.visible=false;for(const [sx,sy,sz,y,z] of[[.034,.026,.1,-.47,.045],[.03,.03,.034,-.462,-.012],[.03,.04,.03,-.43,0]]){const f=new THREE.Mesh(FG,fm);f.scale.set(sx,sy,sz);f.position.set(0,y,z);kn.add(f)}}return}
   p6Heels(a,sk.color.getHexString());
   /* legs: swap the plain stocking colour for the painted stockings */
   const lm=a.legs[0].userData.sk[0],leg=a.legs[0].parent.children.find(c=>c.isSkinnedMesh&&c.material===lm);if(!leg)return;
@@ -8209,7 +8211,7 @@ function p6Jig(a){const tI=a.torso&&a.torso.children[0];if(!tI||!a.torso)return;
 {const _p=person;person=function(o){const L=o&&o.look;if(!L)return _p.apply(this,arguments);const G=pGeo(),f=L.g==='f',keys=['torF','torM','coatS','coatL'],keep=keys.map(k=>G[k]);
   keys.forEach((k,i)=>{if(keep[i])G[k]=p6Deform(keep[i],f?'f':'m',k==='torF'||k==='torM'?1:.6)});
   /* in lingerie there's no garment shell: a bare torso that closes between the legs (no open hem) */
-  if(f&&L.fit==='lingerie'&&!p6Kid())G.torF=p6Deform(P6.bodyF||(P6.bodyF=new THREE.LatheGeometry(p5Prof([[0,-.105],[.04,-.115],[.1,-.1],[.15,-.07],[.178,-.025],[.186,.02],[.172,.1],[.148,.18],[.14,.25],[.155,.32],[.165,.42],[.184,.5],[.155,.565],[.1,.608],[.055,.635],[0,.642]].map(([a,b])=>new THREE.Vector2(a,b))),28)),'b',1);let bd=null;
+  if(f&&(L.fit==='swim'||L.fit==='bikini'||L.fit==='lingerie'&&!p6Kid()))G.torF=p6Deform(P6.bodyF||(P6.bodyF=new THREE.LatheGeometry(p5Prof([[0,-.105],[.04,-.115],[.1,-.1],[.15,-.07],[.178,-.025],[.186,.02],[.172,.1],[.148,.18],[.14,.25],[.155,.32],[.165,.42],[.184,.5],[.155,.565],[.1,.608],[.055,.635],[0,.642]].map(([a,b])=>new THREE.Vector2(a,b))),28)),'b',1);let bd=null;
   if(!f&&(L.bd==='stubble'||L.bd==='full')){bd=L.bd;o=Object.assign({},o,{look:Object.assign({},L,{bd:'none'})})}
   P6.fem=f;let a;try{a=_p.call(this,o)}finally{keys.forEach((k,i)=>G[k]=keep[i]);P6.fem=false}
   if(bd)try{p6Beard(a,bd,L.hc||'#3a2a1e',L.sk)}catch(e){console.error('beard',e)}
@@ -8217,14 +8219,75 @@ function p6Jig(a){const tI=a.torso&&a.torso.children[0];if(!tI||!a.torso)return;
 /* lingerie as an outfit: women only, adults only, and children never see it */
 if(!LK_O.fit.some(x=>x[0]==='lingerie'))LK_O.fit.push(['lingerie','Lingerie']);
 function p6Kid(){return typeof isKid==='function'&&isKid()}
-{const _d=hxDress;hxDress=function(L){if(L&&L.fit==='lingerie'){if(L.g!=='f'||p6Kid())return _d(Object.assign({},L,{fit:'robe'}));
+{const _d=hxDress;hxDress=function(L){if(L&&L.g==='f'&&(L.fit==='swim'||L.fit==='bikini')){const k=L.fit==='bikini'&&!p6Kid()?'bikini':'swim';
+    return Object.assign(_d(Object.assign({},L,{fit:'swim'})),{fit:k,co:L.sk,pa:L.sk,lg:'bare',tg:L.sk,sh:L.sk,sox:0,sl:'none'})}
+  if(L&&L.fit==='bikini')return _d(Object.assign({},L,{fit:'swim'}));
+  if(L&&L.fit==='lingerie'){if(L.g!=='f'||p6Kid())return _d(Object.assign({},L,{fit:'robe'}));
     const st=hxMix(L.sk||'#e0b090','#0d0a0b',.74);return Object.assign(_d(Object.assign({},L,{fit:'swim'})),{co:L.sk,pa:L.sk,lg:'bare',tg:st,sh:'#141114',sox:1,sl:'none',gs:L.gs==='sun'?'none':L.gs})}return _d(L)}}
-{const _l=lkPerson;lkPerson=function(L,extra){const a=_l.apply(this,arguments);try{const C=lkClean(L);if(C.fit==='lingerie'&&C.g==='f'&&!p6Kid()){const D=hxDress(C);p6Ling(a,MF['s'+(D.sk||C.sk)]||pSkin(C.sk))}}catch(e){console.error('lingerie',e)}return a}}
+{const _l=lkPerson;lkPerson=function(L,extra){const a=_l.apply(this,arguments);try{const C=lkClean(L);if(C.fit==='lingerie'&&C.g==='f'&&!p6Kid()){const D=hxDress(C);p6Ling(a,MF['s'+(D.sk||C.sk)]||pSkin(C.sk))}
+    else if(C.g==='f'&&(C.fit==='swim'||C.fit==='bikini'))p6Ling(a,null,p6SwimTex(hxDress(C).fit))}catch(e){console.error('lingerie',e)}return a}}
 if(typeof HX_W!=='undefined'){const sec=['Underneath',[['lingerie','🖤','Undress to your lingerie','Black lace push-up bra, thong, garter belt and stockings','f']]];
   const _w=hxWardrobe;hxWardrobe=function(){const i=HX_W.indexOf(sec);if(i>=0)HX_W.splice(i,1);if(!p6Kid())HX_W.push(sec);return _w.apply(this,arguments)}}
 {const _w=hxWear;hxWear=function(f){if(f==='lingerie'&&(p6Kid()||!LOOK||LOOK.g!=='f'))return;if(f==='lingerie'&&LOOK.fit!=='lingerie')P6.prev=LOOK.fit;return _w.apply(this,arguments)}}
 /* lingerie stays indoors: leaving the house puts your clothes back on */
 {const _h=hsLeave;hsLeave=function(){if(LOOK&&LOOK.fit==='lingerie'){LOOK=lkClean(Object.assign({},LOOK,{fit:P6.prev&&P6.prev!=='lingerie'?P6.prev:'in'}));lkSave();ME.t=0}return _h.apply(this,arguments)}}
+/* ===== v107: swimwear (a one-piece or a bikini with a thong bottom), feminine arms and shoulders, jewelry ===== */
+/* painted on the bare body like the lingerie (same uv: u 0 = front centre, .5 = back; v = torso height) */
+function p6SwimTex(kind){const k='sw'+kind;if(P6.tex[k])return P6.tex[k];const W=1024,H=512,c=cvs(W,H),q=c.getContext('2d'),Y=y=>(1-(y+.16)/.81)*H,U=u=>u*W,ss=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
+  const col=kind==='bikini'?'#8f1d22':'#1f3550',hem=kind==='bikini'?'#6a1218':'#16263a';q.clearRect(0,0,W,H);q.fillStyle=col;q.strokeStyle=hem;q.lineCap=q.lineJoin='round';
+  const cover=()=>{q.fillRect(0,Y(-.093),W,H-Y(-.093))};/* the underside between the legs */
+  if(kind==='swim'){/* one-piece: scoop front, low back, high-cut legs, straps over the shoulders */
+    const top=d=>.44-.08*ss(.1,.16,d)-.14*ss(.36,.42,d),bot=d=>-.2+.26*ss(.04,.2,d)*(1-ss(.3,.44,d));
+    q.beginPath();for(let i=0;i<=200;i++){const u=i/200;q.lineTo(U(u),Y(top(Math.min(u,1-u))))}for(let i=200;i>=0;i--){const u=i/200;q.lineTo(U(u),Y(bot(Math.min(u,1-u))))}q.closePath();q.fill();cover();
+    q.globalCompositeOperation='destination-out';for(const x of[0,W]){q.beginPath();q.ellipse(x,Y(.47),U(.075),Y(.355)-Y(.47),0,0,7);q.fill()}q.globalCompositeOperation='source-over';
+    for(const u of[.105,.895,.4,.6]){q.fillRect(U(u)-6,Y(.64),12,Y(u>.3&&u<.7?.24:.4)-Y(.64))}}
+  else{/* bikini: triangle cups on a string band with a halter tie, a thong bottom */
+    for(const s of[1,-1]){const uc=s>0?.074:1-.074,o=s*.062;q.beginPath();q.moveTo(U(uc-o),Y(.3));q.quadraticCurveTo(U(uc),Y(.285),U(uc+o*1.05),Y(.3));q.quadraticCurveTo(U(uc+o*.75),Y(.4),U(uc+o*.15),Y(.445));q.quadraticCurveTo(U(uc-o*.5),Y(.4),U(uc-o),Y(.3));q.fill();
+      q.lineWidth=6;q.beginPath();q.moveTo(U(uc+o*.15),Y(.44));q.lineTo(U(uc+o*.9),Y(.64));q.stroke()}
+    q.fillRect(0,Y(.3),W,Y(.285)-Y(.3));
+    q.lineWidth=7;q.beginPath();q.moveTo(U(.05),Y(-.03));q.quadraticCurveTo(U(.17),Y(.03),U(.25),Y(.04));q.quadraticCurveTo(U(.33),Y(.03),U(.45),Y(-.01));
+    q.moveTo(U(.95),Y(-.03));q.quadraticCurveTo(U(.83),Y(.03),U(.75),Y(.04));q.quadraticCurveTo(U(.67),Y(.03),U(.55),Y(-.01));q.stroke();
+    for(const [u0,s] of[[0,1],[1,-1]]){q.beginPath();q.moveTo(U(u0),Y(-.015));q.lineTo(U(u0+s*.06),Y(-.03));q.quadraticCurveTo(U(u0+s*.035),Y(-.1),U(u0+s*.014),Y(-.17));q.lineTo(U(u0),Y(-.17));q.closePath();q.fill()}
+    q.beginPath();q.moveTo(U(.45),Y(-.01));q.quadraticCurveTo(U(.49),Y(-.03),U(.5),Y(-.08));q.quadraticCurveTo(U(.51),Y(-.03),U(.55),Y(-.01));q.closePath();q.fill();q.fillRect(U(.5)-4,Y(-.08),8,H-Y(-.08));cover()}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapT=THREE.ClampToEdgeWrapping;t.anisotropy=8;return P6.tex[k]=t}
+if(!LK_O.fit.some(x=>x[0]==='bikini'))LK_O.fit.push(['bikini','Bikini']);
+if(typeof HX_W!=='undefined')for(const [,l] of HX_W){const i=l.findIndex(x=>x[0]==='swim'&&x[4]==='f');if(i>=0){l[i]=['swim','🩱','Swimsuit','One-piece, navy, high-cut legs','f'];l.splice(i+1,0,['bikini','👙','Bikini','Deep red triangle top and thong bottom','f'])}}
+{const _w=hxWear;hxWear=function(f){if(f==='bikini'&&(!LOOK||LOOK.g!=='f'))return;return _w.apply(this,arguments)}}
+/* women's arms: slimmer, softer upper arms, slender wrists */
+{const _a=pArms;pArms=function(tI,arms,wid){if(!P6.fem)return _a.apply(this,arguments);const mat=arms[0].userData.sk[0],E=arms.map(p=>p.userData.sk[1]),rx=E.map(e=>e.rotation.x);E.forEach(e=>e.rotation.x=0);
+  const prof=[[.005,.041],[-.035,.05],[-.08,.049],[-.14,.044],[-.22,.039],[-.29,.035],[-.32,.036],[-.37,.038],[-.43,.034],[-.5,.028],[-.565,.023],[-.585,.022]];
+  const D={pos:[],nor:[],uv:[],si:[],sw:[],idx:[]},bones=[tI];arms.forEach((p,i)=>{const s=i?1:-1;bones.push(p,E[i]);pLimbGeo(prof,y=>{const t=y>-.05?pSS(-.05,.04,y)*.6:0,q=pSS(-.265,-.335,y);return[t,1-t-q,q]},.94,1,-s*.006,pRel(tI,p),1+i*2,D)});
+  const m=pSkinned(tI,bones,D,mat);E.forEach((e,i)=>e.rotation.x=rx[i]);try{pHem(tI)}catch(e){console.error(e)}return m}}
+/* women's shoulders slope down from the neck instead of squaring off (applied after the body shaping) */
+{const _d=p6Deform;p6Deform=function(src,sex,amt){if(sex==='m')return _d(src,sex,amt);const key=src.uuid+sex+amt+'sl';if(P6.def.has(key))return P6.def.get(key);
+  const g=_d(src,sex,amt).clone(),p=g.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i),k=1-.09*amt*p6Bell(y,.56,.045)*(sex==='b'?1:.8);p.setX(i,p.getX(i)*k)}g.computeVertexNormals();P6.def.set(key,g);return g}}
+/* jewelry: earrings (studs, hoops, diamonds), necklaces (fine chain, pendant, pearls), bracelets, in gold or silver */
+Object.assign(LK_O,{er:[['none','None'],['studs','Studs'],['hoops','Hoops'],['diamonds','Diamond studs']],nk:[['none','None'],['chain','Fine chain'],['pendant','Pendant'],['pearls','Pearls']],br:[['none','None'],['chain','Chain bracelet'],['bangles','Bangles'],['cuff','Cuff']],jm:[['gold','Gold'],['silver','Silver']]});
+if(!LK_T.some(t=>t[0]==='Jewelry'))LK_T.push(['Jewelry',[['er','Earrings'],['nk','Necklace'],['br','Bracelets'],['jm','Metal']]]);
+if(LOOK)LOOK=lkClean(LOOK);
+function p6Jewel(a,L){if(!L||(L.er||'none')==='none'&&(L.nk||'none')==='none'&&(L.br||'none')==='none')return;
+  const M=P6.jm||(P6.jm={gold:new THREE.MeshStandardMaterial({color:'#e0b44c',metalness:.85,roughness:.22,emissive:'#3a2808',emissiveIntensity:.35}),silver:new THREE.MeshStandardMaterial({color:'#e4e4ea',metalness:.85,roughness:.18,emissive:'#2a2a30',emissiveIntensity:.35}),
+    dia:new THREE.MeshStandardMaterial({color:'#ffffff',metalness:0,roughness:.02,emissive:'#cfe4ff',emissiveIntensity:.55,flatShading:true}),pearl:new THREE.MeshStandardMaterial({color:'#f3eee4',metalness:.1,roughness:.25,emissive:'#3a3630',emissiveIntensity:.3})});
+  const G=P6.jg||(P6.jg={sph:new THREE.SphereGeometry(1,12,8),oct:new THREE.OctahedronGeometry(1,0),ring:new THREE.TorusGeometry(1,.08,8,32),thin:new THREE.TorusGeometry(1,.035,6,40)});
+  const mt=M[L.jm==='silver'?'silver':'gold'],add=(par,g,m,sx,sy,sz,x,y,z,rx,ry)=>{const o=new THREE.Mesh(g,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,0);par.add(o);return o};
+  const hI=a.head&&a.head.children[0],tI=a.torso&&a.torso.children[0];
+  if(hI)for(const s of[-1,1]){const x=s*.104,y=1.65;
+    if(L.er==='studs')add(hI,G.sph,mt,.006,.006,.006,x,y,0);
+    else if(L.er==='diamonds'){add(hI,G.oct,M.dia,.0075,.0075,.0075,x,y,0);add(hI,G.sph,mt,.0035,.0035,.0035,x+s*.002,y,0)}
+    else if(L.er==='hoops')add(hI,G.ring,mt,.017,.017,.017,x+s*.002,y-.016,0,0,Math.PI/2)}
+  if(tI&&L.nk&&L.nk!=='none'){/* the chain lies on the skin: cast outward from the neck axis and keep the outermost surface hit */
+    const ms=tI.children.filter(o=>o.isMesh&&o.geometry&&o.visible).map(o=>{const m=new THREE.Mesh(o.geometry,P6.dbl||(P6.dbl=new THREE.MeshBasicMaterial({side:THREE.DoubleSide})));m.matrix.copy(o.matrix);m.matrixWorld.copy(o.matrix);return m});
+    const rc=new THREE.Raycaster(),pts=[],nor=[],n=48;
+    for(let i=0;i<n;i++){const t=i/n*Math.PI*2,d=new THREE.Vector3(Math.cos(t),0,Math.sin(t)),y=1.505-.04*Math.max(0,Math.sin(t))+.012*Math.max(0,-Math.sin(t));rc.set(new THREE.Vector3(0,y,0),d);rc.far=.3;
+      const h=rc.intersectObjects(ms,false);const f=h.length?h[h.length-1]:null;const p=f?f.point.clone():new THREE.Vector3(d.x*.07,y,d.z*.07);pts.push(p.addScaledVector(d,L.nk==='pearls'?.005:.0025));nor.push(d)}
+    if(L.nk==='pearls'){const pg=[];for(let i=0;i<n;i++)pg.push([G.sph,new THREE.Matrix4().compose(pts[i],new THREE.Quaternion(),new THREE.Vector3(.0055,.0055,.0055))]);tI.add(new THREE.Mesh(mergeG(pg),M.pearl))}
+    else tI.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts,true),96,.0016,6,true),mt));
+    if(L.nk==='pendant'){const f=pts[n/4];add(tI,G.sph,mt,.0035,.0035,.0035,f.x,f.y-.004,f.z+.002);add(tI,G.oct,M.dia,.007,.01,.005,f.x,f.y-.016,f.z+.004)}}
+  if(a.elbows&&L.br&&L.br!=='none')for(const [i,E] of a.elbows.entries()){const s=i?1:-1,x=-s*.006;
+    if(L.br==='chain'&&i===0)add(E,G.thin,mt,.026,.026,.026,x,-.255,0,Math.PI/2);
+    else if(L.br==='cuff'&&i===0){const c=add(E,P6.cuff||(P6.cuff=new THREE.CylinderGeometry(.027,.025,.022,20,1,true)),mt,1,1,1,x,-.25,0);c.material=mt.clone();c.material.side=THREE.DoubleSide}
+    else if(L.br==='bangles')for(const d of[0,.012,.022])add(E,G.ring,mt,.029,.029,.029,x,-.245-d,0,Math.PI/2+(d-.01)*4)}}
+{const _p=person;person=function(o){const a=_p.apply(this,arguments);try{if(o&&o.look)p6Jewel(a,o.look)}catch(e){console.error('jewel',e)}return a}}
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
