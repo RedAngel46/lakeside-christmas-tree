@@ -2978,7 +2978,7 @@ function hsLeave(quiet){if(!V3.inH)return;V3.inH=false;V3.hl=0;V3.path=null;V3.p
   if(!quiet){const go=()=>{const o=S3.homeOut;V3.pos.set(o.x,0,o.z);V3.yaw=-Math.PI/2;V3.pitch=-.03;V3.gy=0;V3.tgt=null;V3.near=undefined;ambTown(true);murmur(true);v3Msg('❄️ Back out in the old town',2200)};if(typeof tourFade==='function')tourFade(go);else go()}}
 function hsOpen(){HS.want=1;v3Open()}
 function hsFrame(dt,T){if(!V3.inH)return;
-  if(HS.fireL){const f=.75+.18*Math.sin(T*9.3)+.12*Math.sin(T*15.7+1)+.08*Math.sin(T*23+2);HS.fireL.intensity=4.2*f}
+  if(HS.fireL){const f=.75+.18*Math.sin(T*9.3)+.12*Math.sin(T*15.7+1)+.08*Math.sin(T*23+2);HS.fireL.intensity=V3.hl?0:4.2*f}
   HS.flames.forEach((s,i)=>{const k=.8+.25*Math.sin(T*(7+i*1.7)+i*2)+.15*Math.sin(T*(13+i)+i);s.scale.set(s.userData.w*k,s.userData.h*(.85+.3*Math.sin(T*(9+i)+i)),1);s.material.opacity=s.userData.o*(.75+.25*k)});
   if(HS.treeLights){HS.treeLights.material.opacity=.85+.12*Math.sin(T*1.6)}}
 
@@ -7890,14 +7890,15 @@ const WV={rt:[],cam:[],list:null,on:false,lit:null,t:0};
 function wvHouse(){
   if(HS.plot&&typeof PL_D!=='undefined'&&PL_D[HS.plot]){const d=PL_D[HS.plot];return{x:d.cx,z:(d.hz0+d.hz1)/2,m:d.side==='s'?Math.PI:0,g:(PL.g[HS.plot]||{}).house}}
   /* the Main Street home: the camera sits just inside its front wall and clips the 3D shop-front trim on it (near .75) */
-  if(!HS.owner&&!HS.sr&&S3.homeC)return S3.homeC;
+  /* v104: not when you have a starter home: after a reload you're put back inside without srEnter, and saw Main Street */
+  if(!HS.owner&&!HS.sr&&S3.homeC&&SR.mine==null)return S3.homeC;
   let slot=SR.mine;if(HS.owner){const r=SR.list.find(r=>r.player===HS.owner);slot=r?r.slot:null}
   if(slot==null)return null;const d=srLot(slot);return{x:d.cx,z:(d.hz0+d.hz1)/2,m:d.side==='s'?Math.PI:0,g:(SR.hs.get(slot)||{}).g}}
 /* the starter-home door and the Main Street door lead to the same interior: remember which one was used */
 {const _e=srEnter;srEnter=function(){HS.sr=1;return _e.apply(this,arguments)}}
-function wvMat(frost){return new THREE.ShaderMaterial({uniforms:{t0:{value:WV.rt[0].texture},t1:{value:WV.rt[1].texture},uM:{value:0},uF:{value:HS.F}},
+function wvMat(frost){return new THREE.ShaderMaterial({uniforms:{t0:{value:WV.rt[0].texture},t1:{value:WV.rt[1].texture},uM:{value:0},uF:{value:HS.F},uC:{value:new THREE.Vector2(HS.X+6.5,HS.Z+5)}},
   vertexShader:'varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
-  fragmentShader:'uniform samplerCube t0,t1;uniform float uM,uF;varying vec3 vW;void main(){vec3 d=normalize(vW-cameraPosition);d.xz=vec2(d.x*cos(uM)+d.z*sin(uM),d.z*cos(uM)-d.x*sin(uM));'+
+  fragmentShader:'uniform samplerCube t0,t1;uniform float uM,uF;uniform vec2 uC;varying vec3 vW;void main(){vec3 d=normalize(vW-cameraPosition);float cy=vW.y>uF?1.95+uF:1.95;vec3 p=vW-vec3(uC.x,cy,uC.y);vec3 hi=vec3(18.,60.,18.)-p,lo=vec3(-18.,-cy,-18.)-p;vec3 tm=max(hi/d,lo/d);d=p+d*min(min(tm.x,tm.y),tm.z);d.xz=vec2(d.x*cos(uM)+d.z*sin(uM),d.z*cos(uM)-d.x*sin(uM));'+
     'vec3 c=vW.y>uF?textureCube(t1,d).rgb:textureCube(t0,d).rgb;'+(frost?'c=mix(c,vec3(.8,.83,.86)*max(.25,dot(c,vec3(.33))*1.6),.7);':'')+
     'gl_FragColor=vec4(c,1.);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'})}
 function wvList(){if(!HS.viewM)return[];if(!WV.list||WV.list.some(([o])=>!o.parent)){WV.list=[];S3.scene.traverse(o=>{if(o.isMesh&&(o.material===HS.viewM||o.material===HS.frostM||o.material===WV.m0||o.material===WV.m1))WV.list.push([o,o.material===WV.m0?HS.viewM:o.material===WV.m1?HS.frostM:o.material])})}return WV.list}
@@ -7908,6 +7909,8 @@ function wvCapture(h){const S=S3;if(!S.ren||!h)return;
   if(typeof CULL!=='undefined'&&CULL.list)for(const e of CULL.list){const o=e.o,c=e.dyn?o.position:e.c.copy(o.position).add(e.off);vis(o,Math.hypot(c.x-h.x,c.z-h.z)-e.r<e.d)}
   for(const o of S.scene.children)if(o.position.x===HS.X&&o.position.z===HS.Z)vis(o,false);
   if(h.g)vis(h.g,false);
+  /* v104: no people in the picture: you and your guests are standing at the front door when it's taken */
+  if(typeof ME!=='undefined'&&ME.av)vis(ME.av.g,false);if(typeof MP!=='undefined')for(const q of MP.peers.values())if(q.av)vis(q.av.g,false);
   try{for(let f=0;f<2;f++){const c=WV.cam[f];for(const k of c.children){k.near=h.near||.3;k.updateProjectionMatrix()}c.position.set(h.x,1.95+f*HS.F,h.z);c.updateMatrixWorld(true);c.update(S.ren,S.scene)}}catch(e){console.error('winview',e)}
   for(let i=back.length-1;i>=0;i--)back[i][0].visible=back[i][1]}
 function wvApply(on){const h=on?wvHouse():null;if(on&&!h)on=false;
@@ -7923,6 +7926,295 @@ setInterval(()=>{if(!WV.on||!WV.lit||!V3.inH||document.hidden)return;const S=S3,
   const moved=!WV.house||h.x!==WV.house.x||h.z!==WV.house.z;if(!moved&&performance.now()-WV.t<240e3)return;
   const now=[S.hemi.color.clone(),S.hemi.groundColor.clone(),S.hemi.intensity,S.dl.intensity];S.hemi.color.copy(WV.lit[0]);S.hemi.groundColor.copy(WV.lit[1]);S.hemi.intensity=WV.lit[2];S.dl.intensity=WV.lit[3];
   try{wvApply(true)}finally{S.hemi.color.copy(now[0]);S.hemi.groundColor.copy(now[1]);S.hemi.intensity=now[2];S.dl.intensity=now[3]}},5000);
+
+/* v104: an attic over the upstairs, reached by a pull-down ladder in the landing ceiling. In the attic V3.hl is 2, so h=2*F is the attic floor for peers too */
+const ATT={t:0,want:0,A:2*HS.F,R:2.7,hx0:5.7,hx1:7.0,hz0:6.0,hz1:6.8,th:-.42,obs:[]};
+function attBuild(){if(ATT.g||!S3||!S3.scene)return;const F=HS.F,X=HS.X,Z=HS.Z,A=ATT.A,R=ATT.R,C0=F+2.7,{hx0,hx1,hz0,hz1}=ATT;
+  const tex=(w,h,f)=>{const c=cvs(w,h),q=c.getContext('2d');f(q,w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;return t};
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  const boards=(base,n)=>(q,w,h)=>{const bh=h/n;for(let i=0;i<n;i++){const v=rnd(.86,1.08);q.fillStyle='rgb('+base.map(c=>Math.min(255,c*v|0))+')';q.fillRect(0,i*bh,w,bh);
+      for(let k=0;k<12;k++){q.strokeStyle='rgba(90,60,30,'+rnd(.05,.15)+')';q.lineWidth=rnd(.6,1.4);q.beginPath();const y=i*bh+rnd(1,bh-1);q.moveTo(0,y);q.bezierCurveTo(w*.3,y+rnd(-3,3),w*.7,y+rnd(-3,3),w,y+rnd(-2,2));q.stroke()}
+      if(Math.random()<.5){q.fillStyle='rgba(70,40,15,.35)';q.beginPath();q.ellipse(rnd(20,w-20),i*bh+bh/2,rnd(3,6),rnd(2,4),0,0,7);q.fill()}q.fillStyle='rgba(35,20,8,.55)';q.fillRect(0,i*bh,w,1.5)}noiseFill(q,w,h,.05,4000)};
+  const L=(c,o)=>new THREE.MeshLambertMaterial(Object.assign({color:c},o||{}));
+  const pine=L('#ffffff',{map:tex(512,512,boards([196,160,112],8)),side:THREE.DoubleSide}),floorM=L('#ffffff',{map:tex(512,512,boards([182,146,100],6))}),
+    beam=L('#a9824f'),wood=L('#c7a271'),white=L('#f4f2ed'),
+    wool=L('#ffffff',{map:tex(256,256,(q,w,h)=>{q.fillStyle='#d8c27a';q.fillRect(0,0,w,h);for(let i=0;i<2500;i++){q.fillStyle='rgba('+(Math.random()<.5?'120,95,40':'245,230,170')+','+rnd(.1,.35)+')';q.fillRect(rnd(0,w),rnd(0,h),rnd(1,5),rnd(1,3))}q.fillStyle='#8a6438';q.fillRect(0,0,w*.12,h)})});
+  const g=new THREE.Group();g.userData.bake=1;g.position.set(X,0,Z);S3.scene.add(g);ATT.g=g;
+  /* uv in metres / t, like the house's own pl() */
+  const pl=(m,w,h,x,y,z,rx,ry,t)=>{const ge=new THREE.PlaneGeometry(w,h);if(t){const uv=ge.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*w/t,uv.getY(i)*h/t)}const o=new THREE.Mesh(ge,m);o.position.set(x,y,z);o.rotation.order='YXZ';o.rotation.y=ry||0;o.rotation.x=rx||0;g.add(o);return o};
+  const bx=(m,x0,x1,y0,y1,z0,z1,par)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,y1-y0,z1-z0),m);o.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);(par||g).add(o);return o};
+  const ob=(x0,x1,z0,z1)=>ATT.obs.push({x0,x1,z0,z1});
+  /* cut the hatch out of the upstairs ceiling */
+  for(const grp of S3.scene.children)if(grp.position.x===X&&grp.position.z===Z)for(const o of grp.children){const p=o.geometry&&o.geometry.parameters;
+    if(o.isMesh&&p&&p.width===13&&p.height===10&&Math.abs(o.position.y-C0)<.01){o.visible=false;const m=o.material,
+      cut=[[0,13,0,hz0],[0,13,hz1,10],[0,hx0,hz0,hz1],[hx1,13,hz0,hz1]];for(const [a,b,c,d] of cut)pl(m,b-a,d-c,(a+b)/2,C0,(c+d)/2,Math.PI/2,0,2);ATT.ceil=o}}
+  /* hatch lining and casing */
+  bx(white,hx0-.03,hx0,C0,A,hz0,hz1);bx(white,hx1,hx1+.03,C0,A,hz0,hz1);bx(white,hx0,hx1,C0,A,hz0-.03,hz0);bx(white,hx0,hx1,C0,A,hz1,hz1+.03);
+  bx(white,hx0-.09,hx0,C0-.02,C0,hz0-.09,hz1+.09);bx(white,hx1,hx1+.09,C0-.02,C0,hz0-.09,hz1+.09);bx(white,hx0,hx1,C0-.02,C0,hz0-.09,hz0);bx(white,hx0,hx1,C0-.02,C0,hz1,hz1+.09);
+  /* boarded walkway down the middle, insulation between the joists towards the eaves */
+  for(const [a,b,c,d] of [[0,13,2.4,hz0],[0,13,hz1,7.6],[0,hx0,hz0,hz1],[hx1,13,hz0,hz1]]){const f=pl(floorM,b-a,d-c,(a+b)/2,A,(c+d)/2,-Math.PI/2,0,1.4);f.userData.l=2}
+  pl(wool,13,2.4,6.5,A-.015,1.2,-Math.PI/2,0,.6);pl(wool,13,2.4,6.5,A-.015,8.8,-Math.PI/2,0,.6);
+  bx(beam,.2,12.8,A-.06,A+.02,2.32,2.4);bx(beam,.2,12.8,A-.06,A+.02,7.6,7.68);
+  /* the roof: boarded slopes on rafters, a ridge beam, collar ties */
+  const sl=Math.hypot(5,R),ra=Math.atan2(5,R);
+  for(const s of [1,-1]){/* run the boards .2 m past the eaves so there's no slit where they meet the insulation */pl(pine,13,sl+.4,6.5,A+R/2-R/sl*.2,5-s*2.5-s*5/sl*.2,s*ra,0,1.2);
+    const rg=new THREE.BoxGeometry(.06,sl,.14),im=new THREE.InstancedMesh(rg,beam,22),d=new THREE.Object3D(),n=[0,-5/sl,s*R/sl];
+    for(let i=0;i<22;i++){d.position.set(.3+i*.6,A+R/2+n[1]*.08,5-s*2.5+n[2]*.08);d.rotation.set(s*ra,0,0);d.updateMatrix();im.setMatrixAt(i,d.matrix)}g.add(im)}
+  bx(beam,0,13,A+R-.24,A+R-.02,4.92,5.08);
+  for(let x=.3;x<13;x+=2.4)bx(beam,x-.03,x+.03,A+1.9,A+2.04,5-1.4,5+1.4);
+  /* gable ends, each with a small window */
+  const gs=new THREE.Shape();gs.moveTo(0,0);gs.lineTo(-10,0);gs.lineTo(-5,R);gs.lineTo(0,0);
+  const gt=tex(512,512,boards([190,156,110],8));gt.repeat.set(1/1.2,1/1.2);const gm=L('#ffffff',{map:gt,side:THREE.DoubleSide});
+  for(const [x,ry] of [[0,Math.PI/2],[13,-Math.PI/2]]){const ge=new THREE.ShapeGeometry(gs);ge.rotateY(Math.PI/2);const o=new THREE.Mesh(ge,gm);o.position.set(x,A,0);g.add(o);
+    const ix=x?x-.03:x+.03;pl(HS.viewM||white,.7,.5,ix,A+1.35,5,0,ry);const fx=x?x-.06:x;
+    bx(white,fx,fx+.06,A+1.07,A+1.1,4.6,5.4);bx(white,fx,fx+.06,A+1.6,A+1.63,4.6,5.4);bx(white,fx,fx+.06,A+1.1,A+1.6,4.62,4.65);bx(white,fx,fx+.06,A+1.1,A+1.6,5.35,5.38);bx(white,fx,fx+.06,A+1.1,A+1.6,4.985,5.015)}
+  /* a rail round three sides of the hatch; you step off on the far side */
+  for(const [x,z] of [[hx0-.06,hz1+.06],[hx1+.06,hz1+.06],[hx0-.06,hz0-.02],[hx1+.06,hz0-.02]])bx(wood,x-.035,x+.035,A,A+.95,z-.035,z+.035);
+  bx(wood,hx0-.09,hx0-.03,A+.9,A+.96,hz0-.05,hz1+.09);bx(wood,hx1+.03,hx1+.09,A+.9,A+.96,hz0-.05,hz1+.09);bx(wood,hx0-.09,hx1+.09,A+.9,A+.96,hz1+.03,hz1+.09);ob(hx0-.1,hx1+.1,hz0-.04,hz1+.1);
+  /* what's stored up here: cartons (one of Christmas decorations), a steamer trunk, a rolled rug, an old suitcase */
+  const carton=lab=>L('#ffffff',{map:tex(256,256,(q,w,h)=>{q.fillStyle='#b58c5a';q.fillRect(0,0,w,h);noiseFill(q,w,h,.06,3000);q.fillStyle='rgba(225,205,160,.85)';q.fillRect(0,h*.44,w,h*.12);
+    if(lab){q.fillStyle='#2b2622';q.font='bold 34px "Permanent Marker",Arial';q.textAlign='center';q.fillText(lab,w/2,h*.32)}})});
+  const cA=carton('XMAS'),cB=carton('BOOKS'),cC=carton('');
+  bx(cA,1.0,1.6,A,A+.45,2.9,3.4);bx(cC,1.7,2.3,A,A+.45,2.9,3.4);bx(cA,1.1,1.6,A+.45,A+.85,2.95,3.35);bx(cB,2.5,3.0,A,A+.35,2.9,3.3);ob(.9,3.1,2.8,3.5);
+  bx(cC,11.2,11.8,A,A+.5,3.0,3.5);bx(cA,11.25,11.75,A+.5,A+.85,3.05,3.45);ob(11.1,11.9,2.9,3.6);
+  const trunk=L('#3d2a1d'),brass=new THREE.MeshStandardMaterial({color:'#b8913f',roughness:.45,metalness:.4});
+  bx(trunk,10.3,11.4,A,A+.55,6.3,6.95);bx(trunk,10.28,11.42,A+.55,A+.62,6.28,6.97);for(const x of [10.5,11.2])bx(L('#6b4a2c'),x-.04,x+.04,A,A+.63,6.27,6.98);
+  bx(brass,10.8,10.9,A+.42,A+.56,6.255,6.28);ob(10.2,11.5,6.2,7.05);
+  {const rug=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,2.1,18),L('#7a2e2a'));rug.rotation.z=Math.PI/2;rug.position.set(3.4,A+.16,7.1);g.add(rug);ob(2.35,4.45,6.92,7.28)}
+  bx(L('#5b4636'),8.6,9.3,A,A+.22,2.95,3.45);bx(brass,8.9,9.0,A+.22,A+.25,3.18,3.22);ob(8.5,9.4,2.85,3.55);
+  /* a bare bulb on its cord from the ridge */
+  bx(L('#222'),6.495,6.505,A+1.95,A+R-.24,4.995,5.005);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.05,12,10),new THREE.MeshBasicMaterial({color:'#fff1d0'}));bulb.position.set(6.5,A+1.9,5);g.add(bulb);
+  HS.lamps[1].push({p:new THREE.Vector3(X+6.5,A+1.85,Z+5),k:.9,d:9,r:'attic'});
+  /* the ladder: a hinged hatch board with a sliding pine ladder on it, pivoting at the hatch's far edge */
+  const P=new THREE.Group();P.position.set(X+(hx0+hx1)/2,C0,Z+hz0);S3.scene.add(P);ATT.lad=P;
+  bx(white,-.63,.63,-.79,-.01,0,.04,P);bx(L('#333'),-.005,.005,-.7,-.69,-.3,0,P);bx(brass,-.02,.02,-.72,-.68,-.34,-.3,P);
+  const LD=new THREE.Group();P.add(LD);ATT.ld=LD;const len=2.7/Math.cos(ATT.th);
+  bx(wood,-.27,-.22,-len,0,.04,.12,LD);bx(wood,.22,.27,-len,0,.04,.12,LD);for(let y=-.25;y>-len+.05;y-=.27)bx(wood,-.22,.22,y-.02,y+.02,.04,.17,LD);
+  attActs();attPose()}
+function attPose(){const P=ATT.lad;if(!P)return;const e=x=>x*x*(3-2*x),a=e(Math.min(1,ATT.t/.45)),b=e(Math.max(0,(ATT.t-.35)/.65));
+  P.rotation.x=-Math.PI/2+(ATT.th+Math.PI/2)*a;ATT.ld.scale.y=.27+.73*b}
+{const _b=hsBuild;hsBuild=function(){_b.apply(this,arguments);try{attBuild()}catch(e){console.error('attic',e)}}}
+{const _y=hsY;hsY=function(P){return V3.hl===2&&!V3.pose?ATT.A:_y.apply(this,arguments)}}
+{const _c=hsClamp;hsClamp=function(p){if(V3.hl!==2)return _c.apply(this,arguments);const r=.26;let lx=Math.max(.5,Math.min(12.5,p.x-HS.X)),lz=Math.max(2.75,Math.min(7.25,p.z-HS.Z));
+  for(const b of ATT.obs){const nx=Math.max(b.x0,Math.min(b.x1,lx)),nz=Math.max(b.z0,Math.min(b.z1,lz)),dx=lx-nx,dz=lz-nz,d=Math.hypot(dx,dz);
+    if(d<r){if(d>1e-5){lx=nx+dx/d*r;lz=nz+dz/d*r}else{const o=[[b.x0-r-lx,0],[b.x1+r-lx,0],[0,b.z0-r-lz],[0,b.z1+r-lz]].sort((a,c)=>Math.abs(a[0]+a[1])-Math.abs(c[0]+c[1]))[0];lx+=o[0];lz+=o[1]}}}
+  p.x=lx+HS.X;p.z=lz+HS.Z}}
+{const _m=meCeil;meCeil=function(x,z,y){if(!(V3.inH&&V3.hl===2))return _m.apply(this,arguments);return ATT.A+ATT.R*(1-Math.abs(z-HS.Z-5)/5)-.2}}
+{const _l=hsLeave;hsLeave=function(){ATT.want=0;ATT.t=0;attPose();attLab();return _l.apply(this,arguments)}}
+/* the ladder blocks the landing while it's down */
+const ATT_BOX={x0:ATT.hx0+.3,x1:ATT.hx1-.3,z0:ATT.hz0+.2,z1:ATT.hz0+1.15,l:1};
+function attLab(){const a=ACTS.find(a=>a.id==='hsAtt');if(a)a.lab=ATT.want?'🪜 Climb up to the attic':'🪜 Pull down the attic ladder';const i=HS.boxes.indexOf(ATT_BOX);if(ATT.want&&i<0)HS.boxes.push(ATT_BOX);if(!ATT.want&&i>=0)HS.boxes.splice(i,1);V3.near=undefined}
+function attSnd(){if(typeof AC!=='undefined'&&AC&&AC.state==='running'&&typeof ksPlay==='function')ksPlay('wood',.3)}
+function attUp(){V3.hl=2;V3.pose=null;V3.tgt=null;V3.path=null;V3.pos.set(HS.X+(ATT.hx0+ATT.hx1)/2,0,HS.Z+ATT.hz0-.75);V3.yaw=0;V3.near=undefined;attSnd();
+  v3Msg('🏚️ The attic · stored boxes, an old trunk and the Christmas decorations',3600);if(typeof MP!=='undefined'&&MP.ok)mpPos(true)}
+function attDown(){V3.hl=1;V3.pose=null;V3.tgt=null;V3.path=null;V3.pos.set(HS.X+(ATT.hx0+ATT.hx1)/2,0,HS.Z+ATT.hz0+1.75);V3.yaw=Math.PI;V3.near=undefined;attSnd();
+  if(typeof MP!=='undefined'&&MP.ok)mpPos(true);setTimeout(()=>{if(V3.hl!==2){ATT.want=0;attLab();attSnd()}},1600)}
+function attActs(){ACTS.push({id:'hsAtt',hl:1,p:new THREE.Vector3(HS.X+(ATT.hx0+ATT.hx1)/2,0,HS.Z+ATT.hz0+1.2),r:1.2,lab:'🪜 Pull down the attic ladder',
+  go:()=>{if(!ATT.want){ATT.want=1;attLab();attSnd();v3Msg('🪜 You pull the cord and the ladder slides down',2200)}else if(ATT.t>.95)attUp()}});
+ACTS.push({id:'hsAttD',hl:2,p:new THREE.Vector3(HS.X+(ATT.hx0+ATT.hx1)/2,0,HS.Z+ATT.hz0-.5),r:.9,lab:'🪜 Climb down the ladder',go:attDown})}
+{let t0=0;const f=T=>{requestAnimationFrame(f);const dt=Math.min(.1,(T-t0)/1000);t0=T;if(!ATT.lad||ATT.t===ATT.want)return;ATT.t=ATT.want?Math.min(1,ATT.t+dt*1.1):Math.max(0,ATT.t-dt*1.1);attPose()};requestAnimationFrame(f)}
+
+/* v104: one game tab per browser. Two tabs share one player id, so everyone saw that player flicker between where each tab stood (e.g. lying on the bed and standing). The newest tab plays; older tabs go quiet until you click "Play here" */
+const TAB={id:Math.random().toString(36).slice(2),off:false};
+if(typeof BroadcastChannel!=='undefined'){TAB.bc=new BroadcastChannel('lakeside-tab');
+  TAB.bc.onmessage=e=>{const d=e.data;if(d&&d.t==='hi'&&d.id!==TAB.id&&!TAB.off)tabOff()};
+  TAB.bc.postMessage({t:'hi',id:TAB.id})}
+function tabOff(){TAB.off=true;let el=document.getElementById('tabOff');
+  if(!el){el=document.createElement('div');el.id='tabOff';el.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(10,14,22,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font:600 17px system-ui,sans-serif;text-align:center;padding:20px';
+    el.innerHTML='<div>The game is open in another tab.<br><span style="font-weight:400;opacity:.8">Only one tab can play at a time, or others see you in two places.</span></div>';
+    const b=document.createElement('button');b.textContent='Play here';b.style.cssText='font:600 16px system-ui,sans-serif;padding:10px 22px;border-radius:22px;border:0;background:#e8c46a;color:#1d1a14;cursor:pointer';
+    b.onclick=()=>{TAB.off=false;el.style.display='none';TAB.bc.postMessage({t:'hi',id:TAB.id});if(typeof mpPos==='function'&&typeof MP!=='undefined'&&MP.ok)mpPos(true)};el.appendChild(b);document.body.appendChild(el)}
+  el.style.display='flex'}
+{const _s=mpSend;mpSend=function(){if(TAB.off)return;return _s.apply(this,arguments)}}
+/* v104: the wallet sits after the Lobby button (its online count made Lobby wider than the fixed 420px) */
+setInterval(()=>{const w=document.getElementById('vWal'),b=document.getElementById('vLobB');if(!w||!b||innerWidth<=560)return;const r=b.getBoundingClientRect();if(r.width)w.style.left=Math.round(r.right+8)+'px'},500);
+/* v104: one duvet per bed over everyone lying in it. Before, each player drew a duvet over only themselves, so in a shared bed you saw the other lying on top of the covers */
+function dvBuild(s,bodies){
+  const fl=s.l*HS.F,yT=fl+s.sh+.01,ax=s.dx||0,az=s.dz||0;let bx=HS.boxes.find(b=>b.l===s.l&&s.hx+ax*.9>b.x0&&s.hx+ax*.9<b.x1&&s.hz+az*.9>b.z0&&s.hz+az*.9<b.z1);
+  if(!bx)bx={x0:s.hx-1,x1:s.hx+2,z0:s.hz-.5,z1:s.hz+.5};
+  /* bed-local frame: a runs head to foot, v across */
+  const alongX=ax!==0,sg=alongX?ax:az,A0=alongX?(sg>0?bx.x0:bx.x1):(sg>0?bx.z0:bx.z1),A1=alongX?(sg>0?bx.x1:bx.x0):(sg>0?bx.z1:bx.z0),V0=alongX?bx.z0:bx.x0,V1=alongX?bx.z1:bx.x1,ha=alongX?s.hx:s.hz,hv=alongX?s.hz:s.hx;
+  const L=Math.abs(A1-A0),dS=Math.abs(ha-A0)+.36,drop=.34,NA=46,NV=40;
+  const body=d=>{const k=(a,b,x)=>Math.max(0,Math.min(1,(x-a)/(b-a)));const t=d-Math.abs(ha-A0)+.14;/* distance from the top of the head */
+    const h=t<.45?.2:t<.95?.2-.03*k(.45,.95,t):t<1.35?.17-.04*k(.95,1.35,t):t<1.6?.13:t<1.92?.13+.035*Math.sin(Math.PI*k(1.6,1.92,t)):.0;const w=t<.6?.32:t<1.05?.3:t<1.4?.22:.21;return[h,w]};
+  const H=(d,v)=>{const [h,w]=body(d);let mx=0;for(const b of bodies){const x=(v-(alongX?b.s.hz:b.s.hx))/(w*1.3),bell=1/(1+x*x*x*x*1.6);mx=Math.max(mx,Math.max(0,b.ay+h+.04-yT-.05)*bell)}return yT+.05+mx+.006*Math.sin(d*21+v*5)*Math.sin(v*17-d*3)};
+  const pos=[],col=[],idx=[],cS=new THREE.Color('#f6f2ea'),cD=new THREE.Color('#e9e2d4');
+  for(let i=0;i<=NA;i++){const d=dS+(L-dS+drop)*i/NA;for(let j=0;j<=NV;j++){const vw=(V1-V0)+drop*2,v=V0-drop+vw*j/NV;
+      let dd=Math.min(d,L),vv=Math.max(V0,Math.min(V1,v)),y=H(dd,vv);const eA=Math.max(0,d-L),eV=Math.max(V0-v,v-V1,0),e=Math.max(eA,eV);
+      if(e>0){y=Math.min(y,yT+.07)-e*.98;dd=Math.min(d,L+.025+e*.06);vv=v<V0?V0-.025-eV*.06:v>V1?V1+.025+eV*.06:vv}
+      /* the top edge folds back over itself */
+      const fold=d-dS<.16;if(fold)y+=.022*Math.sin(Math.PI*(d-dS)/.16);
+      const a=A0+sg*dd,X=alongX?a:vv,Z=alongX?vv:a;pos.push(HS.X+X,y,HS.Z+Z);const cc=fold?cS:cD;col.push(cc.r,cc.g,cc.b)}}
+  for(let i=0;i<NA;i++)for(let j=0;j<NV;j++){const a=i*(NV+1)+j,b=a+NV+1;idx.push(a,b,a+1,b,b+1,a+1)}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));geo.setIndex(idx);geo.computeVertexNormals();
+  const m=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});const mesh=new THREE.Mesh(geo,m);mesh.userData.noBake=1;
+  /* the turned-down edge has a little thickness */
+  const g=new THREE.Group();g.add(mesh);S3.scene.add(g);return g}
+
+const DV={seats:null,g:[],sig:''};
+/* the bed spots: run each bed act once with hsSeat stubbed to record its seat */
+function dvSeats(){if(DV.seats)return DV.seats;const rec=[],_h=hsSeat;hsSeat=s=>{if(s&&s.bed)rec.push(s)};try{for(const a of ACTS)if(a.id==='hsBed')a.go()}finally{hsSeat=_h}DV.seats=rec;return rec}
+/* which seat a lying body is on: its anchor is hx+dx*1.66*k (see hsSeat) */
+function dvSeatAt(x,z,k){let best=null,bd=.5;for(const s of dvSeats()){const d=Math.hypot(HS.X+s.hx+s.dx*1.66*k-x,HS.Z+s.hz+s.dz*1.66*k-z);if(d<bd){bd=d;best=s}}return best}
+function dvBed(s){return s.l+':'+(s.dx?s.hx:s.hz)}
+function dvTick(){if(!S3||!S3.scene)return;const occ=[];
+  if(V3.inH){const po=V3.pose;if(po&&po.k==='lie'&&po.s&&po.s.bed)occ.push({s:po.s,ay:po.ay});
+    if(typeof MP!=='undefined')for(const q of MP.peers.values())if(q.ps==='lie'&&q.av&&q.av.g.visible){const s=dvSeatAt(q.x,q.z,q.av.k||1);q.av._bed=!!s;if(s)occ.push({s,ay:q.h})}else if(q.av)q.av._bed=false;}
+  const sig=occ.map(b=>dvBed(b.s)+'/'+(b.s.dx?b.s.hz:b.s.hx)+'/'+b.ay.toFixed(2)).sort().join('|');if(sig===DV.sig)return;DV.sig=sig;
+  for(const g of DV.g){g.parent&&g.parent.remove(g);g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}DV.g=[];
+  const beds=new Map();for(const b of occ){const k=dvBed(b.s);if(!beds.has(k))beds.set(k,[]);beds.get(k).push(b)}
+  for(const bs of beds.values())try{DV.g.push(dvBuild(bs[0].s,bs))}catch(e){console.error('duvet',e)}}
+hxDuvet=function(){DV.sig='?'};
+setInterval(dvTick,200);
+/* guests in bed get the same arms-flat pose as you, so their hands don't poke up through the duvet */
+{const _a=poseApply;poseApply=function(a,k,dt,T){const r=_a.apply(this,arguments);if(k!=='lie'||!a._bed||a===ME.av)return r;const f=Math.min(1,dt*5);
+  for(const [n,i,ax,v] of P2_LIE.bed){const o=a[n]&&a[n][i];if(o)o.rotation[ax]+=(v-o.rotation[ax])*f}for(let i=0;i<2;i++){a.arms[i].rotation.x+=(.1-a.arms[i].rotation.x)*f;a.elbows[i].rotation.x+=(0-a.elbows[i].rotation.x)*f}return r}}
+
+/* ===== v104: body shapes, lingerie, real stubble and beards =====
+   Players' torsos are reshaped per sex (NPCs keep theirs): women get a defined waist, rounder hips, a full bust and glutes;
+   men broader shoulders, a chest and a tapered waist. Women can undress to lingerie inside a house (never for child accounts,
+   and children see a bathrobe instead). Stubble and beards are soft textured shells on the jaw, not a dark blob. */
+const P6={def:new Map(),tex:{},prev:null};
+const p6Bell=(y,c,w)=>Math.exp(-((y-c)/w)*((y-c)/w));
+function p6Deform(src,sex,amt){const key=src.uuid+sex+amt;if(P6.def.has(key))return P6.def.get(key);const g=src.clone(),p=g.attributes.position;
+  for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+    if(sex==='f'){const s=1-.12*amt*p6Bell(y,.24,.08)+.1*amt*p6Bell(y,-.03,.12);x*=s;z*=s;
+      if(z>0)z+=.08*amt*Math.exp(-(((Math.abs(x)-.082)/.058)**2))*p6Bell(y,.37,.075)*Math.min(1,z/.1);
+      if(z<0)z-=.065*amt*Math.exp(-(((Math.abs(x)-.072)/.07)**2))*p6Bell(y,-.09,.075)*Math.min(1,-z/.1)}
+    else{const s=1+.08*amt*p6Bell(y,.49,.07)-.05*amt*p6Bell(y,.12,.1);x*=s*(1+.04*amt*p6Bell(y,.36,.12));z*=s;
+      if(z>0)z+=.035*amt*Math.exp(-(((Math.abs(x)-.085)/.065)**2))*p6Bell(y,.41,.06)*Math.min(1,z/.1)}
+    p.setXYZ(i,x,y,z)}
+  g.computeVertexNormals();P6.def.set(key,g);return g}
+/* women's legs: fuller at the top of the thigh, slimmer knees and ankles (same length, so seats and poses still fit) */
+{const _l=pLegs;pLegs=function(B,legs,wid){if(!(wid<1)||!P6.fem)return _l.apply(this,arguments);const mat=legs[0].userData.sk[0];
+  const prof=[[.04,.072],[-.02,.082],[-.1,.088],[-.2,.078],[-.3,.066],[-.39,.055],[-.44,.052],[-.5,.057],[-.57,.06],[-.66,.047],[-.76,.037],[-.84,.035]];
+  const D={pos:[],nor:[],uv:[],si:[],sw:[],idx:[]},bones=[B];legs.forEach((hp,i)=>{bones.push(hp,hp.userData.sk[1]);pLimbGeo(prof,y=>{const t=y>-.07?pSS(-.07,.05,y)*.85:0,q=pSS(-.39,-.47,y);return[t,1-t-q,q]},1,1,0,pRel(B,hp),1+i*2,D)});
+  return pSkinned(B,bones,D,mat)}}
+/* soft stubble / beard shells over the jaw: a sphere around the head, painted only where a beard grows (uv: u .25 = the face, v down from the crown) */
+function p6BeardTex(kind,col){const k=kind+col;if(P6.tex[k])return P6.tex[k];const W=512,H=256,c=cvs(W,H),q=c.getContext('2d'),id=q.createImageData(W,H),d=id.data,C=new THREE.Color(col);
+  const R=C.r*255,G=C.g*255,B=C.b*255,ss=(a,b,x)=>{x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x)};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const ph=Math.abs((x/W-.25)*360),th=y/H*180;
+    /* cheek line high at the sideburns, low at the front; nothing past the ears or down the neck; the lips stay bare */
+    const top=ph>78?72+ (ph-78)*1.5:ph>40?100+(78-ph)*.1:104+(40-ph)*.3,inn=ss(top,top+5,th)*(1-ss(82,90,ph))*(1-ss(150,162,th));
+    const lip=(ph<24?1:0)*ss(115.5,117,th)*(1-ss(124,126,th)),mo=kind==='full'?0:0,a=inn*(1-lip)+mo;if(a<=0)continue;
+    const r=Math.random(),i=(y*W+x)*4;let al;
+    if(kind==='stubble')al=r<.32?.7:r<.6?.28:.08;else al=Math.min(1,.55+r*.6);
+    d[i]=R*(.85+r*.2);d[i+1]=G*(.85+r*.2);d[i+2]=B*(.85+r*.2);d[i+3]=255*al*a}
+  q.putImageData(id,0,0);
+  if(kind==='full'){q.globalCompositeOperation='source-atop';for(let n=0;n<2600;n++){const x=Math.random()*W,y=Math.random()*H;q.strokeStyle='rgba('+(R*.6|0)+','+(G*.6|0)+','+(B*.6|0)+','+(.2+Math.random()*.3)+')';q.lineWidth=.7;q.beginPath();q.moveTo(x,y);q.lineTo(x+(Math.random()-.5)*2,y+3+Math.random()*5);q.stroke()}}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return P6.tex[k]=t}
+function p6Beard(a,kind,hc,skc){const hI=a.head&&a.head.children[0];if(!hI)return;const dark=hc==='#bdb6aa'?'#8a847a':hxMix(hc,'#120c08',.45);
+  const shell=(s,tex,o)=>{/* the head's own sculpted shape, a little bigger, so the beard follows the jaw instead of floating as a ball */const m=new THREE.Mesh(pGeo().head,new THREE.MeshLambertMaterial({map:tex,transparent:true,depthWrite:false,opacity:o}));m.scale.set(.1*s,.105*s,.102*s);m.position.set(0,1.67,0);m.renderOrder=2;hI.add(m);return m};
+  if(kind==='stubble')shell(1.012,p6BeardTex('stubble',dark),.9);
+  else{shell(1.02,p6BeardTex('full',hc),1);shell(1.045,p6BeardTex('full',hc),.8);
+    const v=new THREE.Mesh(pGeo().sph,pHair(hc));v.scale.set(.05,.032,.042);v.position.set(0,1.585,.058);hI.add(v)}}
+/* the lingerie: drawn on a second skin over the torso, plus stocking tops, lace bands and suspenders on the thighs */
+/* v105 lingerie, drawn after real sets: sheer black mesh with solid trims (underwired balconette bra, garter belt
+   arching up in front, a high-cut thong), suspenders running on down the thighs into sheer stockings with a lace top
+   and a back seam. Sheer parts are half see-through, so the skin tints through them. */
+function p6LingTex(){if(P6.tex.ling)return P6.tex.ling;const W=1024,H=512,c=cvs(W,H),q=c.getContext('2d'),Y=y=>(1-(y+.16)/.81)*H,U=u=>u*W;
+  const solid='#0d0a0c',mesh='rgba(14,10,12,.8)',trim=w=>{q.strokeStyle=solid;q.lineWidth=w;q.stroke()},both=f=>{f(0,1);f(1,-1)};
+  q.clearRect(0,0,W,H);q.lineJoin=q.lineCap='round';
+  /* bra: sheer cups with seams, an underwire and a trimmed top edge; thin straps; a band round the back */
+  for(const s of[1,-1]){const uc=s>0?.074:1-.074,o=s*.06,cup=()=>{q.beginPath();q.moveTo(U(uc-o),Y(.345));q.bezierCurveTo(U(uc-o*.95),Y(.405),U(uc+o*.4),Y(.43),U(uc+o),Y(.395));q.lineTo(U(uc+o*1.02),Y(.35));q.bezierCurveTo(U(uc+o*.9),Y(.27),U(uc-o*.8),Y(.27),U(uc-o),Y(.345))};
+    cup();q.fillStyle=mesh;q.fill();q.save();cup();q.clip();q.strokeStyle='rgba(8,6,7,.95)';q.lineWidth=2;for(const k of[-.45,0,.45]){q.beginPath();q.moveTo(U(uc+o*k*1.4),Y(.285));q.quadraticCurveTo(U(uc+o*k*.6),Y(.36),U(uc+o*k*.8),Y(.43));q.stroke()}q.restore();
+    q.beginPath();q.moveTo(U(uc-o),Y(.345));q.bezierCurveTo(U(uc-o*.8),Y(.27),U(uc+o*.9),Y(.27),U(uc+o*1.02),Y(.35));trim(7);
+    q.beginPath();q.moveTo(U(uc-o),Y(.345));q.bezierCurveTo(U(uc-o*.95),Y(.405),U(uc+o*.4),Y(.43),U(uc+o),Y(.395));trim(4);
+    q.beginPath();q.moveTo(U(uc+o*.55),Y(.41));q.lineTo(U(uc+o*1.6),Y(.64));q.strokeStyle=solid;q.lineWidth=8;q.stroke();q.fillStyle=solid;const ub=s>0?.41:.59;q.fillRect(U(ub)-4,Y(.62),8,Y(.3)-Y(.62))}
+  q.fillStyle=solid;q.fillRect(U(.125),Y(.31),U(.875)-U(.125),Y(.275)-Y(.31));
+  /* garter belt: a sheer panel between solid trims, its lower edge arching up at the front, and a clasp */
+  const bot=u=>{const d=Math.min(u,1-u);return .005+.05*Math.exp(-((d/.06)**2))};
+  q.beginPath();q.moveTo(0,Y(.11));q.lineTo(W,Y(.11));for(let u=1;u>=0;u-=.01)q.lineTo(U(u),Y(bot(u)));q.closePath();q.fillStyle=mesh;q.fill();
+  q.fillStyle=solid;q.fillRect(0,Y(.115),W,Y(.09)-Y(.115));q.beginPath();for(let u=0;u<=1;u+=.01)q.lineTo(U(u),Y(bot(u)));trim(6);
+  for(const x of[0,W-8]){q.fillStyle='#3a3236';q.fillRect(x,Y(.11),8,Y(.06)-Y(.11))}
+  /* four suspenders: from the belt down to the stocking tops, with a small slider */
+  for(const u of[.055,.945,.42,.58]){q.fillStyle=solid;q.fillRect(U(u)-4,Y(bot(u)),8,H-Y(bot(u)));q.fillStyle='#6a6266';q.fillRect(U(u)-6,Y(-.07),12,6)}
+  /* thong: high-cut strings over the hips, a sheer front with a trimmed edge, a slim T at the back */
+  q.beginPath();q.moveTo(U(.05),Y(-.02));q.quadraticCurveTo(U(.17),Y(.035),U(.25),Y(.045));q.quadraticCurveTo(U(.33),Y(.035),U(.45),Y(-.005));
+  q.moveTo(U(.95),Y(-.02));q.quadraticCurveTo(U(.83),Y(.035),U(.75),Y(.045));q.quadraticCurveTo(U(.67),Y(.035),U(.55),Y(-.005));trim(5);
+  both((k,s)=>{const u0=k;q.beginPath();q.moveTo(U(u0),Y(-.01));q.lineTo(U(u0+s*.05),Y(-.02));q.quadraticCurveTo(U(u0+s*.03),Y(-.1),U(u0+s*.012),Y(-.17));q.lineTo(U(u0),Y(-.17));q.closePath();q.fillStyle=mesh;q.fill();
+    q.beginPath();q.moveTo(U(u0),Y(-.01));q.lineTo(U(u0+s*.05),Y(-.02));q.quadraticCurveTo(U(u0+s*.03),Y(-.1),U(u0+s*.012),Y(-.17));trim(5)});
+  q.beginPath();q.moveTo(U(.45),Y(-.005));q.quadraticCurveTo(U(.49),Y(-.02),U(.5),Y(-.07));q.quadraticCurveTo(U(.51),Y(-.02),U(.55),Y(-.005));q.closePath();q.fillStyle=mesh;q.fill();trim(4);
+  q.fillStyle=solid;q.fillRect(U(.5)-3,Y(-.07),6,H-Y(-.07));
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapT=THREE.ClampToEdgeWrapping;t.anisotropy=8;return P6.tex.ling=t}
+/* stockings painted on the legs themselves (no extra pieces to gap or poke through): bare thigh, the suspender,
+   a lace top over a solid welt, then sheer nylon that darkens towards the edges, with a seam down the back.
+   Leg uv after p6Ling: u round the leg (.25 front, .75 back), v from the ankle (0) to the hip (1). */
+const P6_WELT=-.215,p6LegV=y=>(y+.84)/.88;
+function p6LegTex(skHex){const k='leg'+skHex;if(P6.tex[k])return P6.tex[k];const W=256,H=512,c=cvs(W,H),q=c.getContext('2d'),Y=y=>(1-p6LegV(y))*H,U=u=>u*W;
+  const sheer='#'+new THREE.Color('#'+skHex).lerp(new THREE.Color('#0b0809'),.62).getHexString();
+  q.fillStyle='#'+skHex;q.fillRect(0,0,W,H);q.fillStyle=sheer;q.fillRect(0,Y(P6_WELT-.065),W,H);
+  q.fillStyle='#0d0a0c';q.fillRect(0,Y(P6_WELT-.01),W,Y(P6_WELT-.065)-Y(P6_WELT-.01));/* the solid welt */
+  q.fillStyle='rgba(13,10,12,.85)';q.beginPath();q.moveTo(0,Y(P6_WELT-.01));for(let i=0;i<=24;i++){const x=U(i/24);q.lineTo(x-U(1/48),Y(P6_WELT+.004));q.arc(x,Y(P6_WELT+.004),U(1/48),Math.PI,0)}q.lineTo(W,Y(P6_WELT-.01));q.fill();/* scalloped lace edge */
+  q.globalCompositeOperation='destination-out';q.fillStyle='#000';for(let i=0;i<48;i++)for(let j=0;j<2;j++){q.beginPath();q.arc(U((i+.5*j)/48),Y(P6_WELT-.002-j*.006),1.6,0,7);q.fill()}q.globalCompositeOperation='source-over';
+  q.fillStyle='#'+skHex;q.globalCompositeOperation='destination-over';q.fillRect(0,0,W,H);q.globalCompositeOperation='source-over';
+  q.fillStyle='#0d0a0c';for(const u of[.25,.75]){q.fillRect(U(u)-4,0,8,Y(P6_WELT-.01));q.fillStyle='#6a6266';q.fillRect(U(u)-6,Y(P6_WELT+.012),12,Y(P6_WELT-.012)-Y(P6_WELT+.012));q.fillStyle='#0d0a0c'}
+  q.fillRect(U(.75)-1.5,Y(P6_WELT-.065),3,H);/* the back seam */
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return P6.tex[k]=t}
+function p6LegMat(skHex){const m=new THREE.MeshStandardMaterial({map:p6LegTex(skHex),roughness:.5,metalness:0});
+  m.onBeforeCompile=s=>{s.uniforms.uW={value:p6LegV(P6_WELT-.065)};s.fragmentShader='uniform float uW;\n'+s.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+    { float sh=step(vMapUv.y,uW),fr=1.-abs(dot(normalize(vNormal),normalize(vViewPosition)));diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.006,.005,.005),sh*(.85*fr*fr-.25*(1.-fr))); }`)};
+  m.customProgramCacheKey=()=>'p6leg';return m}
+/* black stiletto pumps with an ankle strap: the stockinged foot shows above the shoe's low cut, pitched onto a thin heel.
+   The body isn't raised (seats and beds keep their fit), so the heel stands where the old flat sole was. */
+function p6Heels(a,skHex){const G=P6.heel||(P6.heel={cup:new THREE.SphereGeometry(1,18,12,0,Math.PI*2,Math.PI*.42,Math.PI*.58),foot:new THREE.SphereGeometry(1,16,10),
+    pin:new THREE.CylinderGeometry(.0065,.0035,.07,10),strap:new THREE.TorusGeometry(.039,.0035,6,20).rotateX(Math.PI/2),shoe:new THREE.MeshStandardMaterial({color:'#0c0a0b',roughness:.22,metalness:.1})});
+  const fm=new THREE.MeshStandardMaterial({color:new THREE.Color('#'+skHex).lerp(new THREE.Color('#0b0809'),.86),roughness:.45});
+  for(const kn of a.knees){for(const c of kn.children)if(c.isMesh&&c.material.color&&c.material.color.getHexString()==='141114')c.visible=false;
+    const add=(g,m,sx,sy,sz,x,y,z,rx)=>{const o=new THREE.Mesh(g,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);o.rotation.x=rx||0;kn.add(o);return o};
+    add(G.foot,fm,.036,.028,.105,0,-.455,.05,.33);add(G.cup,G.shoe,.041,.034,.118,0,-.457,.05,.33);
+    add(G.pin,G.shoe,1,1,1,0,-.461,-.036);add(G.strap,G.shoe,1,1,1,0,-.418,0)}}
+function p6Ling(a,sk){const tI=a.torso&&a.torso.children[0];if(!tI)return;
+  /* the torso is the mesh reaching lowest (it may carry a fabric copy of the skin colour, not sk itself) */
+  const base=tI.children.find(o=>o.isMesh&&o.geometry&&(o.geometry.boundingBox||(o.geometry.computeBoundingBox(),o.geometry.boundingBox)).min.y<.8);if(!base)return;
+  const g=base.geometry.clone(),P=g.attributes.position,uv=g.attributes.uv;if(!uv)return;
+  for(let i=0;i<P.count;i++){const y=P.getY(i)-.9,r=Math.hypot(P.getX(i)/.94,P.getZ(i)/.7);uv.setY(i,y>.66||(y>.54&&r<.065)?2:(y+.16)/.81)}/* the neck pieces share this mesh: keep them bare */uv.needsUpdate=true;
+  const m=new THREE.MeshStandardMaterial({map:p6LingTex(),transparent:true,alphaTest:.02,roughness:.42,metalness:0,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4});
+  if(a.p6J)a.p6J.hook(m);
+  const o=base.isSkinnedMesh?new THREE.SkinnedMesh(g,m):new THREE.Mesh(g,m);if(base.isSkinnedMesh)o.bind(base.skeleton,base.bindMatrix);o.position.copy(base.position);o.quaternion.copy(base.quaternion);o.scale.copy(base.scale);o.frustumCulled=false;base.parent.add(o);
+  p6Heels(a,sk.color.getHexString());
+  /* legs: swap the plain stocking colour for the painted stockings */
+  const lm=a.legs[0].userData.sk[0],leg=a.legs[0].parent.children.find(c=>c.isSkinnedMesh&&c.material===lm);if(!leg)return;
+  const lu=leg.geometry.attributes.uv;for(let i=0;i<lu.count;i++)lu.setXY(i,lu.getX(i)/2,p6LegV(lu.getY(i)/3));lu.needsUpdate=true;
+  leg.material=p6LegMat(sk.color.getHexString())}
+/* soft-body: the bust and glutes lag a little behind the body's own movement (a damped spring per avatar, on the GPU
+   as a small vertex offset), so walking, stopping, sitting down and jumping read as a real body, not a rigid shell */
+function p6Jig(a){const tI=a.torso&&a.torso.children[0];if(!tI||!a.torso)return;
+  const base=tI.children.find(o=>o.isMesh&&o.geometry&&(o.geometry.boundingBox||(o.geometry.computeBoundingBox(),o.geometry.boundingBox)).min.y<.8);if(!base)return;
+  const P=base.geometry.attributes.position,J=new Float32Array(P.count*2),sm=(a0,b,x)=>pSS(a0,b,x);
+  for(let i=0;i<P.count;i++){const x=Math.abs(P.getX(i))/.94,y=P.getY(i)-.9,z=P.getZ(i);
+    J[i*2]=Math.exp(-(((x-.082)/.06)**2))*p6Bell(y,.37,.08)*sm(.03,.09,z);J[i*2+1]=Math.exp(-(((x-.072)/.075)**2))*p6Bell(y,-.09,.085)*sm(-.03,-.09,z)}
+  base.geometry.setAttribute('jig',new THREE.BufferAttribute(J,2));
+  const U={value:new THREE.Vector3()},S={v:new Float32Array(3),x:new Float32Array(3),p:new THREE.Vector3(),pv:new THREE.Vector3(),t:0},w=new THREE.Vector3(),vl=new THREE.Vector3(),q=new THREE.Quaternion();
+  const hook=m=>{m.onBeforeCompile=s=>{s.uniforms.uJ=U;s.vertexShader='attribute vec2 jig;\nuniform vec3 uJ;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n transformed+=vec3(0.,uJ.x*jig.x+uJ.z*jig.y,uJ.y*jig.x);')};m.customProgramCacheKey=()=>'p6jig'};
+  base.material=base.material.clone();hook(base.material);
+  /* bust: ~3.2 Hz, light damping; glutes: slower and firmer. Offsets are capped at a centimetre and a half */
+  const K=[[3.2,.22],[3.2,.22],[2.6,.32]].map(([f,z])=>[(2*Math.PI*f)**2,2*z*2*Math.PI*f]);
+  base.onBeforeRender=()=>{const now=performance.now()/1000,dt=now-S.t;if(dt<.004)return;S.t=now;
+    a.torso.localToWorld(w.set(0,.32,.1));if(dt>.2){S.p.copy(w);S.pv.set(0,0,0);S.x.fill(0);S.v.fill(0);return}
+    vl.copy(w).sub(S.p).divideScalar(dt);const acc=vl.clone().sub(S.pv).divideScalar(dt);S.p.copy(w);S.pv.copy(vl);
+    a.torso.getWorldQuaternion(q).invert();acc.applyQuaternion(q);const A=[acc.y,acc.z,acc.y];
+    for(let k=0;k<3;k++){const ak=Math.max(-40,Math.min(40,A[k]));S.v[k]+=(-K[k][0]*S.x[k]-K[k][1]*S.v[k]-ak)*dt;S.x[k]=Math.max(-.015,Math.min(.015,S.x[k]+S.v[k]*dt))}
+    U.value.set(S.x[0],S.x[1]*.6,S.x[2])};
+  a.p6J={hook,U}}
+/* who's who: wrap person() so players' looks get the reshaped torso and the new beards */
+{const _p=person;person=function(o){const L=o&&o.look;if(!L)return _p.apply(this,arguments);const G=pGeo(),f=L.g==='f',keys=['torF','torM','coatS','coatL'],keep=keys.map(k=>G[k]);
+  keys.forEach((k,i)=>{if(keep[i])G[k]=p6Deform(keep[i],f?'f':'m',k==='torF'||k==='torM'?1:.6)});let bd=null;
+  if(!f&&(L.bd==='stubble'||L.bd==='full')){bd=L.bd;o=Object.assign({},o,{look:Object.assign({},L,{bd:'none'})})}
+  P6.fem=f;let a;try{a=_p.call(this,o)}finally{keys.forEach((k,i)=>G[k]=keep[i]);P6.fem=false}
+  if(bd)try{p6Beard(a,bd,L.hc||'#3a2a1e',L.sk)}catch(e){console.error('beard',e)}
+  if(f&&!p6Kid())try{p6Jig(a)}catch(e){console.error('jig',e)}return a}}
+/* lingerie as an outfit: women only, adults only, and children never see it */
+if(!LK_O.fit.some(x=>x[0]==='lingerie'))LK_O.fit.push(['lingerie','Lingerie']);
+function p6Kid(){return typeof isKid==='function'&&isKid()}
+{const _d=hxDress;hxDress=function(L){if(L&&L.fit==='lingerie'){if(L.g!=='f'||p6Kid())return _d(Object.assign({},L,{fit:'robe'}));
+    const st=hxMix(L.sk||'#e0b090','#0d0a0b',.74);return Object.assign(_d(Object.assign({},L,{fit:'swim'})),{co:L.sk,pa:L.sk,lg:'bare',tg:st,sh:'#141114',sox:1,sl:'none',gs:L.gs==='sun'?'none':L.gs})}return _d(L)}}
+{const _l=lkPerson;lkPerson=function(L,extra){const a=_l.apply(this,arguments);try{const C=lkClean(L);if(C.fit==='lingerie'&&C.g==='f'&&!p6Kid()){const D=hxDress(C);p6Ling(a,MF['s'+(D.sk||C.sk)]||pSkin(C.sk))}}catch(e){console.error('lingerie',e)}return a}}
+if(typeof HX_W!=='undefined'){const sec=['Underneath',[['lingerie','🖤','Undress to your lingerie','Black lace push-up bra, thong, garter belt and stockings','f']]];
+  const _w=hxWardrobe;hxWardrobe=function(){const i=HX_W.indexOf(sec);if(i>=0)HX_W.splice(i,1);if(!p6Kid())HX_W.push(sec);return _w.apply(this,arguments)}}
+{const _w=hxWear;hxWear=function(f){if(f==='lingerie'&&(p6Kid()||!LOOK||LOOK.g!=='f'))return;if(f==='lingerie'&&LOOK.fit!=='lingerie')P6.prev=LOOK.fit;return _w.apply(this,arguments)}}
+/* lingerie stays indoors: leaving the house puts your clothes back on */
+{const _h=hsLeave;hsLeave=function(){if(LOOK&&LOOK.fit==='lingerie'){LOOK=lkClean(Object.assign({},LOOK,{fit:P6.prev&&P6.prev!=='lingerie'?P6.prev:'in'}));lkSave();ME.t=0}return _h.apply(this,arguments)}}
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
