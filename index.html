@@ -4212,7 +4212,7 @@ function mpChatDraw(){const el=mpEl(),L=el.querySelector('.mpLog');const rows=MP
 function mpFade(){const el=document.getElementById('mpChat');if(!el)return;const now=performance.now();for(const d of el.querySelectorAll('.mpLog>div')){const age=now-d.dataset.at;d.style.opacity=MP.open?1:age<12e3?1:Math.max(0,1-(age-12e3)/3e3)}}
 async function mpPost(v){v=String(v||'').replace(/\s+/g,' ').trim().slice(0,280);if(!v||!LB.on)return;{const m=v.toLowerCase().match(/^\/(wave|cheer|clap|dance)$/);if(m){mpEmote(m[1]);return}}const t=performance.now();if(t-MP.lastMsg<600)return;MP.lastMsg=t;
   mpAdd({n:who,c:LB.color,t:v,me:1});mpSend('chat',{id:LB.id,n:who,c:LB.color,t:v});
-  try{await fetch(LB.url.replace('/players','/chat'),{method:'POST',headers:{apikey:LB.key,Authorization:'Bearer '+LB.key,'Content-Type':'application/json'},body:JSON.stringify({lobby:LB.lobby||LB_SQ,player:LB.id,name:who,color:LB.color,body:v})})}catch(_){}}
+  try{await fetch(LB.url.replace('/players','/chat'),{method:'POST',headers:lbH(1),body:JSON.stringify({lobby:LB.lobby||LB_SQ,player:LB.id,name:who,color:LB.color,body:v})})}catch(_){}}
 async function mpHistory(){const lob=LB.lobby||LB_SQ,top=MP.topic;try{const since=new Date(Date.now()+(LB.off||0)-3*3600e3).toISOString();const r=await fetch(LB.url.replace('/players','/chat')+'?select=name,color,body,created_at&lobby=eq.'+encodeURIComponent(lob)+'&created_at=gt.'+encodeURIComponent(since)+'&order=created_at.desc&limit=20',{headers:lbH()});if(!r.ok||MP.topic!==top)return;const a=(await r.json()).reverse();
   const old=a.map(m=>({n:m.name,c:m.color||'#999999',t:m.body,at:performance.now()-60e3}));MP.chat=old.concat(MP.chat.filter(m=>!m.sys||1));mpChatDraw()}catch(_){}}
 function mpUi(){const el=mpEl();const show=LB.on&&LB.ok!==false&&!(VM&&VM.on);el.style.display=show?'':'none';if(!show&&MP.open)mpChat(false);
@@ -7691,6 +7691,104 @@ function mdwBuild(){const S=S3,root=SR.root;if(!root||!SR.xE)return;const snow=!
 {const _b=srBuild;srBuild=function(){const had=SR.root,xE=SR.xE;const r=_b.apply(this,arguments);if(SR.root&&(SR.root!==had||!MDW.built||MDW.xE!==SR.xE)){MDW.built=1;MDW.xE=SR.xE;try{mdwBuild()}catch(e){console.error('meadow',e)}}
   return r}}
 {const _a=srActs;srActs=function(){_a.apply(this,arguments);for(const a of MDW.acts){ACTS.push(a);SR.acts.push(a)}if(MDW.walls&&SR.extra)SR.extra.push(...MDW.walls)}}
+
+/* ---------- v100: sign-in (Supabase Auth, invite-only). Your wallet and saved game move to your login,
+   so they follow you to any device. Usernames without @ become <name>@players.lakeside-tree.test ---------- */
+const AU={s:null,me:null,ready:false,up:'',dom:'@players.lakeside-tree.test',
+  keys:['lakeTreeSave1','lakeTreeLook','lakeTreeLobby','lakeTreeMusic','lakeTreeMusicOrder','lakeTreeMusicStyle']};
+try{AU.s=JSON.parse(localStorage.getItem('lakeTreeAuth')||'null')}catch(_){}
+const AU_URL=LB.url.replace(/\/rest\/v1\/players$/,'');
+function auStore(){try{AU.s?localStorage.setItem('lakeTreeAuth',JSON.stringify(AU.s)):localStorage.removeItem('lakeTreeAuth')}catch(_){}}
+function auEmail(v){v=String(v||'').trim().toLowerCase();return v.includes('@')?v:v.replace(/[^a-z0-9._-]/g,'')+AU.dom}
+function auShown(){const e=AU.s&&AU.s.user&&AU.s.user.email||'';return e.endsWith(AU.dom)?e.slice(0,-AU.dom.length):e}
+async function auCall(path,body){const r=await fetch(AU_URL+'/auth/v1/'+path,{method:'POST',headers:{apikey:LB.key,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  let j=null;try{j=await r.json()}catch(_){}if(!r.ok){const m=(j&&(j.msg||j.error_description||j.message))||'Something went wrong';throw new Error(/Database error saving/.test(m)?'That invite code isn’t valid (or was already used)':/Invalid login/.test(m)?'Wrong email/username or password':/already registered/.test(m)?'That email/username is taken · sign in instead':m)}return j}
+function auSet(j){AU.s={access_token:j.access_token,refresh_token:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000,user:{id:j.user.id,email:j.user.email}};auStore()}
+async function auRefresh(){if(!AU.s)return false;try{auSet(await auCall('token?grant_type=refresh_token',{refresh_token:AU.s.refresh_token}));return true}catch(e){if(navigator.onLine){AU.s=null;auStore()}return false}}
+/* every request to the database goes out as the signed-in player */
+{const _h=lbH;lbH=function(j){const h=_h(j);if(AU.s)h.Authorization='Bearer '+AU.s.access_token;return h}}
+/* the wallet waits for the login, so a new device never opens a second, empty wallet */
+{const _o=ecOpen;ecOpen=function(){if(!AU.ready)return;return _o.apply(this,arguments)}}
+function auLocal(){const o={};for(const k of AU.keys){try{const v=localStorage.getItem(k);if(v!=null)o[k]=v}catch(_){}}return o}
+async function auUpload(keep){if(!AU.ready||!AU.s)return;const o=auLocal(),t=JSON.stringify(o);if(t===AU.up)return;AU.up=t;
+  try{await fetch(LB.url.replace(/players$/,'rpc/game_save'),{method:'POST',headers:lbH(1),body:JSON.stringify({p_save:o}),keepalive:!!keep})}catch(_){AU.up=''}}
+async function auBoot(){if(!AU.s)return auGate();
+  if(Date.now()>AU.s.exp-120e3&&!(await auRefresh()))return auGate();
+  let me;try{me=await ecRpc('game_me',{})}catch(e){if(e.code==='PGRST301'||/JWT/.test(e.message)){if(await auRefresh())return auBoot();return auGate()}setTimeout(auBoot,15e3);return}
+  if(!me){AU.s=null;auStore();return auGate('This login has no player yet · ask for a new invite')}
+  AU.me=me;const sv=me.save||{},has=Object.keys(sv).length>0;
+  /* a saved game on the server wins over this device; load it once and restart */
+  if(has){let diff=false;for(const k of AU.keys){let v=null;try{v=localStorage.getItem(k)}catch(_){}if(sv[k]!=null&&sv[k]!==v)diff=true}
+    if(diff&&sessionStorage.getItem('auLoaded')!==me.user){for(const k of AU.keys)try{sv[k]!=null?localStorage.setItem(k,sv[k]):localStorage.removeItem(k)}catch(_){}
+      try{window.name='';sessionStorage.setItem('auLoaded',me.user)}catch(_){}location.reload();return}
+    AU.up=JSON.stringify(auLocal())}
+  if(me.age==='adult'){
+    if(me.acct&&me.acct!==EC.acct){EC.acct=me.acct;EC.tok=EC.tok||ecTok();ecSave()}
+    if(!me.acct&&EC.acct&&EC.tok){try{AU.me=await ecRpc('game_link',{p_acct:EC.acct,p_token:EC.tok})}catch(e){console.warn('link',e.message);if(/another login/.test(e.message)){EC.acct=null;EC.tok=ecTok();ecSave()}}}}
+  AU.ready=true;auGate(false);if(!has)auUpload();
+  if(!AU.me.acct&&me.age==='adult'){/* a brand-new player: link the wallet as soon as it exists */
+    const k=setInterval(async()=>{if(!EC.acct||!EC.ok)return;clearInterval(k);try{AU.me=await ecRpc('game_link',{p_acct:EC.acct,p_token:EC.tok})}catch(e){console.warn('link',e.message)}},2000)}}
+setInterval(()=>{if(AU.s&&Date.now()>AU.s.exp-300e3)auRefresh()},60e3);
+setInterval(()=>{if(!document.hidden)auUpload()},30e3);
+addEventListener('pagehide',()=>auUpload(true));
+async function auOut(){await auUpload();try{await fetch(AU_URL+'/auth/v1/logout',{method:'POST',headers:lbH()})}catch(_){}
+  AU.s=null;auStore();for(const k of AU.keys.concat(['lakeTreeEcon','lakeTreeStarter']))try{localStorage.removeItem(k)}catch(_){}
+  try{window.name='';sessionStorage.removeItem('auLoaded')}catch(_){}location.reload()}
+/* the sign-in card */
+function auGate(msg){let d=document.getElementById('au');if(msg===false){if(d)d.remove();return}
+  if(!d){d=document.createElement('div');d.id='au';document.body.appendChild(d)}
+  const q=new URLSearchParams(location.search),inv=(q.get('invite')||'').toUpperCase().replace(/[^A-Z0-9]/g,''),join=!!inv||d.dataset.m==='join';d.dataset.m=join?'join':'in';
+  d.innerHTML='<form class="auC" autocomplete="on"><h3>🎄 Lakeside</h3><p class="auS">'+(join?'Join with the invite code you were given.':'Sign in to play. Your town, house and wallet are saved to your login.')+'</p>'+
+    (join?'<label>Invite code<input name="inv" required autocomplete="off" autocapitalize="characters" value="'+inv+'"></label>':'')+
+    '<label>Email or username<input name="em" required autocomplete="username" autocapitalize="off" spellcheck="false"></label>'+
+    '<label>Password<input name="pw" type="password" required minlength="'+(join?8:6)+'" autocomplete="'+(join?'new-password':'current-password')+'"></label>'+
+    '<p class="auE" role="alert">'+(msg?lbEsc(msg):'')+'</p><button class="pill gold">'+(join?'Join':'Sign in')+'</button>'+
+    '<p class="auS"><a href="#" class="auSw">'+(join?'I already have a login · sign in':'I have an invite code · join')+'</a></p></form>';
+  d.querySelector('.auSw').onclick=e=>{e.preventDefault();d.dataset.m=join?'in':'join';if(join&&inv){history.replaceState(null,'',location.pathname)}auGate()};
+  const f=d.querySelector('form');f.onsubmit=async e=>{e.preventDefault();const b=f.querySelector('button'),E=f.querySelector('.auE');b.disabled=true;E.textContent='';
+    try{const email=auEmail(f.em.value),password=f.pw.value;
+      auSet(join?await auCall('signup',{email,password,data:{invite:f.inv.value.trim().toUpperCase()}}):await auCall('token?grant_type=password',{email,password}));
+      if(join)history.replaceState(null,'',location.pathname);await auBoot()}catch(err){E.textContent=err.message}finally{b.disabled=false}}}
+{const st=document.createElement('style');st.textContent=
+ '#au{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(6,8,14,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}'+
+ '#au .auC{box-sizing:border-box;width:min(380px,calc(100% - 28px));padding:20px 20px 16px;border-radius:18px;color:#f6ecd8;font:15px/1.4 -apple-system,system-ui,sans-serif;background:linear-gradient(#2c1d12,#1b120b);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(232,198,110,.3) inset}'+
+ '#au h3{margin:0 0 4px;font:italic 700 24px Georgia,serif;color:#f3dfa8}#au .auS{margin:6px 0 12px;opacity:.85}#au a{color:#e8c66e}'+
+ '#au label{display:block;margin:0 0 10px;font-size:13px;opacity:.9}#au input{display:block;box-sizing:border-box;width:100%;margin-top:4px;font:16px -apple-system,system-ui,sans-serif;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.3);color:#fff}'+
+ '#au .auE{min-height:1.2em;margin:4px 0 10px;color:#ffb4a0}#au button{width:100%;font:600 15px -apple-system,system-ui,sans-serif;border:0;border-radius:999px;padding:11px 18px;cursor:pointer;color:#1a1208;background:linear-gradient(#e8c66e,#b8862a)}#au button:disabled{opacity:.6}';document.head.appendChild(st)}
+/* the lobby card shows who is signed in, a sign-out button and invites */
+{const _d=lbDraw;lbDraw=function(){const r=_d.apply(this,arguments);const el=document.getElementById('lob');if(!LB.open||!el||!AU.me||LB.mode!=='room')return r;const M=el.querySelector('.lbMe');if(!M||M.querySelector('.auRow'))return r;
+  const p=document.createElement('div');p.className='auRow';p.innerHTML='<p class="lbS">Signed in as <b>'+lbEsc(auShown())+'</b>'+(AU.me.age==='child'?' · child account':'')+'</p><div class="row">'+(AU.me.age==='adult'?'<button type="button" class="pill" id="auInv">✉️ Invite</button>':'')+'<button type="button" class="pill" id="auOut">Sign out</button></div><p class="lbS auI"></p>';M.appendChild(p);
+  p.querySelector('#auOut').onclick=auOut;const ib=p.querySelector('#auInv');if(ib)ib.onclick=()=>auInvite(p.querySelector('.auI'));return r}}
+function auInvite(box){const ages=AU.me.admin?[['adult','🧑 An adult'],['child','🧒 A child']]:[['child','🧒 My child']];
+  box.innerHTML='Who is it for? '+ages.map(([a,l])=>'<button type="button" class="pill" data-a="'+a+'">'+l+'</button>').join(' ');
+  box.querySelectorAll('button').forEach(b=>b.onclick=async()=>{box.textContent='Making a code…';try{const c=await ecRpc('invite_make',{p_age:b.dataset.a});const link=LB.link+'?invite='+c;
+    box.innerHTML='Code <b style="letter-spacing:.1em">'+lbEsc(c)+'</b> ('+(b.dataset.a==='child'?'child':'adult')+', works once, 14 days)<br><a href="'+link+'" target="_blank" rel="noopener">'+lbEsc(link)+'</a>';try{navigator.clipboard.writeText(link)}catch(_){}}catch(e){box.textContent=e.message}})}
+if(/HeadlessChrome/.test(navigator.userAgent)&&!/[?&]auth\b/.test(location.search))AU.ready=true;else auBoot();
+
+/* ---------- v100: child accounts. No wallet, jobs or money; no mulled wine; nobody looks bare-chested;
+   no picnic nooks; chat only with ready-made phrases (the same list the server enforces, game_phrases);
+   holding hands, dancing, ride-alongs and home invites only within the family ---------- */
+const KID_PH=['Hi!','Bye!','Yes','No','Thank you!','Follow me!','Wait for me!','Want to skate?','Want to dance?',"Let's go to the boat!",'Nice!','Merry Christmas!','Happy Thanksgiving!','Good game!','Where are you?','Over here!'];
+const isKid=()=>!!(AU.me&&AU.me.age==='child');
+const famId=()=>AU.me?(AU.me.age==='child'?AU.me.family:AU.me.user):null;
+/* children have no wallet */
+{const _o=ecOpen;ecOpen=function(){if(isKid())return;return _o.apply(this,arguments)}}
+setInterval(()=>{if(!isKid())return;const w=document.getElementById('vWal');if(w)w.style.display='none';if(document.getElementById('mpChat'))mpEl();
+  for(const a of ACTS){if(a._kid)continue;const m=a.id==='kiosk'||a.id==='cart'?'💼 Jobs are for grown-ups':/^wine/.test(a.id)?'🍷 Mulled wine is for grown-ups · try a hot cider or cocoa':a.id==='mdw'?'🧺 The picnic nooks are for grown-ups':/^pl(gate|door)$/.test(a.id)?'🏡 Ask a grown-up in your family to show you houses':null;
+    if(m){a._kid=1;a.lab=m;a.go=()=>v3Msg(m,2600)}}},1500);
+{const _t=v3Treat;v3Treat=function(k,a){if(isKid()&&k==='wine')k='cider';return _t.call(this,k,a)}}
+/* for a child, every bare-chested look gets a swim shirt */
+{const _d=hxDress;hxDress=function(L){const o=_d(L);if(isKid()&&L&&L.g!=='f'&&(L.fit==='swim'||L.fit==='bath'))return Object.assign({},o,{co:'#2f5d7c',sl:'short'});return o}}
+/* every message carries the sender's family, so the family can still play together */
+{const _s=mpSend;mpSend=function(ev,p){if(p&&typeof p==='object'&&AU.me){p.fu=famId();if(isKid())p.ch=1}return _s.call(this,ev,p)}}
+const KID_PRIV=new Set(['ask','dga','pinv','fdinv','fdask','fdyes','ring']);
+{const _m=mpOn;mpOn=function(ev,p){if(p&&KID_PRIV.has(ev)&&(isKid()||p.ch)&&(!p.fu||p.fu!==famId()))return;
+  if(ev==='chat'&&isKid()&&!KID_PH.includes(String(p&&p.t||'').trim()))return;return _m.apply(this,arguments)}}
+/* a child's chat box: phrase buttons instead of typing */
+{const _e=mpEl;mpEl=function(){const el=_e.apply(this,arguments);if(isKid()&&!el.dataset.kid){el.dataset.kid=1;const box=el.querySelector('.mpIn');
+  box.innerHTML='<div class="kidPh">'+KID_PH.map(t=>'<button type="button">'+lbEsc(t)+'</button>').join('')+'</div>';box.querySelectorAll('button').forEach(b=>b.onclick=()=>mpPost(b.textContent))}return el}}
+{const _p=mpPost;mpPost=function(v){if(isKid()&&!KID_PH.includes(String(v||'').trim())&&!/^\/(wave|cheer|clap|dance)$/i.test(String(v||'').trim()))return;return _p.apply(this,arguments)}}
+{const st=document.createElement('style');st.textContent='#mpChat .kidPh{display:flex;flex-wrap:wrap;gap:6px;max-width:340px}#mpChat .kidPh button{font:600 13px -apple-system,system-ui,sans-serif;border:1px solid rgba(240,215,150,.45);border-radius:999px;padding:7px 12px;background:rgba(16,12,8,.82);color:#fff;cursor:pointer}';document.head.appendChild(st)}
 </script><script type="module">/**
  * @license
  * Copyright 2010-2024 Three.js Authors
