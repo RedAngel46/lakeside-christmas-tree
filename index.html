@@ -2815,7 +2815,7 @@ function v3Frame(now){if(!V3.on)return;requestAnimationFrame(v3Frame);const S=S3
   if(V3.jy>0){V3.jv-=11*dt;V3.jy+=V3.jv*dt;if(V3.jy<=0){V3.jy=0;V3.jv=0;if(AC&&AC.state==='running')ksLand()}}if(V3.mode!=='walk')V3.jy=0;
   if(!isFinite(V3.bob))V3.bob=0;if(!isFinite(V3.jy)){V3.jy=0;V3.jv=0}
   V3.gy=(V3.gy||0)+((V3.inH?hsY(P):V3.boat&&TOUR.B?TOUR.B.RB.position.y+(V3.floor||1.3)-(V3.seat?(V3.lv===1?.6:.48):0)+(V3.dance>T?Math.abs(Math.sin(T*4.4))*.05:0):V3.ovl?(V3.pose?V3.pose.gy:OV.y):V3.mode==='walk'&&P.x<-18.9?(V3.gyo!=null?V3.gyo:-.12):(typeof hsPorchY==='function'&&V3.mode==='walk'&&!V3.boat&&!V3.inH?hsPorchY(P.x,P.z):0))-(V3.gy||0))*Math.min(1,dt*(V3.boat||V3.inH?14:8));if(!isFinite(V3.gy))V3.gy=0;
-  let ey=1.62+(V3.mode==='walk'?V3.gy:0)+(moving&&!(V3.jy>0)?Math.sin(V3.bob)*(k.run?.05:.035):0)+(V3.jy||0),cx=P.x,cz=P.z,yaw=V3.yaw;
+  let ey=1.62+(!V3.pose&&!V3.seat&&typeof ME!=='undefined'&&ME.av&&ME.av.p6H||0)+(V3.mode==='walk'?V3.gy:0)+(moving&&!(V3.jy>0)?Math.sin(V3.bob)*(k.run?.05:.035):0)+(V3.jy||0),cx=P.x,cz=P.z,yaw=V3.yaw;
   if(V3.mode==='skate'){const u=(T-V3.t0)/16,a=u*6.28*1.6,r=4.4;cx=10+Math.cos(a)*r;cz=-88+Math.sin(a)*r;yaw=Math.atan2(Math.sin(a),-Math.cos(a))*-1;yaw=-a;ey=1.6+Math.sin(T*3)*.03;if(u>=1){V3.mode='walk';P.set(10-7.2,0,-86.5);V3.yaw=-Math.PI/2;v3Msg('That was fun! ⛸️')}else{V3.yaw=yaw}}
   if(V3.mode==='ride'){const u=(T-V3.t0)/14,a=S.carRot.rotation.y+Math.PI*.15,r=3.75;cx=-10+Math.cos(-a)*r;cz=-68+Math.sin(-a)*r;yaw=-a+Math.PI;ey=2.55+Math.sin(T*2.2)*.24;if(u>=1){V3.mode='walk';P.set(-10+6.2,0,-66.5);V3.yaw=Math.PI/2+.3}else V3.yaw=yaw}
   S.cam.position.set(cx,ey,cz);S.cam.rotation.set(0,0,0);S.cam.rotation.order='YXZ';S.cam.rotation.y=V3.mode==='walk'?V3.yaw:yaw;S.cam.rotation.x=V3.pitch;try{meFrame(dt,T,moving)}catch(e){if(!ME.err){ME.err=1;console.error(e)}}if(V3.mode==='drive')try{carCam(dt,T)}catch(e){if(!CAR.err2){CAR.err2=1;console.error(e)}}if(V3.mode==='fdrive')try{fdUpd(dt);fdCam(dt)}catch(e){if(!FD.err){FD.err=1;console.error(e)}}if(V3.mode==='dinghy')try{if(DG.on)dgCam(dt,T);else crCam(dt,T)}catch(e){if(!DG.err2){DG.err2=1;console.error(e)}}
@@ -3332,7 +3332,7 @@ function meFrame(dt,T,moving){const S=S3,P=V3.pos,cam=S.cam;if(!P)return;const h
   if(po){a.g.position.set(po.ax,po.ay,po.az);a.g.rotation.y=po.ry;poseApply(a,po.k,dt,T,po.eat?Math.min(1,(T-po.eat)/1.6):0);if(po.eat&&T-po.eat>1.6)po.eat=0;tx=po.cx;tz=po.cz;ty=po.cy;base=po.ay}
   else if(V3.boat&&V3.seat&&TOUR.B){const deck=TOUR.B.RB.position.y+(V3.lv===1?TOUR.B.UY:1.3);a.g.position.set(P.x,deck+.46-.9*a.k,P.z);a.g.rotation.y=V3.yaw+Math.PI;poseApply(a,'sit',dt,T,0);ty=deck+1.1;base=deck}
   else{const jy=V3.jy||0;a.g.position.set(P.x,base+jy,P.z);a.g.rotation.y=V3.yaw+Math.PI;a.g.rotation.x*=1-Math.min(1,dt*8);const run=!!(V3.keys.run&&moving);a.sp=run?1.9:1.2;animPerson(a,dt,moving,T);
-    if(jy>.02)jumpPose(a,jy);ty=base+jy+1.52}
+    if(jy>.02)jumpPose(a,jy);ty=base+jy+1.52+(a._lift||0)}
   const pt=Math.max(-1.05,Math.min(.6,V3.pitch)),cp=Math.cos(pt),fx=-Math.sin(V3.yaw)*cp,fy=Math.sin(pt),fz=-Math.cos(V3.yaw)*cp,rx=Math.cos(V3.yaw),rz=-Math.sin(V3.yaw);if(V3.pitch!==pt){V3.pitch=pt;cam.rotation.x=pt}
   let D=V3.inH?(po&&po.k==='lie'?1.6:2.15):V3.boat?2.5:3.1;D=meCamDist(tx,ty,tz,-fx,-fy,-fz,D,base);const sh=.32*Math.min(1,D/2);
   let cx=tx-fx*D+rx*sh,cz=tz-fz*D+rz*sh,cy=ty-fy*D+.12;if(meBlocked(cx,cy,cz,base)){cx=tx-fx*D;cz=tz-fz*D}cy=Math.min(cy,meCeil(cx,cz,cy));
@@ -8078,7 +8078,11 @@ const P6={def:new Map(),tex:{},prev:null};
 const p6Bell=(y,c,w)=>Math.exp(-((y-c)/w)*((y-c)/w));
 function p6Deform(src,sex,amt){const key=src.uuid+sex+amt;if(P6.def.has(key))return P6.def.get(key);const g=src.clone(),p=g.attributes.position;
   for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);
-    if(sex==='f'){const s=1-.12*amt*p6Bell(y,.24,.08)+.1*amt*p6Bell(y,-.03,.12);x*=s;z*=s;
+    if(sex==='b'){/* the bare body: rounder breasts set apart with a cleavage, a full round seat that tucks under */
+      const s=1-.1*p6Bell(y,.22,.08)+.08*p6Bell(y,-.02,.1);x*=s;z*=s;const ax=Math.abs(x);
+      if(z>0)z+=.1*Math.exp(-(((ax-.085)/.052)**2))*Math.exp(-(((y-.355)/(y<.355?.06:.08))**2))*Math.min(1,z/.09);
+      if(z<0)z-=.085*Math.exp(-(((ax-.068)/.062)**2))*Math.exp(-(((y+.06)/(y<-.06?.05:.085))**2))*Math.min(1,-z/.08)}
+    else if(sex==='f'){const s=1-.12*amt*p6Bell(y,.24,.08)+.1*amt*p6Bell(y,-.03,.12);x*=s;z*=s;
       if(z>0)z+=.08*amt*Math.exp(-(((Math.abs(x)-.082)/.058)**2))*p6Bell(y,.37,.075)*Math.min(1,z/.1);
       if(z<0)z-=.065*amt*Math.exp(-(((Math.abs(x)-.072)/.07)**2))*p6Bell(y,-.09,.075)*Math.min(1,-z/.1)}
     else{const s=1+.08*amt*p6Bell(y,.49,.07)-.05*amt*p6Bell(y,.12,.1);x*=s*(1+.04*amt*p6Bell(y,.36,.12));z*=s;
@@ -8136,6 +8140,7 @@ function p6LingTex(){if(P6.tex.ling)return P6.tex.ling;const W=1024,H=512,c=cvs(
     q.beginPath();q.moveTo(U(u0),Y(-.01));q.lineTo(U(u0+s*.05),Y(-.02));q.quadraticCurveTo(U(u0+s*.03),Y(-.1),U(u0+s*.012),Y(-.17));trim(5)});
   q.beginPath();q.moveTo(U(.45),Y(-.005));q.quadraticCurveTo(U(.49),Y(-.02),U(.5),Y(-.07));q.quadraticCurveTo(U(.51),Y(-.02),U(.55),Y(-.005));q.closePath();q.fillStyle=mesh;q.fill();trim(4);
   q.fillStyle=solid;q.fillRect(U(.5)-3,Y(-.07),6,H-Y(-.07));
+  q.fillStyle=mesh;q.fillRect(0,Y(-.093),W,H-Y(-.093));q.beginPath();q.moveTo(0,Y(-.093));q.lineTo(W,Y(-.093));trim(3);
   const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapT=THREE.ClampToEdgeWrapping;t.anisotropy=8;return P6.tex.ling=t}
 /* stockings painted on the legs themselves (no extra pieces to gap or poke through): bare thigh, the suspender,
    a lace top over a solid welt, then sheer nylon that darkens towards the edges, with a seam down the back.
@@ -8156,14 +8161,17 @@ function p6LegMat(skHex){const m=new THREE.MeshStandardMaterial({map:p6LegTex(sk
     { float sh=step(vMapUv.y,uW),fr=1.-abs(dot(normalize(vNormal),normalize(vViewPosition)));diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.006,.005,.005),sh*(.85*fr*fr-.25*(1.-fr))); }`)};
   m.customProgramCacheKey=()=>'p6leg';return m}
 /* black stiletto pumps with an ankle strap: the stockinged foot shows above the shoe's low cut, pitched onto a thin heel.
-   The body isn't raised (seats and beds keep their fit), so the heel stands where the old flat sole was. */
+   12 cm heels: standing and walking lift the body 11 cm (p6H); sitting and lying poses drop it again, so seats and beds still fit. */
 function p6Heels(a,skHex){const G=P6.heel||(P6.heel={cup:new THREE.SphereGeometry(1,18,12,0,Math.PI*2,Math.PI*.42,Math.PI*.58),foot:new THREE.SphereGeometry(1,16,10),
-    pin:new THREE.CylinderGeometry(.0065,.0035,.07,10),strap:new THREE.TorusGeometry(.039,.0035,6,20).rotateX(Math.PI/2),shoe:new THREE.MeshStandardMaterial({color:'#0c0a0b',roughness:.22,metalness:.1})});
+    pin:new THREE.CylinderGeometry(.0065,.003,.155,10),strap:new THREE.TorusGeometry(.039,.0035,6,20).rotateX(Math.PI/2),shoe:new THREE.MeshStandardMaterial({color:'#0c0a0b',roughness:.22,metalness:.1})});
   const fm=new THREE.MeshStandardMaterial({color:new THREE.Color('#'+skHex).lerp(new THREE.Color('#0b0809'),.86),roughness:.45});
   for(const kn of a.knees){for(const c of kn.children)if(c.isMesh&&c.material.color&&c.material.color.getHexString()==='141114')c.visible=false;
     const add=(g,m,sx,sy,sz,x,y,z,rx)=>{const o=new THREE.Mesh(g,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);o.rotation.x=rx||0;kn.add(o);return o};
-    add(G.foot,fm,.036,.028,.105,0,-.455,.05,.33);add(G.cup,G.shoe,.041,.034,.118,0,-.457,.05,.33);
-    add(G.pin,G.shoe,1,1,1,0,-.461,-.036);add(G.strap,G.shoe,1,1,1,0,-.418,0)}}
+    add(G.foot,fm,.036,.028,.105,0,-.52,.04,.85);add(G.cup,G.shoe,.041,.034,.118,0,-.522,.04,.85);
+    add(G.pin,G.shoe,1,1,1,0,-.528,-.034);add(G.strap,G.shoe,1,1,1,0,-.418,0)}a.p6H=.11}
+/* the lift is added after the game's own animation each frame and taken off before the next, so it never accumulates */
+{const _a=animPerson;animPerson=function(p){if(p&&p.body){p.body.position.y-=p._lift||0;p._lift=0}const r=_a.apply(this,arguments);if(p&&p.body&&p.p6H){p.body.position.y+=p.p6H;p._lift=p.p6H}return r}}
+{const _p=poseApply;poseApply=function(a){if(a&&a.body){a.body.position.y-=a._lift||0;a._lift=0}return _p.apply(this,arguments)}}
 function p6Ling(a,sk){const tI=a.torso&&a.torso.children[0];if(!tI)return;
   /* the torso is the mesh reaching lowest (it may carry a fabric copy of the skin colour, not sk itself) */
   const base=tI.children.find(o=>o.isMesh&&o.geometry&&(o.geometry.boundingBox||(o.geometry.computeBoundingBox(),o.geometry.boundingBox)).min.y<.8);if(!base)return;
@@ -8199,7 +8207,9 @@ function p6Jig(a){const tI=a.torso&&a.torso.children[0];if(!tI||!a.torso)return;
   a.p6J={hook,U}}
 /* who's who: wrap person() so players' looks get the reshaped torso and the new beards */
 {const _p=person;person=function(o){const L=o&&o.look;if(!L)return _p.apply(this,arguments);const G=pGeo(),f=L.g==='f',keys=['torF','torM','coatS','coatL'],keep=keys.map(k=>G[k]);
-  keys.forEach((k,i)=>{if(keep[i])G[k]=p6Deform(keep[i],f?'f':'m',k==='torF'||k==='torM'?1:.6)});let bd=null;
+  keys.forEach((k,i)=>{if(keep[i])G[k]=p6Deform(keep[i],f?'f':'m',k==='torF'||k==='torM'?1:.6)});
+  /* in lingerie there's no garment shell: a bare torso that closes between the legs (no open hem) */
+  if(f&&L.fit==='lingerie'&&!p6Kid())G.torF=p6Deform(P6.bodyF||(P6.bodyF=new THREE.LatheGeometry(p5Prof([[0,-.105],[.04,-.115],[.1,-.1],[.15,-.07],[.178,-.025],[.186,.02],[.172,.1],[.148,.18],[.14,.25],[.155,.32],[.165,.42],[.184,.5],[.155,.565],[.1,.608],[.055,.635],[0,.642]].map(([a,b])=>new THREE.Vector2(a,b))),28)),'b',1);let bd=null;
   if(!f&&(L.bd==='stubble'||L.bd==='full')){bd=L.bd;o=Object.assign({},o,{look:Object.assign({},L,{bd:'none'})})}
   P6.fem=f;let a;try{a=_p.call(this,o)}finally{keys.forEach((k,i)=>G[k]=keep[i]);P6.fem=false}
   if(bd)try{p6Beard(a,bd,L.hc||'#3a2a1e',L.sk)}catch(e){console.error('beard',e)}
