@@ -7775,7 +7775,10 @@ const famId=()=>AU.me?(AU.me.age==='child'?AU.me.family:AU.me.user):null;
 {const _o=ecOpen;ecOpen=function(){if(isKid())return;return _o.apply(this,arguments)}}
 setInterval(()=>{if(!isKid())return;const w=document.getElementById('vWal');if(w)w.style.display='none';if(document.getElementById('mpChat'))mpEl();
   for(const a of ACTS){if(a._kid)continue;const m=a.id==='kiosk'||a.id==='cart'?'💼 Jobs are for grown-ups':/^wine/.test(a.id)?'🍷 Mulled wine is for grown-ups · try a hot cider or cocoa':a.id==='mdw'?'🧺 The picnic nooks are for grown-ups':/^pl(gate|door)$/.test(a.id)?'🏡 Ask a grown-up in your family to show you houses':null;
-    if(m){a._kid=1;a.lab=m;a.go=()=>v3Msg(m,2600)}}},1500);
+    if(m){a._kid=1;const g=a.go;a.lab=m;a.go=a.id==='pldoor'?()=>plRole(a.plid)?g():v3Msg(m,2600):a.id==='plgate'?()=>v3Msg(plRole(a.plid)?'🏡 Family home · walk on in':m,2600):()=>v3Msg(m,2600)}}},1500);
+/* a child may enter wherever their family's adult owns or lives, as a guest */
+{const _r=plRole;plRole=function(id){if(!isKid())return _r.apply(this,arguments);const f=AU.me.facct,p=PL.plots.get(id),now=Date.now();if(!f||!p)return null;
+  return p.owner===f||PL.acc.some(x=>x.plot===id&&x.account===f&&x.role!=='guest'&&(!x.expires_at||Date.parse(x.expires_at)>now))?'guest':null}}
 {const _t=v3Treat;v3Treat=function(k,a){if(isKid()&&k==='wine')k='cider';return _t.call(this,k,a)}}
 /* for a child, every bare-chested look gets a swim shirt */
 {const _d=hxDress;hxDress=function(L){const o=_d(L);if(isKid()&&L&&L.g!=='f'&&(L.fit==='swim'||L.fit==='bath'))return Object.assign({},o,{co:'#2f5d7c',sl:'short'});return o}}
