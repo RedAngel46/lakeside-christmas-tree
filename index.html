@@ -4478,7 +4478,7 @@ function ecCourierTick(T){const j=EC.job;if(!j||j.job!=='courier'||!j.tg)return;
 /* the kiosk and the coffee cart on Millennium Plaza */
 function ecSign(txt,sub,w,h,bg,fg){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,w,h);x.strokeStyle=fg;x.lineWidth=h*.05;x.strokeRect(h*.06,h*.06,w-h*.12,h-h*.12);
   x.fillStyle=fg;x.textAlign='center';x.textBaseline='middle';x.font='600 '+Math.round(h*(sub?.36:.46))+'px Georgia,serif';x.fillText(txt,w/2,h*(sub?.4:.53));if(sub){x.font='italic '+Math.round(h*.2)+'px Georgia,serif';x.fillText(sub,w/2,h*.74)}return tex(c)}
-function ecBuild(){const S=S3;if(!S||S.ecB)return;S.ecB=1;const g=new THREE.Group();S.scene.add(g);
+function ecBuild(){const S=S3;if(!S||S.ecB)return;S.ecB=1;if(S.sea&&(S.sea.xmas||S.sea.snow)){EC_POS.kiosk={x:14.6,z:-79};EC_POS.cart={x:10.5,z:-78.2}}/* the winter rink covers the summer spots */const g=new THREE.Group();S.scene.add(g);
   const M=(c,e)=>new THREE.MeshLambertMaterial(Object.assign({color:c},e||{})),wood=M('#2f3b33'),trim=M('#c9b48a'),dark=M('#1b1f24'),cork=M('#8a6a45'),paper=M('#efe8d8',{emissive:'#3a352a'}),metal=M('#9aa0a6'),awn=M('#6b2430');
   const b=(m,sx,sy,sz,x,y,z,p)=>{const o=new THREE.Mesh(S.boxG,m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);(p||g).add(o);return o};
   /* jobs kiosk: a dark-green timber booth with a pitched roof, a counter and a notice board */
