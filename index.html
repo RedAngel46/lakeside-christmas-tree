@@ -5032,7 +5032,7 @@ function hxWardrobe(){let el=document.getElementById('hxW');if(!el){el=document.
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=b.dataset.f;hxWardClose();if(f===cur)return;hxWear(f,f==='out'?'🧥 Coat and boots back on':'👗 You change into the '+HX_FIT[f].n.toLowerCase())});
   const b=el.querySelector('.on')||el.querySelector('button[data-f]');if(b)b.focus()}
 function hxWardClose(){const el=document.getElementById('hxW');if(el)el.classList.remove('show')}
-addEventListener('keydown',e=>{const el=document.getElementById('hxW');if(el&&el.classList.contains('show')){if(e.key==='Escape'){hxWardClose();e.stopPropagation()}else if(/^[1-5]$/.test(e.key)){const b=el.querySelectorAll('[data-f]')[+e.key-1];if(b){b.click();e.stopPropagation()}}}},true);
+addEventListener('keydown',e=>{const el=document.getElementById('hxW');if(el&&el.classList.contains('show')){if(e.key==='Escape'){hxWardClose();e.stopPropagation()}else if(/^[1-9]$/.test(e.key)){const b=el.querySelectorAll('[data-f]')[+e.key-1];if(b){b.click();e.stopPropagation()}}}},true);
 /* the bath: clothes off before you get in, the bathrobe on when you get out */
 const hxTub=s=>!!(s&&s.msg&&s.msg.startsWith('🛁'));
 {const _s=hsSeat;hsSeat=function(s){if(hxTub(s)&&LOOK&&LOOK.fit!=='bath'){HS.preBath=LOOK.fit;hxWear('bath')}const r=_s.apply(this,arguments);if(hxTub(s)&&V3.pose){const po=V3.pose,y=HS.F,k=(meAv().k||1);po.k='sit';po.ax=HS.X+10.32;po.az=HS.Z+.55;po.ay=y+.16-.9*k;po.ry=Math.PI/2;po.cx=HS.X+10.75;po.cz=HS.Z+.55;po.cy=y+.8;po.tub=1;if(ME.view==='third'){V3.yaw=0;V3.pitch=-.55}}return r}}
@@ -9171,9 +9171,9 @@ function p6Kid(){return typeof isKid==='function'&&isKid()}
     const st=hxMix(L.sk||'#e0b090','#0d0a0b',.74);return Object.assign(_d(Object.assign({},L,{fit:'swim'})),{berry:L.fit==='berry',p6Slim:true,co:L.sk,pa:L.sk,lg:'bare',tg:L.fit==='berry'?L.sk:st,sh:'#141114',sox:1,sl:'none',gs:L.gs==='sun'?'none':L.gs})}return _d(L)}}
 {const _l=lkPerson;lkPerson=function(L,extra){const a=_l.apply(this,arguments);try{const C=lkClean(L);if((C.fit==='lingerie'||C.fit==='berry')&&C.g==='f'&&!p6Kid()){const D=hxDress(C);p6Ling(a,MF['s'+(D.sk||C.sk)]||pSkin(C.sk),null,C.fit==='berry')}
     else if(C.g==='f'&&(C.fit==='swim'||C.fit==='bikini')){const k=hxDress(C).fit;p6Ling(a,null,p6SwimTex(k));p6Straps(a,k)}}catch(e){console.error('lingerie',e)}return a}}
-if(typeof HX_W!=='undefined'){const sec=['Underneath',[['lingerie','🖤','Undress to your lingerie','Black lace push-up bra, thong, garter belt and stockings','f']]];
+if(typeof HX_W!=='undefined'){const sec=['Underneath',[['lingerie','🖤','Undress to your lingerie','Black lace push-up bra, thong, garter belt and stockings','f'],['berry','❤️','Berry crystal set','Scarlet bra and thong with crystal trim','f']]];
   const _w=hxWardrobe;hxWardrobe=function(){const i=HX_W.indexOf(sec);if(i>=0)HX_W.splice(i,1);if(!p6Kid())HX_W.push(sec);return _w.apply(this,arguments)}}
-{const _w=hxWear;hxWear=function(f){if(f==='lingerie'&&(p6Kid()||!LOOK||LOOK.g!=='f'))return;if(f==='lingerie'&&LOOK.fit!=='lingerie')P6.prev=LOOK.fit;return _w.apply(this,arguments)}}
+{const _w=hxWear;hxWear=function(f){const U=f==='lingerie'||f==='berry';if(U&&(p6Kid()||!LOOK||LOOK.g!=='f'))return;if(U&&!['lingerie','berry'].includes(LOOK.fit))P6.prev=LOOK.fit;return _w.apply(this,arguments)}}
 /* lingerie stays indoors: leaving the house puts your clothes back on */
 {const _h=hsLeave;hsLeave=function(){if(LOOK&&['berry','lingerie'].includes(LOOK.fit)){LOOK=lkClean(Object.assign({},LOOK,{fit:P6.prev&&P6.prev!=='lingerie'?P6.prev:'in'}));lkSave();ME.t=0}return _h.apply(this,arguments)}}
 
@@ -9438,7 +9438,7 @@ function tlGo(){if(!V3.on)return;if(V3.mode!=='walk'||V3.boat||V3.ovl){v3Msg('�
 {const _d=vmDraw;vmDraw=function(){_d.apply(this,arguments);if(!VM.on||!V3.on||!tlSeason())return;const cv=document.querySelector('#vMap canvas');if(!cv)return;const W=cv.clientWidth,H=cv.clientHeight,sc=VM.sc,q=cv.getContext('2d'),u=(14.3-VM.cz)*sc+W/2,v=(VM.cx+12.7)*sc+H/2;
   q.fillStyle='rgba(10,20,35,.45)';q.beginPath();q.ellipse(u+1,v+2,6,3,0,0,7);q.fill();q.fillStyle='#2f6a3e';q.strokeStyle='#f3ead2';q.lineWidth=2;q.beginPath();q.moveTo(u,v);q.bezierCurveTo(u-11,v-14,u-9,v-26,u,v-26);q.bezierCurveTo(u+9,v-26,u+11,v-14,u,v);q.fill();q.stroke();
   q.font='13px system-ui';q.textAlign='center';q.fillText('🌲',u,v-14);if(sc>.6){q.font='600 12px Georgia,serif';q.fillStyle='rgba(10,20,35,.6)';q.fillText('Christmas Tree Lot',u+1,v+15);q.fillStyle='#f3ead2';q.fillText('Christmas Tree Lot',u,v+14)}}}
-/* ===== v128: rigged character test (?rig=1) · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
+/* ===== v129: wardrobe fixes (Berry set, outfits with ?rig=1) · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
    Drinks and food (market, kitchen, breakfast, the cookie plate) fill them; the cold outside drains warmth, the fire and the sofa bring it back ===== */
 const CZ={t:performance.now(),hid:null,hn:0,cozy:0,chill:0,st:null};
 function czN(){if(typeof prog==='undefined')return{d:70,f:70,w:80};if(!prog.need)prog.need={d:70,f:70,w:80};return prog.need}
@@ -16224,7 +16224,7 @@ function rgLoad(){if(RG.ld)return;RG.ld=1;rigLibs();
     const sa=RG.act.Sitting_Idle_Loop,pel=m.getObjectByName('pelvis');if(sa&&pel){sa.play();RG.mx.update(0);m.updateMatrixWorld(true);RG.pel=m.worldToLocal(pel.getWorldPosition(new THREE.Vector3()));sa.stop()}},undefined,e=>{console.error('rig',e);RG.on=false})}
 function rgPlay(n,f){const a=RG.act[n];if(!a||RG.cur===a)return;a.reset().setEffectiveWeight(1).fadeIn(f||.25).play();if(RG.cur)RG.cur.fadeOut(f||.25);RG.cur=a}
 {const _f=meFrame;meFrame=function(dt,T,moving){const r=_f.apply(this,arguments);if(!RG.on)return r;rgLoad();const a=ME.av;if(!RG.g||!a)return r;
-  const po=V3.pose,lie=po&&po.k!=='sit',show=a.g.visible&&!lie;RG.g.visible=show;if(!show)return r;a.g.visible=false;
+  const po=V3.pose,lie=po&&po.k!=='sit',show=a.g.visible&&!lie&&!(LOOK&&!['out','in'].includes(LOOK.fit));/* shortcut: the rig has one outfit, so wardrobe outfits show on the old body until LOOK mapping lands */RG.g.visible=show;if(!show)return r;a.g.visible=false;
   RG.g.position.copy(a.g.position);RG.g.rotation.set(0,a.g.rotation.y,0);if(po&&RG.pel){const s=po.s,k=a.k||1,fy=po.ay-s.sh+.9*k-.04,c=Math.cos(po.ry),n=Math.sin(po.ry),P=RG.pel;/* hips on the seat centre, sit bones ~10 cm under the pelvis joint */RG.g.position.set(po.ax-(P.x*c+P.z*n),fy+s.sh-P.y+.1,po.az-(-P.x*n+P.z*c))}
   rgPlay(po?'Sitting_Idle_Loop':moving?(V3.keys.run?'Jog_Fwd_Loop':'Walk_Loop'):'Idle_Loop');RG.mx.update(dt);
   const h=V3.held;if(h&&RG.hand&&!po){if(h.g.parent!==RG.hand)RG.hand.add(h.g);h.g.position.set(0,.09,.03);h.g.rotation.set(0,0,Math.PI/2);h.g.visible=true}
