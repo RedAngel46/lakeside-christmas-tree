@@ -243,7 +243,7 @@ canvas#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 <canvas id="c"></canvas>
 <div id="title">Lakeside living room · Lake Oswego</div>
 <button id="vgo" title="Walk through the lakeside town">🏘️ Old town</button><button id="vhs" title="Walk around your house">🏡 Walk around the house</button>
-<div id="vil" role="application" aria-label="Old town Christmas market"><canvas id="v3c"></canvas><div id="vVig"></div><div id="vBub"></div><div id="vTap"></div><div id="vHold"></div><button id="vHome">🏠 Home</button><button id="vSnow" title="Turn the snowfall on or off">❄️ Snowing</button><button id="vMapB" title="World map (M)">🗺️ Map</button><button id="vLobB" title="Lobby · who's online">👥 Lobby<b class="lobN"></b></button><div id="vSide"><button id="vView" title="Switch to first person (V)">👁️</button><button id="vBino" title="Binoculars (B)">🔭</button><button id="vQual" title="Graphics quality">💎</button><button id="vInv" title="Invite your lobby into your house" style="display:none">✉️</button></div><div id="vBinoO"><svg width="100%" height="100%" preserveAspectRatio="none"><defs><mask id="bnm"><rect width="100%" height="100%" fill="white"/><ellipse cx="38%" cy="50%" rx="24%" ry="40%" fill="black"/><ellipse cx="62%" cy="50%" rx="24%" ry="40%" fill="black"/></mask><radialGradient id="bng" cx="50%" cy="50%" r="50%"><stop offset="70%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".55"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#bng)"/><rect width="100%" height="100%" fill="#05070b" mask="url(#bnm)"/></svg><div class="bz"><button data-z="0.77">−</button><span class="z">4×</span><button data-z="1.3">+</button><button data-z="x">Lower</button></div></div><div id="vTitle">Lake Oswego · Millennium Plaza</div><div id="vTreats" title="Treats you tasted"><span title="Hot chocolate">☕</span><span title="Mulled wine">🍷</span><span title="Gingerbread">🍪</span><span title="Roasted chestnuts">🌰</span><span title="Hot apple cider">🍎</span></div><div id="vMsg"></div><div id="vAct"></div><div id="vLoad">Building the old town…</div></div>
+<div id="vil" role="application" aria-label="Old town Christmas market"><canvas id="v3c"></canvas><div id="vVig"></div><div id="vBub"></div><div id="vTap"></div><div id="vHold"></div><button id="vHome">🏠 Home</button><button id="vSnow" title="Turn the snowfall on or off">❄️ Snowing</button><button id="vMapB" title="World map (M)">🗺️ Map</button><button id="vLobB" title="Lobby · who's online">👥 Lobby<b class="lobN"></b></button><div id="vSide"><button id="vView" title="Switch to first person (V)">👁️</button><button id="vBino" title="Binoculars (B)">🔭</button><button id="vQual" title="Graphics quality">🐢</button><button id="vInv" title="Invite your lobby into your house" style="display:none">✉️</button></div><div id="vBinoO"><svg width="100%" height="100%" preserveAspectRatio="none"><defs><mask id="bnm"><rect width="100%" height="100%" fill="white"/><ellipse cx="38%" cy="50%" rx="24%" ry="40%" fill="black"/><ellipse cx="62%" cy="50%" rx="24%" ry="40%" fill="black"/></mask><radialGradient id="bng" cx="50%" cy="50%" r="50%"><stop offset="70%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".55"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#bng)"/><rect width="100%" height="100%" fill="#05070b" mask="url(#bnm)"/></svg><div class="bz"><button data-z="0.77">−</button><span class="z">4×</span><button data-z="1.3">+</button><button data-z="x">Lower</button></div></div><div id="vTitle">Lake Oswego · Millennium Plaza</div><div id="vTreats" title="Treats you tasted"><span title="Hot chocolate">☕</span><span title="Mulled wine">🍷</span><span title="Gingerbread">🍪</span><span title="Roasted chestnuts">🌰</span><span title="Hot apple cider">🍎</span></div><div id="vMsg"></div><div id="vAct"></div><div id="vLoad">Building the old town…</div></div>
 <div id="bar"><button id="goals" title="Advent calendar & challenges">⭐<b id="gpN">0</b></button><button id="lobB" title="Lobby · who's online">👥<b class="lobN"></b></button><button id="me" title="Your name">👤<span class="lbl" id="meL"> Name</span></button><button id="presets" title="Decoration presets">✨<span class="lbl"> Presets</span></button><button id="undo" title="Undo (Ctrl+Z)" class="off">↩︎</button><button id="redo" title="Redo (Ctrl+Shift+Z)" class="off">↪︎</button><button id="clear" title="Clear tree">🗑</button><button id="wx" title="Weather outside" aria-haspopup="true" aria-expanded="false">🌨</button><button id="dim" title="Room lights">🌙</button><button id="music" class="on" title="Christmas music">🎵</button><button id="skip" title="Next song">⏭</button><button id="mute" title="Sound">🔊</button><button id="snap">📷<span class="lbl"> Photo</span></button></div>
 <div class="hint" id="hint">Drag ornaments, lights and the star onto the tree ✨</div>
 <div class="hint" id="lhint" style="display:none">Drag across the tree to hang lights <button id="auto">Drape for me</button><button id="done">Done</button></div>
@@ -1563,8 +1563,8 @@ function animPerson(p,dt,moving,T){if(p.cul)return;const B=p.body,Tq=p.torso,Hd=
     if(Hd){if(!p.lkT||T>p.lkT){p.lkT=T+2+Math.random()*4;p.lkY=(Math.random()-.5)*(p.talk?.4:.9);p.lkX=(Math.random()-.5)*.18}const h=Math.min(1,dt*2.2);Hd.rotation.y+=(p.lkY-Hd.rotation.y)*h;Hd.rotation.x+=(p.lkX-Hd.rotation.x)*h}}}
 /* build the whole town */
 /* ===== graphics quality: read the visitor's hardware, pick a preset, then check the real frame rate and step down if needed ===== */
-const GQ={mode:'auto',lvl:2,det:2,gpu:'',why:'',names:['Low','Medium','High'],bench:null,downs:0};
-(function(){try{const m=localStorage.getItem('gqMode');if(m&&/^(auto|low|medium|high)$/.test(m))GQ.mode=m}catch(e){}})();
+const GQ={mode:'low',/* v131: start at Low unless you picked something */lvl:2,det:2,gpu:'',why:'',names:['Low','Medium','High'],bench:null,downs:0};
+(function(){try{const m=localStorage.getItem('gqMode');if(m&&/^(auto|low|medium|high)$/.test(m))GQ.mode=m}catch(e){}const b=document.getElementById('vQual');if(b)b.textContent=['🐢','⚖️','💎'][{medium:1,high:2}[GQ.mode]||0]})();
 function gqDetect(){let sc=2;const why=[];let gpu='unknown';
   try{const c=document.createElement('canvas'),gl=c.getContext('webgl2')||c.getContext('webgl');if(!gl){GQ.det=0;GQ.why='no WebGL';return 0}
     const ext=gl.getExtension('WEBGL_debug_renderer_info');gpu=String(ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'');
@@ -5002,7 +5002,6 @@ wxB.addEventListener('click',()=>{if(mup.classList.contains('show'))muOpen(false
 
 /* ---------- the house: a wardrobe with indoor clothes, a bath you undress for, light switches and curtains that close ---------- */
 LK_O.fit=[['out','Coat & boots'],['sweater','Knit sweater'],['shirt','Flannel shirt'],['pyjamas','Pyjamas'],['robe','Bathrobe'],['bath','Bath']];
-if(LOOK&&LOOK.fit!=='out'){LOOK.fit='out';lkSave()}
 const HX_FIT={
   out:{e:'🧥',n:'Coat & boots',d:'Your outdoor look'},
   sweater:{e:'🧶',n:'Cream knit sweater',d:'With your trousers and wool socks'},
@@ -5091,7 +5090,6 @@ function hxSwitches(){const seen=new Set();for(const [a,b,pts] of HS.doors)for(c
   const tgt=dark?(.12+.75*day*(1-.8*sh)):1.05;if(S3.hemi){S3.hemi.intensity+=(tgt-S3.hemi.intensity)*Math.min(1,dt*4)}
   hxGlowSet()}}
 {const _k=hsLook;hsLook=function(on){const r=_k.apply(this,arguments);if(!on&&HS.off.size){HS.off.clear();hxGlowSet()}return r}}
-{const _o=lkOpen;lkOpen=function(){const r=_o.apply(this,arguments);if(LKE.d)LKE.d.fit='out';return r}}
 /* ---------- clothes for every season, a duvet over you in bed, Douglas firs on Lakeshore Lane ---------- */
 LK_O.fit=[['out','Coat & boots'],['sweater','Knit sweater'],['shirt','Flannel shirt'],['pyjamas','Pyjamas'],['robe','Bathrobe'],['bath','Bath'],['tee','T-shirt & shorts'],['linen','Linen shirt & chinos'],['dress','Summer dress'],['skirt','Blouse & skirt'],['swim','Swimwear'],['in','Coat off'],['hoodie','Hoodie & joggers'],['jeans','Top & jeans'],['knit','Knit dress'],['wskirt','Sweater & wool skirt'],['tank','Tank top & shorts'],['maxi','Long summer dress'],['polo','Polo & shorts']];
 /* who can wear what: g = 'm', 'f' or both */
@@ -5134,8 +5132,7 @@ hxWardrobe=function(){let el=document.getElementById('hxW');if(!el){el=document.
   const b=el.querySelector('.on')||el.querySelector('button[data-f]');if(b)b.focus()};
 addEventListener('keydown',e=>{const el=document.getElementById('hxW');if(el&&el.classList.contains('show')&&/^[6-9]$/.test(e.key)){const b=el.querySelectorAll('[data-f]')[+e.key-1];if(b){b.click();e.stopPropagation()}}},true);
 /* going outside: the coat goes back on unless it's summer and you're dressed for it */
-{const _l=hsLeave;hsLeave=function(quiet){if(V3.inH&&LOOK&&LOOK.fit&&LOOK.fit!=='out'){const f=LOOK.fit,warm=hxWarm(),keep=warm&&['tee','linen','dress','skirt','swim','shirt','tank','maxi','polo','jeans'].includes(f);
-    if(!keep){hxWardClose();hxWear('out');setTimeout(()=>v3Msg(warm?'🧥 You get dressed to go out':'🧥 It’s cold out · you put your coat and boots back on',2600),quiet?0:900)}}
+{const _l=hsLeave;hsLeave=function(quiet){/* v131: your outfit stays as you left it; only the bath towel comes off at the door */if(V3.inH&&LOOK&&LOOK.fit==='bath'){hxWardClose();hxWear(HS.preBath&&HS.preBath!=='bath'?HS.preBath:'in')}
   return _l.apply(this,arguments)}}
 /* bed: you slide under the duvet */
 function hxDuvet(on){if(HS.duv){HS.duv.parent&&HS.duv.parent.remove(HS.duv);HS.duv=null}if(!on)return;const po=V3.pose,s=po&&po.s;if(!s||!s.bed)return;
@@ -5193,7 +5190,7 @@ function hxShare(what){if(!V3.inH)return;HX_ST[hxKey()]=hxState();if(typeof MP==
 /* entering: the house as you left it, then as the people inside have it; the coat and boots come off at the door */
 function hxArrive(){let n=0;const t=setInterval(()=>{if(!V3.inH){if(++n>40)clearInterval(t);return}clearInterval(t);
     hxApply(HX_ST[hxKey()]||{off:[],cur:[]},true);if(typeof MP!=='undefined'&&MP.ok)mpSend('hxq',{id:LB.id,hs:hxKey()});
-    if(LOOK&&LOOK.fit==='out')setTimeout(()=>{if(V3.inH&&LOOK.fit==='out'&&!V3.pose)hxWear('in','🧦 You hang up your coat and take off your boots')},1300)},100)}
+  },100)}
 {const _e=hsEnter;hsEnter=function(){const r=_e.apply(this,arguments);hxArrive();return r}}
 {const _j=hsJoin;hsJoin=function(){const was=V3.inH;if(was)HX_ST[hxKey()]=hxState();const r=_j.apply(this,arguments);if(was)hxArrive();return r}}
 {const _l=hsLeave;hsLeave=function(){if(V3.inH)HX_ST[hxKey()]=hxState();return _l.apply(this,arguments)}}
@@ -8454,7 +8451,7 @@ function p6AdultBody(slim,berry){
         const dx=outer?tangent*(position.getX(k)-position.getX(k+1)):0;
         const dz=outer?tangent*(position.getZ(k)-position.getZ(k+1)):0;
         const x=(1-blend)*topX+blend*lowX+dx+sign*.013*round*Math.max(0,sign*c);
-        const z=(1-blend)*topZ+blend*lowZ+dz-.065*round*rear*(.64+.36*rear);
+        const z=(1-blend)*topZ+blend*lowZ+dz*(1-rear)-.075*Math.sin(Math.PI*u)*rear*(.64+.36*rear);
         pos.push(x,topY+(-.160-topY)*u,z);
         // Carry the torso longitude down the outer panel. Across the medial
         // saddle interpolate from front to back to avoid a wrap inside a face.
@@ -9248,7 +9245,8 @@ if(typeof HX_W!=='undefined')for(const [,l] of HX_W){const i=l.findIndex(x=>x[0]
 /* jewelry: earrings (studs, hoops, diamonds), necklaces (fine chain, pendant, pearls), bracelets, in gold or silver */
 Object.assign(LK_O,{er:[['none','None'],['studs','Studs'],['hoops','Hoops'],['huggies','Huggie stack'],['diamonds','Diamond studs']],nk:[['none','None'],['chain','Fine chain'],['pendant','Pendant'],['pearls','Pearls']],br:[['none','None'],['chain','Chain bracelet'],['bangles','Bangles'],['cuff','Cuff']],jm:[['gold','Gold'],['silver','Silver']]});
 if(!LK_T.some(t=>t[0]==='Jewelry'))LK_T.push(['Jewelry',[['er','Earrings'],['nk','Necklace'],['br','Bracelets'],['jm','Metal']]]);
-if(LOOK)LOOK=lkClean(LOOK);
+/* v131: the first read dropped keys added later (outfit, jewelry), so read the saved look again now; lingerie and the towel don't start outdoors */
+if(LOOK){let j=null;try{j=JSON.parse(localStorage.getItem('lakeTreeLook'))}catch(_){}LOOK=lkClean(Object.assign({},LOOK,j));if(['lingerie','berry','bath'].includes(LOOK.fit))LOOK.fit='in'}
 function p6Jewel(a,L){if(!L||(L.er||'none')==='none'&&(L.nk||'none')==='none'&&(L.br||'none')==='none')return;
   const M=P6.jm||(P6.jm={gold:new THREE.MeshStandardMaterial({color:'#e0b44c',metalness:.85,roughness:.22,emissive:'#3a2808',emissiveIntensity:.35}),silver:new THREE.MeshStandardMaterial({color:'#e4e4ea',metalness:.85,roughness:.18,emissive:'#2a2a30',emissiveIntensity:.35}),
     dia:new THREE.MeshStandardMaterial({color:'#ffffff',metalness:0,roughness:.02,emissive:'#cfe4ff',emissiveIntensity:.55,flatShading:true}),pearl:new THREE.MeshStandardMaterial({color:'#f3eee4',metalness:.1,roughness:.25,emissive:'#3a3630',emissiveIntensity:.3})});
@@ -9438,7 +9436,7 @@ function tlGo(){if(!V3.on)return;if(V3.mode!=='walk'||V3.boat||V3.ovl){v3Msg('�
 {const _d=vmDraw;vmDraw=function(){_d.apply(this,arguments);if(!VM.on||!V3.on||!tlSeason())return;const cv=document.querySelector('#vMap canvas');if(!cv)return;const W=cv.clientWidth,H=cv.clientHeight,sc=VM.sc,q=cv.getContext('2d'),u=(14.3-VM.cz)*sc+W/2,v=(VM.cx+12.7)*sc+H/2;
   q.fillStyle='rgba(10,20,35,.45)';q.beginPath();q.ellipse(u+1,v+2,6,3,0,0,7);q.fill();q.fillStyle='#2f6a3e';q.strokeStyle='#f3ead2';q.lineWidth=2;q.beginPath();q.moveTo(u,v);q.bezierCurveTo(u-11,v-14,u-9,v-26,u,v-26);q.bezierCurveTo(u+9,v-26,u+11,v-14,u,v);q.fill();q.stroke();
   q.font='13px system-ui';q.textAlign='center';q.fillText('🌲',u,v-14);if(sc>.6){q.font='600 12px Georgia,serif';q.fillStyle='rgba(10,20,35,.6)';q.fillText('Christmas Tree Lot',u+1,v+15);q.fillStyle='#f3ead2';q.fillText('Christmas Tree Lot',u,v+14)}}}
-/* ===== v130: rigged character follows your look (?rig=1) · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
+/* ===== v131: graphics start Low, outfit stays on reload, rounder seat · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
    Drinks and food (market, kitchen, breakfast, the cookie plate) fill them; the cold outside drains warmth, the fire and the sofa bring it back ===== */
 const CZ={t:performance.now(),hid:null,hn:0,cozy:0,chill:0,st:null};
 function czN(){if(typeof prog==='undefined')return{d:70,f:70,w:80};if(!prog.need)prog.need={d:70,f:70,w:80};return prog.need}
