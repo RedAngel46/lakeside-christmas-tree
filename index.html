@@ -4175,12 +4175,12 @@ function lkDraw(el){el.querySelector('h3').textContent='🧥 Your character';el.
 function lkTabs(){const T=document.querySelector('#lob .lkTabs');if(!T)return;T.innerHTML=LK_T.map((t,i)=>'<button type="button" role="tab" aria-selected="'+(i===LKE.tab)+'" class="'+(i===LKE.tab?'on':'')+'" data-t="'+i+'">'+t[0]+'</button>').join('');
   T.querySelectorAll('button').forEach(b=>b.onclick=()=>{LKE.tab=+b.dataset.t;lkTabs();lkRows()})}
 function lkRows(){const S=document.querySelector('#lob .lkS');if(!S)return;const d=LKE.d;let h='';
-  for(const [k,lab] of LK_T[LKE.tab][1]){if(k==='rp'?d.g==='m':(k==='rm'||k==='ro')&&d.g!=='m')continue/* v142: woman rows for women, man rows for men */;h+='<div class="lkRow"><label>'+lab+'</label><div class="lkCh">';
-    for(const x of LK_O[k]){const v=Array.isArray(x)?x[0]:x,on=String(d[k])===String(v);
+  for(const [k,lab] of LK_T[LKE.tab][1]){if(k==='rp'?d.g==='m':(k==='rm'||k==='ro')&&d.g!=='m')continue/* v142: woman rows for women, man rows for men */;if(RG.rb&&(k==='bd'||k==='ey'||k==='gs'||d.g==='m'&&(k==='hs'||k==='hc')))continue/* v145: Rocketbox has no beards, eye colours or glasses, and the men's hair comes with the man you pick */;h+='<div class="lkRow"><label>'+lab+'</label><div class="lkCh">';
+    for(const x of LK_O[k]){const v=Array.isArray(x)?x[0]:x,on=RG.rb&&k==='hs'?(v==='waves')===(d.rp==='15'):String(d[k])===String(v);if(RG.rb&&(k==='hs'&&v!=='long'&&v!=='waves'||k==='hc'&&!['#1a1a1a','#2a1a10','#6b4423','#8a3a1a','#c9a46a'].includes(v)))continue/* v145: only the styles and colours rbVar has a Rocketbox hair for (long = #8, loose curls = #15) */;
       if(Array.isArray(x))h+='<button type="button" class="ch'+(on?' on':'')+'" data-k="'+k+'" data-v="'+v+'">'+x[1]+'</button>';
       else h+='<button type="button" class="sw'+(on?' on':'')+(v===''?' no':'')+'" data-k="'+k+'" data-v="'+v+'" title="'+(v===''?(k==='gl'?'Bare hands':'None'):v)+'" style="background:'+(v===''?(k==='gl'?d.sk:'transparent'):v)+'"></button>'}
     h+='</div></div>'}
-  S.innerHTML=h;S.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;let v=b.dataset.v;if(k==='k'||k==='ln')v=+v;LKE.d[k]=v;
+  S.innerHTML=h||'<p class="lbE">His hair comes with the man you pick under Body.</p>';S.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;let v=b.dataset.v;if(k==='k'||k==='ln')v=+v;LKE.d[k]=v;if(RG.rb&&k==='hs')LKE.d.rp=v==='waves'?'15':'8';
     if(k==='g'){if(v==='m'&&(LKE.d.hs==='long'||LKE.d.hs==='bun'||LKE.d.hs==='bob'))LKE.d.hs='short';if(v==='f'&&(LKE.d.hs==='short'||LKE.d.hs==='bald'))LKE.d.hs='long';if(v==='f')LKE.d.bd='none'}
     lkRows();lkBuild()})}
 function lkGl(cv){if(LKE.ren&&LKE.ren.domElement===cv)return;if(LKE.ren)try{LKE.ren.dispose()}catch(_){}
@@ -4197,12 +4197,7 @@ LKE.rb=null
 LKE.rbv=v
 if(v){rigLibs()
 new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('rig/rb'+v+'.glb',g=>{if(LKE.rbv!==v||!LKE.scene)return
-g.scene.traverse(o=>{if(o.isMesh){o.frustumCulled=false
-const M=o.material
-M.transparent=false
-M.depthWrite=true
-rbSkin(M)
-if(/eyebrow|eyelash|opacity/i.test(M.name))M.alphaTest=.45}})
+g.scene.traverse(o=>{if(o.isMesh)rbMat(o)})
 LKE.rb=g.scene
 LKE.mx=new THREE.AnimationMixer(g.scene)
 const c=g.animations.find(c=>c.name==='Idle')
@@ -8114,8 +8109,8 @@ function dvBuild(s,bodies){
   const alongX=ax!==0,sg=alongX?ax:az,A0=alongX?(sg>0?bx.x0:bx.x1):(sg>0?bx.z0:bx.z1),A1=alongX?(sg>0?bx.x1:bx.x0):(sg>0?bx.z1:bx.z0),V0=alongX?bx.z0:bx.x0,V1=alongX?bx.z1:bx.x1,ha=alongX?s.hx:s.hz,hv=alongX?s.hz:s.hx;
   const L=Math.abs(A1-A0),dS=Math.abs(ha-A0)+.36,drop=.34,NA=46,NV=40;
   const body=d=>{const k=(a,b,x)=>Math.max(0,Math.min(1,(x-a)/(b-a)));const t=d-Math.abs(ha-A0)+.14;/* distance from the top of the head */
-    const h=t<.45?.2:t<.95?.2-.03*k(.45,.95,t):t<1.35?.17-.04*k(.95,1.35,t):t<1.6?.13:t<1.92?.13+.035*Math.sin(Math.PI*k(1.6,1.92,t)):.0;const w=t<.6?.32:t<1.05?.3:t<1.4?.22:.21;return[h,w]};
-  const H=(d,v)=>{const [h,w]=body(d);let mx=0;for(const b of bodies){const x=(v-(alongX?b.s.hz:b.s.hx))/(w*1.3),bell=1/(1+x*x*x*x*1.6);mx=Math.max(mx,Math.max(0,b.ay+h+.04-yT-.05)*bell)}return yT+.05+mx+.006*Math.sin(d*21+v*5)*Math.sin(v*17-d*3)};
+    const h=t<.45?.2:t<.95?.2-.03*k(.45,.95,t):t<1.35?.17-.04*k(.95,1.35,t):t<1.6?.13:t<2.35?.13+.05*Math.sin(Math.PI*k(1.6,2.35,t)):.0;/* v145: longer, higher foot hump for the 1.80 m Rocketbox characters' feet */const w=t<.6?.32:t<1.05?.3:t<1.4?.22:.27;return[h,w]};
+  const H=(d,v)=>{const [h,w]=body(d);let mx=0;for(const b of bodies){const x=(v-(alongX?b.s.hz:b.s.hx))/(w*1.3),bell=1/(1+x*x*x*x*1.6);mx=Math.max(mx,Math.max(0,b.ay+h+.06-yT-.05)*bell)/* v145: +2 cm loft so hands stay under */}return yT+.05+mx+.006*Math.sin(d*21+v*5)*Math.sin(v*17-d*3)};
   const pos=[],col=[],idx=[],cS=new THREE.Color('#f6f2ea'),cD=new THREE.Color('#e9e2d4');
   for(let i=0;i<=NA;i++){const d=dS+(L-dS+drop)*i/NA;for(let j=0;j<=NV;j++){const vw=(V1-V0)+drop*2,v=V0-drop+vw*j/NV;
       let dd=Math.min(d,L),vv=Math.max(V0,Math.min(V1,v)),y=H(dd,vv);const eA=Math.max(0,d-L),eV=Math.max(V0-v,v-V1,0),e=Math.max(eA,eV);
@@ -8137,7 +8132,7 @@ function dvSeatAt(x,z,k){let best=null,bd=.5;for(const s of dvSeats()){const d=M
 function dvBed(s){return s.l+':'+(s.dx?s.hx:s.hz)}
 function dvTick(){if(!S3||!S3.scene)return;const occ=[];
   if(V3.inH){const po=V3.pose;if(po&&po.k==='lie'&&po.s&&po.s.bed)occ.push({s:po.s,ay:po.ay});
-    if(typeof MP!=='undefined')for(const q of MP.peers.values())if(q.ps==='lie'&&q.av&&q.av.g.visible){const s=dvSeatAt(q.x,q.z,q.av.k||1);q.av._bed=!!s;if(s)occ.push({s,ay:q.h})}else if(q.av)q.av._bed=false;}
+    if(typeof MP!=='undefined')for(const q of MP.peers.values())if(q.ps==='lie'&&q.av&&(q.av.g.visible||q.rg&&q.rg.visible)){const s=dvSeatAt(q.x,q.z,q.av.k||1);q.av._bed=!!s;if(s)occ.push({s,ay:q.h})}else if(q.av)q.av._bed=false;}
   const sig=occ.map(b=>dvBed(b.s)+'/'+(b.s.dx?b.s.hz:b.s.hx)+'/'+b.ay.toFixed(2)).sort().join('|');if(sig===DV.sig)return;DV.sig=sig;
   for(const g of DV.g){g.parent&&g.parent.remove(g);g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}DV.g=[];
   const beds=new Map();for(const b of occ){const k=dvBed(b.s);if(!beds.has(k))beds.set(k,[]);beds.get(k).push(b)}
@@ -9456,7 +9451,7 @@ function tlGo(){if(!V3.on)return;if(V3.mode!=='walk'||V3.boat||V3.ovl){v3Msg('�
 {const _d=vmDraw;vmDraw=function(){_d.apply(this,arguments);if(!VM.on||!V3.on||!tlSeason())return;const cv=document.querySelector('#vMap canvas');if(!cv)return;const W=cv.clientWidth,H=cv.clientHeight,sc=VM.sc,q=cv.getContext('2d'),u=(14.3-VM.cz)*sc+W/2,v=(VM.cx+12.7)*sc+H/2;
   q.fillStyle='rgba(10,20,35,.45)';q.beginPath();q.ellipse(u+1,v+2,6,3,0,0,7);q.fill();q.fillStyle='#2f6a3e';q.strokeStyle='#f3ead2';q.lineWidth=2;q.beginPath();q.moveTo(u,v);q.bezierCurveTo(u-11,v-14,u-9,v-26,u,v-26);q.bezierCurveTo(u+9,v-26,u+11,v-14,u,v);q.fill();q.stroke();
   q.font='13px system-ui';q.textAlign='center';q.fillText('🌲',u,v-14);if(sc>.6){q.font='600 12px Georgia,serif';q.fillStyle='rgba(10,20,35,.6)';q.fillText('Christmas Tree Lot',u+1,v+15);q.fillStyle='#f3ead2';q.fillText('Christmas Tree Lot',u,v+14)}}}
-/* ===== v144: guests show as their own Rocketbox character, guests upstairs stay on the upstairs floor · v143: Rocketbox women and men for everyone (no ?rb=1), old MakeHuman model retired, warmer livelier faces · v142: Rocketbox men #2, #7, #8, #20, each in his own, a leather-jacket or a denim outfit (?rb=1) · v141: no dark squares in the Rocketbox women's hair · v140: sofa sit higher, editor preview shows the Rocketbox woman, smoother blonde hairline · v139: Rocketbox women also redhead, black and light brown · v138: Rocketbox women 8 (casual) and 15 (smart casual), brown or blonde, in the look editor (?rb=1) · v137: Rocketbox woman 8, brown or blonde by your hair colour, hazel eyes, 1.80 m (?rb=1) · v136: Rocketbox woman test (?rb=1) · v135: natural light (AgX colour, stronger sky light) · v134: always the human character, also in wardrobe outfits · v133: softer women's walk (open hands, hip sway, feet in line) · v132: new rigged character is the default (?rig=0 = old body), armchair sit moved forward · v131: graphics start Low, outfit stays on reload, rounder seat · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
+/* ===== v145: one hair setup (no hair shadows) in game, guests and Lobby preview; editor shows only working Rocketbox choices; you and guests lie in bed (and on the sofa) as your own character, feet pointed, duvet a bit higher so nothing pokes through. v144: guests show as their own Rocketbox character, guests upstairs stay on the upstairs floor · v143: Rocketbox women and men for everyone (no ?rb=1), old MakeHuman model retired, warmer livelier faces · v142: Rocketbox men #2, #7, #8, #20, each in his own, a leather-jacket or a denim outfit (?rb=1) · v141: no dark squares in the Rocketbox women's hair · v140: sofa sit higher, editor preview shows the Rocketbox woman, smoother blonde hairline · v139: Rocketbox women also redhead, black and light brown · v138: Rocketbox women 8 (casual) and 15 (smart casual), brown or blonde, in the look editor (?rb=1) · v137: Rocketbox woman 8, brown or blonde by your hair colour, hazel eyes, 1.80 m (?rb=1) · v136: Rocketbox woman test (?rb=1) · v135: natural light (AgX colour, stronger sky light) · v134: always the human character, also in wardrobe outfits · v133: softer women's walk (open hands, hip sway, feet in line) · v132: new rigged character is the default (?rig=0 = old body), armchair sit moved forward · v131: graphics start Low, outfit stays on reload, rounder seat · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
    Drinks and food (market, kitchen, breakfast, the cookie plate) fill them; the cold outside drains warmth, the fire and the sofa bring it back ===== */
 const CZ={t:performance.now(),hid:null,hn:0,cozy:0,chill:0,st:null};
 function czN(){if(typeof prog==='undefined')return{d:70,f:70,w:80};if(!prog.need)prog.need={d:70,f:70,w:80};return prog.need}
@@ -16242,11 +16237,14 @@ function rgLook(){const L=LOOK,D=hxDress(L),key=JSON.stringify([L.sk,L.hs,L.hc,D
     if(/bob0|long01|ponytail01|short02/.test(n)){o.visible=!!hair&&n.endsWith(hair);M.color.copy(C(L.hc))}
     else if(n==='Human.body')M.color.setRGB(Math.min(1.15,sk.r/ref.r),Math.min(1.15,sk.g/ref.g),Math.min(1.15,sk.b/ref.b));
     else if(/shoes01/.test(n))M.color.copy(C(D.sh))})}
+/* v145: one Rocketbox material setup for you, guests and the Lobby preview. Hair cards (DoubleSide, *_opacity) are lit from the side we see (v141) and cast/receive no shadows, so thin cards don't put shadow-map acne on the cards under them */
+function rbMat(o){o.frustumCulled=false;const M=o.material,h=/opacity/.test(M.name);o.castShadow=!h;o.receiveShadow=false;M.depthWrite=true;M.transparent=false;rbSkin(M)
+if(h){M.alphaTest=.45;M.customProgramCacheKey=()=>'rbhair';M.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal*=dot(normal,vViewPosition)<0.?-1.:1.;')}}else M.side=THREE.FrontSide}
 /* v143: livelier Rocketbox faces: warm 10% fill (emissive = own texture) so no dark eye/chin shadows, a touch warmer lips, softer skin sheen, glossy eyes (eyeball at uv .264,.933 in the Rocketbox head atlas) */function rbSkin(M){if(!/_head$/.test(M.name))return;M.emissiveMap=M.map;M.emissive.setRGB(.13,.115,.1);M.roughness=.55;M.customProgramCacheKey=()=>'rbhead';M.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\ndiffuseColor.r+=.03*smoothstep(.15,.3,diffuseColor.r-diffuseColor.g);').replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=mix(.12,roughnessFactor,smoothstep(.045,.07,distance(vMapUv,vec2(.264,.933))));')}}function rbVar(L){L=L||{};return RG.rb&&L.g==='m'?'m'+(L.rm||'2')+'_'+(L.ro||'own')/* v142: Rocketbox men 2, 7, 8, 20 in their own, #4's or #12's outfit */:RG.rb&&L.g!=='m'?(L.rp==='15'?'15':'8')+'_'+({'#1a1a1a':'black','#6b4423':'lbrown','#8a3a1a':'red','#c9a46a':'blonde','#e2d4b0':'blonde'}[L.hc]||'brown'):''}/* v139: hair colour picks the Rocketbox hair texture */
 function rgLoad(){const sx=LOOK&&LOOK.g==='m'?'m':'f',v=rbVar(LOOK),id=sx+v;if(RG.ld===id)return;RG.ld=id;rigLibs();if(!RG.uCo){RG.uCo={value:new THREE.Color()};RG.uPa={value:new THREE.Color()}}
   if(RG.g){S3.scene.remove(RG.g);RG.g=null;RG.act={};RG.cur=null;RG.hand=null;RG.key=''}
   new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('rig/rb'+v+'.glb',g=>{if(RG.ld!==id)return;/* v136 ?rb=1: Microsoft Rocketbox avatar, Copyright (c) Microsoft Corporation, MIT licence (github.com/microsoft/Microsoft-Rocketbox) *//* v136 ?rb=1: Rocketbox (MIT) woman, her clips renamed to ours */if(v)for(const c of g.animations)c.name={Idle:'Idle_Loop',Walk:'Walk_Loop',Run:'Jog_Fwd_Loop',Sit:'Sitting_Idle_Loop'}[c.name]||c.name;const m=g.scene;
-    m.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const M=o.material;M.depthWrite=true;M.transparent=false;rbSkin(M);if(/opacity/.test(M.name)){M.customProgramCacheKey=()=>'rbhair';M.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal*=dot(normal,vViewPosition)<0.?-1.:1.;')}}/* v141: some Rocketbox hair cards have normals pointing inward = dark squares in the hair; light every card from the side we see */if(/eyebrow|eyelash|long01|bob0|ponytail|short02|suit|shoe|opacity/i.test(M.name))M.alphaTest=.45;else M.side=THREE.FrontSide;/* shirt in your top colour, trousers in your trouser colour: the grey atlas is split by UV */if(/casualsuit/.test(M.name)){M.customProgramCacheKey=()=>'rg'+sx;M.onBeforeCompile=sh=>{sh.uniforms.uCo=RG.uCo;sh.uniforms.uPa=RG.uPa;sh.fragmentShader='uniform vec3 uCo,uPa;\n'+sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n{vec2 q=vMapUv;float j='+(sx==='m'?'step(.35,q.x)*step(q.x,.72)':'step(.45,q.y)*step(q.x,.72)')+';diffuseColor.rgb*=mix(uCo,uPa,j);}')}}}if(o.isBone&&o.name==='hand_r')RG.hand=o});
+    m.traverse(o=>{if(o.isMesh){rbMat(o);const M=o.material;/* shirt in your top colour, trousers in your trouser colour: the grey atlas is split by UV */if(/casualsuit/.test(M.name)){M.customProgramCacheKey=()=>'rg'+sx;M.onBeforeCompile=sh=>{sh.uniforms.uCo=RG.uCo;sh.uniforms.uPa=RG.uPa;sh.fragmentShader='uniform vec3 uCo,uPa;\n'+sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n{vec2 q=vMapUv;float j='+(sx==='m'?'step(.35,q.x)*step(q.x,.72)':'step(.45,q.y)*step(q.x,.72)')+';diffuseColor.rgb*=mix(uCo,uPa,j);}')}}}if(o.isBone&&o.name==='hand_r')RG.hand=o});
     RG.g=m;m.userData.hs=1;S3.scene.add(m);m.traverse(o=>{if(o.isBone)o.userData.q0=o.quaternion.clone()});RG.mx=new THREE.AnimationMixer(m);for(const c of g.animations)RG.act[c.name]=RG.mx.clipAction(c);
     /* v133: when in the walk loop the left foot is furthest forward, to time the hip sway */
     const wa=RG.act.Walk_Loop,fl=m.getObjectByName('foot_l'),fr=m.getObjectByName('foot_r'),V=new THREE.Vector3();RG.tL=0;if(wa&&fl){wa.play();let best=-1e9;for(let i=0;i<48;i++){wa.time=i/48*wa.getClip().duration;RG.mx.update(0);m.updateMatrixWorld(true);const d=m.worldToLocal(fl.getWorldPosition(V)).z-m.worldToLocal(fr.getWorldPosition(V)).z;if(d>best){best=d;RG.tL=wa.time}}wa.stop()}
@@ -16266,13 +16264,11 @@ function rgFem(po){const m=RG.g,B=RG.fb||(RG.fb={});const b=n=>B[n]||(B[n]=m.get
   rot('thigh_l',Z,-.09*s-.07*W);rot('thigh_r',Z,-.09*s+.07*W);rot('upperarm_l',Z,-.08*W);rot('upperarm_r',Z,.08*W);
   const pel=b('pelvis');if(pel){m.updateMatrixWorld(true);const a=pel.parent.worldToLocal(pel.getWorldPosition(new THREE.Vector3())),q=m.localToWorld(m.worldToLocal(pel.getWorldPosition(new THREE.Vector3())).addScaledVector(X,.025*s));pel.position.add(pel.parent.worldToLocal(q).sub(a))}}
 /* v144: guests and other players as their own Rocketbox character (their own GLB per player, so nobody's look is shared or swapped) */
-function rbPeer(q,dt){const a=q.av,v=q.lk&&a&&a.g.visible&&(q.pl==='town'||q.pl==='boat')&&q.ps!=='lie'&&!q.dg&&!q.dc?rbVar(q.lk):''
+function rbPeer(q,dt){const a=q.av,v=q.lk&&a&&a.g.visible&&(q.pl==='town'||q.pl==='boat')&&!q.dg&&!q.dc?rbVar(q.lk):''
 if(q.rgv!==v){if(q.rg&&q.rg.parent)q.rg.parent.remove(q.rg)
 q.rg=null;q.rmx=null;q.rgv=v;q.rgOk=false
 if(v){rigLibs();new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('rig/rb'+v+'.glb',g=>{if(q.rgv!==v||!MP.peers.has(q.id))return
-g.scene.traverse(o=>{if(!o.isMesh)return;o.frustumCulled=false;o.castShadow=true;const M=o.material;M.depthWrite=true;M.transparent=false;rbSkin(M)
-if(/opacity/.test(M.name)){M.customProgramCacheKey=()=>'rbhair';M.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal*=dot(normal,vViewPosition)<0.?-1.:1.;')}}
-if(/eyebrow|eyelash|opacity/i.test(M.name))M.alphaTest=.45;else M.side=THREE.FrontSide})
+g.scene.traverse(o=>{if(!o.isMesh)return;rbMat(o)})
 const m=g.scene;q.rg=m;q.rmx=new THREE.AnimationMixer(m);q.ract={};for(const c of g.animations)q.ract[c.name]=q.rmx.clipAction(c)
 const sa=q.ract.Sit,pel=m.getObjectByName('Bip01_Pelvis');if(sa&&pel){sa.play();q.rmx.update(0);m.updateMatrixWorld(true);q.rpel=m.worldToLocal(pel.getWorldPosition(new THREE.Vector3()));sa.stop()}
 S3.scene.add(m)},undefined,e=>console.error('peer rig',e))}}
@@ -16281,17 +16277,22 @@ if(!q.rg)return
 q.rg.visible=!!v;if(!v)return
 const k=q.lk.k||1,sc=k*(q.lk.g!=='m'?1.047:1),G=a.g.position
 q.rg.scale.setScalar(sc);q.rg.rotation.set(0,a.g.rotation.y,0);q.rg.position.copy(G)
-if(q.ps&&q.rpel){const P=q.rpel.clone().multiplyScalar(sc),c=Math.cos(a.g.rotation.y),n=Math.sin(a.g.rotation.y)
+if(q.ps==='lie')q.rg.rotation.copy(a.g.rotation)/* v145: guests in bed stay their own character, laid flat like the old body */
+else if(q.ps&&q.rpel){const P=q.rpel.clone().multiplyScalar(sc),c=Math.cos(a.g.rotation.y),n=Math.sin(a.g.rotation.y)
 /* the old body's origin is .9k-.04 under its hips on the seat (see hsSeat ay) */q.rg.position.set(G.x-(P.x*c+P.z*n),G.y+.9*k-.04+.1-P.y,G.z-(-P.x*n+P.z*c))}
-const vv=Math.hypot(q.vx||0,q.vz||0),d=Math.hypot(q.x-q.rx,q.z-q.rz),nm=q.ps?'Sit':vv>3?'Run':vv>.2||d>.03?'Walk':'Idle',ac=q.ract[nm]
-if(ac&&q.rcur!==ac){ac.reset().fadeIn(.25).play();if(q.rcur)q.rcur.fadeOut(.25);q.rcur=ac}q.rmx.update(dt)}
+const vv=Math.hypot(q.vx||0,q.vz||0),d=Math.hypot(q.x-q.rx,q.z-q.rz),nm=q.ps==='lie'?'Idle':q.ps?'Sit':vv>3?'Run':vv>.2||d>.03?'Walk':'Idle',ac=q.ract[nm]
+if(ac&&q.rcur!==ac){ac.reset().fadeIn(.25).play();if(q.rcur)q.rcur.fadeOut(.25);q.rcur=ac}q.rmx.update(dt);if(q.ps==='lie')rbLie(q.rg)}
+/* v145: lying down, bend at the upper spine (Bip01_Spine1; in a Biped rig the thighs hang off Bip01_Spine) so the head rests on the pillow while the legs stay flat on the mattress (after the mixer, which resets the bones each frame) */
+function rbLie(m){for(const [n,a] of RBLIE)rbBend(m,n,a)}
+function rbBend(m,n,ang){const sp=m.getObjectByName(n);if(!sp)return;const u=sp.userData;if(u.post&&sp.quaternion.equals(u.post))sp.quaternion.copy(u.pre)/* a clip without this bone's track leaves last frame's bend in place: undo it, never stack it */;u.pre=sp.quaternion.clone();m.updateMatrixWorld(true);const pq=sp.parent.getWorldQuaternion(new THREE.Quaternion()),r=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0).transformDirection(m.matrixWorld),ang);sp.quaternion.premultiply(pq.clone().invert().multiply(r).multiply(pq));u.post=sp.quaternion.clone()}
+/* v145: head up on the pillow; feet relaxed and pointed (toes along the mattress, not up into the duvet) */let RBLIE=[['Bip01_Spine1',.35],['Bip01_L_Foot',.8],['Bip01_R_Foot',.8]]
 {const _m=mpFrame;mpFrame=function(dt,T){const r=_m.apply(this,arguments);if(typeof MP!=='undefined')for(const q of MP.peers.values())try{rbPeer(q,dt)}catch(e){console.error('peer rig',e)}return r}
 const _d=mpDrop;mpDrop=function(id){const q=MP.peers.get(id);if(q&&q.rg&&q.rg.parent)q.rg.parent.remove(q.rg);if(q)q.rgv='x';return _d.apply(this,arguments)}}
 function rgPlay(n,f){const a=RG.act[n];if(!a||RG.cur===a)return;a.reset().setEffectiveWeight(1).fadeIn(f||.25).play();if(RG.cur)RG.cur.fadeOut(f||.25);RG.cur=a}
 {const _f=meFrame;meFrame=function(dt,T,moving){const r=_f.apply(this,arguments);if(!RG.on)return r;rgLoad();const a=ME.av;if(a&&!RG.g){a.g.visible=false;return r}/* v134: no old body flash while the human loads */if(!RG.g||!a)return r;rgLook();
-  const po=V3.pose,lie=po&&po.k!=='sit',show=a.g.visible&&!lie;/* v134: always the human character; shortcut: the rig has one outfit (tinted to your outfit colours), real wardrobe meshes on the rig later */RG.g.visible=show;if(!show)return r;a.g.visible=false;
-  RG.g.position.copy(a.g.position);RG.g.rotation.set(0,a.g.rotation.y,0);if(po&&RG.pel){const s=po.s,k=a.k||1,fy=po.ay-s.sh+.9*k-.04,c=Math.cos(po.ry),n=Math.sin(po.ry),P=RG.pel.clone().multiplyScalar(RG.g.scale.x);/* hips on the seat centre, sit bones ~10 cm under the pelvis joint */const f=s.fw||0;/* v132: deep armchair, hips forward so the calves clear the cushion */const fb=f+(RG.rb?(f?.04:-.07):0),dy=RG.rb?(f?-.03:.03):0/* v140: sofa 6 cm higher, thighs on top of the cushion *//* v138: Rocketbox pelvis sits higher above the sit bones and the clip leans forward */;RG.g.position.set(po.ax+n*fb-(P.x*c+P.z*n),fy+s.sh-P.y+.1+f*.15+dy,po.az+c*fb-(-P.x*n+P.z*c))}
-  rgPlay(po?'Sitting_Idle_Loop':moving?(V3.keys.run?'Jog_Fwd_Loop':'Walk_Loop'):'Idle_Loop');if(RG.fu)for(const [o,q,v] of RG.fu){o.quaternion.copy(q);o.position.copy(v)}RG.fu=null;RG.mx.update(dt);if(RG.ld==='f'&&!RG.rb)rgFem(po);
+  const po=V3.pose,lie=po&&po.k!=='sit',show=a.g.visible;/* v134: always the human character; shortcut: the rig has one outfit (tinted to your outfit colours), real wardrobe meshes on the rig later */RG.g.visible=show;if(!show)return r;a.g.visible=false;
+  RG.g.position.copy(a.g.position);RG.g.rotation.set(0,a.g.rotation.y,0);if(lie)RG.g.rotation.copy(a.g.rotation)/* v145: lie down as yourself, laid flat like the old body (same feet origin) */;else if(po&&RG.pel){const s=po.s,k=a.k||1,fy=po.ay-s.sh+.9*k-.04,c=Math.cos(po.ry),n=Math.sin(po.ry),P=RG.pel.clone().multiplyScalar(RG.g.scale.x);/* hips on the seat centre, sit bones ~10 cm under the pelvis joint */const f=s.fw||0;/* v132: deep armchair, hips forward so the calves clear the cushion */const fb=f+(RG.rb?(f?.04:-.07):0),dy=RG.rb?(f?-.03:.03):0/* v140: sofa 6 cm higher, thighs on top of the cushion *//* v138: Rocketbox pelvis sits higher above the sit bones and the clip leans forward */;RG.g.position.set(po.ax+n*fb-(P.x*c+P.z*n),fy+s.sh-P.y+.1+f*.15+dy,po.az+c*fb-(-P.x*n+P.z*c))}
+  rgPlay(po?(lie?'Idle_Loop':'Sitting_Idle_Loop'):moving?(V3.keys.run?'Jog_Fwd_Loop':'Walk_Loop'):'Idle_Loop');if(RG.fu)for(const [o,q,v] of RG.fu){o.quaternion.copy(q);o.position.copy(v)}RG.fu=null;RG.mx.update(dt);if(lie)rbLie(RG.g);if(RG.ld==='f'&&!RG.rb)rgFem(po);
   const h=V3.held;if(h&&RG.hand&&!po){if(h.g.parent!==RG.hand)RG.hand.add(h.g);h.g.position.set(0,.09,.03);h.g.rotation.set(0,0,Math.PI/2);h.g.visible=true}
   return r}}
 
