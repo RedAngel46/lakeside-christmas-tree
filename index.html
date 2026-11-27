@@ -1596,7 +1596,7 @@ function gqCycle(){const order=['auto','high','medium','low'];GQ.mode=order[(ord
 function gqFrame(dt){if(GQ.mode!=='auto'||!V3.on||document.hidden)return;const B=GQ.bench||(GQ.bench={t:0,f:[]});B.t+=dt;if(B.t<1.5||dt>.25)return;B.f.push(dt);if(B.f.length<180)return;
   const a=B.f.slice().sort((x,y)=>x-y),med=a[a.length>>1];GQ.fps=Math.round(1/med);B.f.length=0;B.t=0;
   if(med>1/32&&GQ.lvl>0){GQ.lvl--;GQ.downs++;gqApply(true)}else if(med<1/75&&GQ.lvl<2&&GQ.downs===0&&!GQ.up){GQ.lvl++;GQ.up=1;gqApply(true)}}
-function v3Build(){gqInit();const cv=document.getElementById('v3c');const ren=new THREE.WebGLRenderer({canvas:cv,antialias:GQ.lvl>0,powerPreference:'high-performance'});ren.setPixelRatio(gqPR());ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.05;ren.outputColorSpace=THREE.SRGBColorSpace;
+function v3Build(){gqInit();const cv=document.getElementById('v3c');const ren=new THREE.WebGLRenderer({canvas:cv,antialias:GQ.lvl>0,powerPreference:'high-performance'});ren.setPixelRatio(gqPR());ren.toneMapping=THREE.AgXToneMapping;/* v135: AgX, softer natural highlights */ren.toneMappingExposure=1.05;ren.outputColorSpace=THREE.SRGBColorSpace;
   const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x0e1830,.017);const cam=new THREE.PerspectiveCamera(62,1,.1,2600);
   const S=S3={ren,scene,cam,smoke:[],steam:[],bulbs:[],bcol:[],clk:[]};S.sea=SEA.at(SEA.now());S.seaKey=SEA.key(S.sea);S.ssN=0;
   S.boxG=new THREE.BoxGeometry(1,1,1);S.planeG=new THREE.PlaneGeometry(1,1);S.cylG=new THREE.CylinderGeometry(1,1,1,14);S.coneG=new THREE.ConeGeometry(1,1,10);S.sphG=new THREE.SphereGeometry(1,14,10);S.torG=new THREE.TorusGeometry(1,.38,8,16);
@@ -1862,7 +1862,7 @@ function lakeside(){const S=S3,scene=S.scene,W0=-19,WL=-.55;
     }`});
   const water=new THREE.Mesh(new THREE.PlaneGeometry(2500,5300),wm);water.rotation.x=-Math.PI/2;water.position.set(-1180,WL,-2250);scene.add(water);S.water=water;S.waterM=wm;
   {const N=new THREE.Vector3(0,1,0),MP=new THREE.Vector3(0,WL,0),cp=new THREE.Vector3(),view=new THREE.Vector3(),la=new THREE.Vector3(),tg=new THREE.Vector3(),rm=new THREE.Matrix4(),pl=new THREE.Plane(),cl=new THREE.Vector4(),q=new THREE.Vector4(),sz=new THREE.Vector2();
-   S.waterUpd=T=>{const ren=S.ren,cam=S.cam;wm.uniforms.time.value=T;wm.uniforms.expo.value=ren.toneMappingExposure;wm.uniforms.tmOn.value=ren.toneMapping===THREE.ACESFilmicToneMapping?1:0;cam.updateMatrixWorld();cp.setFromMatrixPosition(cam.matrixWorld);
+   S.waterUpd=T=>{const ren=S.ren,cam=S.cam;wm.uniforms.time.value=T;wm.uniforms.expo.value=ren.toneMappingExposure;wm.uniforms.tmOn.value=ren.toneMapping!==THREE.NoToneMapping?1:0;cam.updateMatrixWorld();cp.setFromMatrixPosition(cam.matrixWorld);
     ren.getDrawingBufferSize(sz);const k=GQ.rs||.5,w=Math.max(64,sz.x*k|0),h=Math.max(64,sz.y*k|0);if(rt.width!==w||rt.height!==h)rt.setSize(w,h);
     view.subVectors(MP,cp);if(view.dot(N)>0)return;view.reflect(N).negate().add(MP);rm.extractRotation(cam.matrixWorld);la.set(0,0,-1).applyMatrix4(rm).add(cp);
     tg.subVectors(MP,la).reflect(N).negate().add(MP);mc.position.copy(view);mc.up.set(0,1,0).applyMatrix4(rm).reflect(N);mc.lookAt(tg);mc.far=cam.far;mc.updateMatrixWorld();mc.projectionMatrix.copy(cam.projectionMatrix);
@@ -4144,8 +4144,9 @@ const LK_O={g:[['f','Feminine'],['m','Masculine']],k:[[.94,'Shorter'],[1,'Averag
   gl:['','#2a2420','#1a1a1c','#5a1a1c','#8a5a32','#d8cfc0'],
   ht:[['none','None'],['beanie','Beanie'],['fedora','Fedora'],['cap','Flat cap'],['muffs','Earmuffs'],['santa','Santa hat']],
   hk:['#2a2a30','#b3121c','#d8cfc0','#2e4a3a','#5a4636','#46597a','#8a6a40'],
-  bg:[['none','None'],['black','Black'],['tan','Tan leather'],['red','Burgundy']]};
-const LK_T=[['Body',[['g','Body type'],['k','Height'],['sk','Skin tone']]],['Hair & face',[['hs','Hairstyle'],['hc','Hair colour'],['bd','Facial hair'],['ey','Eyes'],['gs','Glasses']]],
+  bg:[['none','None'],['black','Black'],['tan','Tan leather'],['red','Burgundy']],
+  rp:[['8','Casual (T-shirt & jeans)'],['15','Smart casual (blouse & skirt)']]};
+const LK_T=[['Body',[['g','Body type'],/* v138: Rocketbox woman, test mode only */.../[?&]rb=1/.test(location.search)?[['rp','Woman']]:[],['k','Height'],['sk','Skin tone']]],['Hair & face',[['hs','Hairstyle'],['hc','Hair colour'],['bd','Facial hair'],['ey','Eyes'],['gs','Glasses']]],
   ['Outfit',[['ln','Coat'],['co','Coat colour'],['pa','Trousers'],['sh','Boots'],['sc','Scarf'],['gl','Gloves']]],['Extras',[['ht','Hat'],['hk','Hat colour'],['bg','Shoulder bag']]]];
 const lkVals=k=>LK_O[k].map(x=>Array.isArray(x)?x[0]:x);
 function lkRand(){const P=a=>a[Math.random()*a.length|0],g=Math.random()<.5?'f':'m';
@@ -4188,16 +4189,34 @@ function lkGl(cv){if(LKE.ren&&LKE.ren.domElement===cv)return;if(LKE.ren)try{LKE.
   const fl=new THREE.Mesh(new THREE.CircleGeometry(.55,40),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.28}));fl.rotation.x=-Math.PI/2;fl.position.y=.002;sc.add(fl);
   LKE.cam=new THREE.PerspectiveCamera(26,1,.05,30)}
 function lkBuild(){if(!LKE.scene)return;if(LKE.av){LKE.scene.remove(LKE.av.g);LKE.av.g.traverse(m=>{if(m.isMesh&&m.geometry&&!m.geometry.parameters)m.geometry.dispose()})}
-  LKE.av=lkPerson(LKE.d,{idle:true});LKE.av.g.children.filter(m=>m.isMesh&&m.material===(S3&&S3.shadowM)).forEach(m=>m.visible=false);LKE.scene.add(LKE.av.g)}
+  LKE.av=lkPerson(LKE.d,{idle:true});LKE.av.g.children.filter(m=>m.isMesh&&m.material===(S3&&S3.shadowM)).forEach(m=>m.visible=false);LKE.scene.add(LKE.av.g)
+const v=rbVar(LKE.d)/* v140: editor preview shows the Rocketbox woman too */
+LKE.av.g.visible=!v
+if(v!==LKE.rbv){if(LKE.rb)LKE.scene.remove(LKE.rb)
+LKE.rb=null
+LKE.rbv=v
+if(v){rigLibs()
+new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('rig/rb'+v+'.glb',g=>{if(LKE.rbv!==v||!LKE.scene)return
+g.scene.traverse(o=>{if(o.isMesh){o.frustumCulled=false
+const M=o.material
+M.transparent=false
+M.depthWrite=true
+if(/eyebrow|eyelash|opacity/i.test(M.name))M.alphaTest=.45}})
+LKE.rb=g.scene
+LKE.mx=new THREE.AnimationMixer(g.scene)
+const c=g.animations.find(c=>c.name==='Idle')
+if(c)LKE.mx.clipAction(c).play()
+LKE.scene.add(g.scene)})}}
+if(LKE.rb)LKE.rb.scale.setScalar((LKE.d.k||1)*1.047)}
 function lkLoop(){cancelAnimationFrame(LKE.raf);let lt=performance.now();const f=t=>{if(!LB.open||LB.mode!=='look'||!LKE.ren)return;const dt=Math.min(.05,(t-lt)/1000);lt=t;
     const cv=LKE.ren.domElement,w=cv.clientWidth,h=cv.clientHeight;if(w&&h&&(cv.width!==Math.round(w*LKE.ren.getPixelRatio())||cv.height!==Math.round(h*LKE.ren.getPixelRatio()))){LKE.ren.setSize(w,h,false);LKE.cam.aspect=w/h;LKE.cam.updateProjectionMatrix()}
     if(!LKE.drag)LKE.rot+=dt*.35;const face=LKE.tab===1||(LKE.tab===3&&LKE.d.ht!=='none'&&LKE.d.bg==='none');LKE.cz+=((face?1:0)-LKE.cz)*Math.min(1,dt*5);
-    if(LKE.av){const k=LKE.av.k,A=LKE.av;A.g.rotation.y=LKE.rot;animPerson(A,dt,false,t/1000);const ty=(.93+LKE.cz*.72)*k,dist=3.9-LKE.cz*2.5;LKE.cam.position.set(0,ty+.12-LKE.cz*.08,dist);LKE.cam.lookAt(0,ty,0)}
+    if(LKE.av){const k=LKE.av.k,A=LKE.av;A.g.rotation.y=LKE.rot;if(LKE.rb){LKE.rb.rotation.y=LKE.rot;LKE.rb.scale.setScalar((LKE.d.k||1)*1.047);LKE.mx.update(dt)}animPerson(A,dt,false,t/1000);const ty=(.93+LKE.cz*.72)*k*(LKE.rb?1.05:1),dist=(3.9-LKE.cz*2.5)*(LKE.rb?1.1:1)/* v140: the 1.80 m woman fits the frame */;LKE.cam.position.set(0,ty+.12-LKE.cz*.08,dist);LKE.cam.lookAt(0,ty,0)}
     LKE.ren.render(LKE.scene,LKE.cam);LKE.raf=requestAnimationFrame(f)};LKE.raf=requestAnimationFrame(f)}
 function lkClose(save){if(save){LOOK=lkClean(LKE.d);lkSave();if(typeof mpPos==='function')mpPos(true);lbNote('🧥 Look saved'+(LB.on?', your lobby sees it now':''))}
   lkKill();const el=lbEl();el.querySelector('.lbL').innerHTML='';el.querySelector('.lbMe').innerHTML='';
   LB.mode=LKE.back==='pick'?'pick':'room';lbDraw()}
-function lkKill(){cancelAnimationFrame(LKE.raf);LKE.drag=null;if(LKE.ren){try{LKE.ren.dispose();LKE.ren.forceContextLoss()}catch(_){}}LKE.ren=null;LKE.av=null;LKE.scene=null}
+function lkKill(){cancelAnimationFrame(LKE.raf);LKE.drag=null;if(LKE.ren){try{LKE.ren.dispose();LKE.ren.forceContextLoss()}catch(_){}}LKE.ren=null;LKE.av=null;LKE.rb=null;LKE.rbv=null;LKE.scene=null}
 function mpTopic(){return LB.on&&LB.id?'realtime:lake-'+(LB.lobby||LB_SQ):null}
 function mpConnect(){const t=mpTopic();if(!t){if(MP.ws||MP.topic)mpClose();return}if(MP.ws&&MP.topic===t)return;if(MP.ws)mpClose();if(Date.now()<MP.next)return;
   MP.topic=t;let ws;try{ws=new WebSocket(LB.url.replace('https://','wss://').replace('/rest/v1/players','/realtime/v1/websocket')+'?apikey='+LB.key+'&vsn=1.0.0')}catch(_){MP.topic=null;MP.next=Date.now()+15e3;return}
@@ -7111,7 +7130,7 @@ function ltEnv(){const h=LTX.hemi;if(!h)return;const k=h.color.getHexString()+h.
   if(!LTX.es){LTX.es=new THREE.Scene();const g=new THREE.SphereGeometry(10,32,16),c=[],P=g.attributes.position;for(let i=0;i<P.count;i++)c.push(0,0,0);g.setAttribute('color',new THREE.Float32BufferAttribute(c,3));LTX.esm=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide}));LTX.es.add(LTX.esm)}
   const P=LTX.esm.geometry.attributes.position,C=LTX.esm.geometry.attributes.color,a=new THREE.Color(),sky=h.color.clone().multiplyScalar(h.intensity*.55),gr=h.groundColor.clone().multiplyScalar(h.intensity*.55);
   for(let i=0;i<P.count;i++){const y=P.getY(i)/10;a.copy(gr).lerp(sky,Math.min(1,Math.max(0,(y+.15)/.5)));if(y>.2)a.multiplyScalar(1+.25*(y-.2));C.setXYZ(i,a.r,a.g,a.b)}C.needsUpdate=true;
-  if(!LTX.pm)LTX.pm=new THREE.PMREMGenerator(S3.ren);const rt=LTX.pm.fromScene(LTX.es,.02);if(LTX.env)LTX.env.dispose();LTX.env=rt;S3.scene.environment=rt.texture;S3.scene.environmentIntensity=.3}
+  if(!LTX.pm)LTX.pm=new THREE.PMREMGenerator(S3.ren);const rt=LTX.pm.fromScene(LTX.es,.02);if(LTX.env)LTX.env.dispose();LTX.env=rt;S3.scene.environment=rt.texture;S3.scene.environmentIntensity=.8}
 function ltShadowQ(){const q=typeof GQ!=='undefined'?GQ.lvl:1;return q>=2?2048:q>=1?1536:0}
 function ltInit(){if(LTX.on||typeof S3==='undefined'||!S3||!S3.ren||!S3.scene)return;LTX.on=true;const R=S3.ren;
   R.toneMappingExposure=1.0;
@@ -9325,9 +9344,9 @@ function hxRoomEnv(){if(!HXR.env){const sc=new THREE.Scene(),bx=(c,e,w,h,d,x,y,z
     const pan=(c,e,w,h,x,y,z,ry)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(e),side:THREE.DoubleSide}));m.position.set(x,y,z);m.rotation.y=ry;sc.add(m)};
     pan('#d6e4ff',2.2,2,1.5,-4.9,1.6,0,Math.PI/2);pan('#ffd9a8',4,.6,.6,2,2.6,1,0);pan('#ffcf96',3,.8,.8,-1,2.9,-2,0);
     if(!LTX.pm)LTX.pm=new THREE.PMREMGenerator(S3.ren);HXR.env=LTX.pm.fromScene(sc,.04)}
-  if(S3.scene.environment!==HXR.env.texture){S3.scene.environment=HXR.env.texture;S3.scene.environmentIntensity=.45}}
+  if(S3.scene.environment!==HXR.env.texture){S3.scene.environment=HXR.env.texture;S3.scene.environmentIntensity=.9}}
 if(typeof ltEnv==='function'){const _le=ltEnv;ltEnv=function(){if(typeof V3!=='undefined'&&V3.inH){hxRoomEnv();return}return _le.apply(this,arguments)}}
-{const _l=hsLeave;hsLeave=function(){const r=_l.apply(this,arguments);LTX.envKey='';if(LTX.env){S3.scene.environment=LTX.env.texture;S3.scene.environmentIntensity=.3}if(LTX.dl&&LTX.sh)LTX.dl.castShadow=true;if(HXR.spot)HXR.spot.intensity=0;return r}}
+{const _l=hsLeave;hsLeave=function(){const r=_l.apply(this,arguments);LTX.envKey='';if(LTX.env){S3.scene.environment=LTX.env.texture;S3.scene.environmentIntensity=.8}if(LTX.dl&&LTX.sh)LTX.dl.castShadow=true;if(HXR.spot)HXR.spot.intensity=0;return r}}
 /* contact shadows: a soft dark footprint under every piece of furniture and a dark band where walls meet the floor (built once) */
 function hxDecals(){if(HXR.dec||!HS.boxes.length)return;HXR.dec=true;
   const tex=(f)=>{const c=cvs(128,128),g=c.getContext('2d');f(g);const t=new THREE.CanvasTexture(c);return t};
@@ -9436,7 +9455,7 @@ function tlGo(){if(!V3.on)return;if(V3.mode!=='walk'||V3.boat||V3.ovl){v3Msg('�
 {const _d=vmDraw;vmDraw=function(){_d.apply(this,arguments);if(!VM.on||!V3.on||!tlSeason())return;const cv=document.querySelector('#vMap canvas');if(!cv)return;const W=cv.clientWidth,H=cv.clientHeight,sc=VM.sc,q=cv.getContext('2d'),u=(14.3-VM.cz)*sc+W/2,v=(VM.cx+12.7)*sc+H/2;
   q.fillStyle='rgba(10,20,35,.45)';q.beginPath();q.ellipse(u+1,v+2,6,3,0,0,7);q.fill();q.fillStyle='#2f6a3e';q.strokeStyle='#f3ead2';q.lineWidth=2;q.beginPath();q.moveTo(u,v);q.bezierCurveTo(u-11,v-14,u-9,v-26,u,v-26);q.bezierCurveTo(u+9,v-26,u+11,v-14,u,v);q.fill();q.stroke();
   q.font='13px system-ui';q.textAlign='center';q.fillText('🌲',u,v-14);if(sc>.6){q.font='600 12px Georgia,serif';q.fillStyle='rgba(10,20,35,.6)';q.fillText('Christmas Tree Lot',u+1,v+15);q.fillStyle='#f3ead2';q.fillText('Christmas Tree Lot',u,v+14)}}}
-/* ===== v133: softer women's walk (open hands, hip sway, feet in line) · v132: new rigged character is the default (?rig=0 = old body), armchair sit moved forward · v131: graphics start Low, outfit stays on reload, rounder seat · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
+/* ===== v141: no dark squares in the Rocketbox women's hair · v140: sofa sit higher, editor preview shows the Rocketbox woman, smoother blonde hairline · v139: Rocketbox women also redhead, black and light brown · v138: Rocketbox women 8 (casual) and 15 (smart casual), brown or blonde, in the look editor (?rb=1) · v137: Rocketbox woman 8, brown or blonde by your hair colour, hazel eyes, 1.80 m (?rb=1) · v136: Rocketbox woman test (?rb=1) · v135: natural light (AgX colour, stronger sky light) · v134: always the human character, also in wardrobe outfits · v133: softer women's walk (open hands, hip sway, feet in line) · v132: new rigged character is the default (?rig=0 = old body), armchair sit moved forward · v131: graphics start Low, outfit stays on reload, rounder seat · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
    Drinks and food (market, kitchen, breakfast, the cookie plate) fill them; the cold outside drains warmth, the fire and the sofa bring it back ===== */
 const CZ={t:performance.now(),hid:null,hn:0,cozy:0,chill:0,st:null};
 function czN(){if(typeof prog==='undefined')return{d:70,f:70,w:80};if(!prog.need)prog.need={d:70,f:70,w:80};return prog.need}
@@ -16213,24 +16232,25 @@ window.SkeletonUtils={clone};
 };
 
 /* ===== v128: rigged human test (?rig=1): MakeHuman (CC0) body on the Quaternius (CC0) skeleton, blended clips; your own character only ===== */
-const RG={on:!/[?&]rig=0/.test(location.search),g:null,mx:null,act:{},cur:null,hand:null,ld:0};
+const RG={on:!/[?&]rig=0/.test(location.search),rb:/[?&]rb=1/.test(location.search),g:null,mx:null,act:{},cur:null,hand:null,ld:0};
 /* your look on the rig: hairstyle -> MakeHuman hair mesh ('' = shaved) */
 const RG_HAIR={short:'short02',bob:'bob01',long:'long01',bun:'ponytail01',highbun:'ponytail01',waves:'bob02',bald:''};
 function rgLook(){const L=LOOK,D=hxDress(L),key=JSON.stringify([L.sk,L.hs,L.hc,D.co,D.pa,D.sh,L.k]);if(RG.key===key)return;RG.key=key;
-  const C=c=>new THREE.Color(c),hair=RG_HAIR[L.hs],sk=C(L.sk),ref=C('#f1c7a5');RG.g.scale.setScalar(L.k||1);RG.uCo.value.copy(C(D.co));RG.uPa.value.copy(C(D.pa||L.pa));
+  const C=c=>new THREE.Color(c),hair=RG_HAIR[L.hs],sk=C(L.sk),ref=C('#f1c7a5');RG.g.scale.setScalar((L.k||1)*(RG.rb&&L.g!=='m'?1.047:1))/* v137: Rocketbox women 1.72 m -> 1.80 m (5 ft 11) */;RG.uCo.value.copy(C(D.co));RG.uPa.value.copy(C(D.pa||L.pa));
   RG.g.traverse(o=>{if(!o.isMesh)return;const M=o.material,n=M.name;
     if(/bob0|long01|ponytail01|short02/.test(n)){o.visible=!!hair&&n.endsWith(hair);M.color.copy(C(L.hc))}
     else if(n==='Human.body')M.color.setRGB(Math.min(1.15,sk.r/ref.r),Math.min(1.15,sk.g/ref.g),Math.min(1.15,sk.b/ref.b));
     else if(/shoes01/.test(n))M.color.copy(C(D.sh))})}
-function rgLoad(){const sx=LOOK&&LOOK.g==='m'?'m':'f';if(RG.ld===sx)return;RG.ld=sx;rigLibs();if(!RG.uCo){RG.uCo={value:new THREE.Color()};RG.uPa={value:new THREE.Color()}}
+function rbVar(L){return RG.rb&&L&&L.g!=='m'?(L.rp==='15'?'15':'8')+'_'+({'#1a1a1a':'black','#6b4423':'lbrown','#8a3a1a':'red','#c9a46a':'blonde','#e2d4b0':'blonde'}[L.hc]||'brown'):''}/* v139: hair colour picks the Rocketbox hair texture */
+function rgLoad(){const sx=LOOK&&LOOK.g==='m'?'m':'f',v=rbVar(LOOK),id=sx+v;if(RG.ld===id)return;RG.ld=id;rigLibs();if(!RG.uCo){RG.uCo={value:new THREE.Color()};RG.uPa={value:new THREE.Color()}}
   if(RG.g){S3.scene.remove(RG.g);RG.g=null;RG.act={};RG.cur=null;RG.hand=null;RG.key=''}
-  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('rig/'+(sx==='m'?'man':'woman')+'.glb',g=>{if(RG.ld!==sx)return;const m=g.scene;
-    m.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const M=o.material;M.depthWrite=true;M.transparent=false;if(/eyebrow|eyelash|long01|bob0|ponytail|short02|suit|shoe/i.test(M.name))M.alphaTest=.45;else M.side=THREE.FrontSide;/* shirt in your top colour, trousers in your trouser colour: the grey atlas is split by UV */if(/casualsuit/.test(M.name)){M.customProgramCacheKey=()=>'rg'+sx;M.onBeforeCompile=sh=>{sh.uniforms.uCo=RG.uCo;sh.uniforms.uPa=RG.uPa;sh.fragmentShader='uniform vec3 uCo,uPa;\n'+sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n{vec2 q=vMapUv;float j='+(sx==='m'?'step(.35,q.x)*step(q.x,.72)':'step(.45,q.y)*step(q.x,.72)')+';diffuseColor.rgb*=mix(uCo,uPa,j);}')}}}if(o.isBone&&o.name==='hand_r')RG.hand=o});
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('rig/'+(sx==='m'?'man':v?'rb'+v:'woman')+'.glb',g=>{if(RG.ld!==id)return;/* v136 ?rb=1: Microsoft Rocketbox avatar, Copyright (c) Microsoft Corporation, MIT licence (github.com/microsoft/Microsoft-Rocketbox) *//* v136 ?rb=1: Rocketbox (MIT) woman, her clips renamed to ours */if(RG.rb&&sx==='f')for(const c of g.animations)c.name={Idle:'Idle_Loop',Walk:'Walk_Loop',Run:'Jog_Fwd_Loop',Sit:'Sitting_Idle_Loop'}[c.name]||c.name;const m=g.scene;
+    m.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const M=o.material;M.depthWrite=true;M.transparent=false;if(/opacity/.test(M.name)){M.customProgramCacheKey=()=>'rbhair';M.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nnormal*=dot(normal,vViewPosition)<0.?-1.:1.;')}}/* v141: some Rocketbox hair cards have normals pointing inward = dark squares in the hair; light every card from the side we see */if(/eyebrow|eyelash|long01|bob0|ponytail|short02|suit|shoe|opacity/i.test(M.name))M.alphaTest=.45;else M.side=THREE.FrontSide;/* shirt in your top colour, trousers in your trouser colour: the grey atlas is split by UV */if(/casualsuit/.test(M.name)){M.customProgramCacheKey=()=>'rg'+sx;M.onBeforeCompile=sh=>{sh.uniforms.uCo=RG.uCo;sh.uniforms.uPa=RG.uPa;sh.fragmentShader='uniform vec3 uCo,uPa;\n'+sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n{vec2 q=vMapUv;float j='+(sx==='m'?'step(.35,q.x)*step(q.x,.72)':'step(.45,q.y)*step(q.x,.72)')+';diffuseColor.rgb*=mix(uCo,uPa,j);}')}}}if(o.isBone&&o.name==='hand_r')RG.hand=o});
     RG.g=m;m.userData.hs=1;S3.scene.add(m);m.traverse(o=>{if(o.isBone)o.userData.q0=o.quaternion.clone()});RG.mx=new THREE.AnimationMixer(m);for(const c of g.animations)RG.act[c.name]=RG.mx.clipAction(c);
     /* v133: when in the walk loop the left foot is furthest forward, to time the hip sway */
     const wa=RG.act.Walk_Loop,fl=m.getObjectByName('foot_l'),fr=m.getObjectByName('foot_r'),V=new THREE.Vector3();RG.tL=0;if(wa&&fl){wa.play();let best=-1e9;for(let i=0;i<48;i++){wa.time=i/48*wa.getClip().duration;RG.mx.update(0);m.updateMatrixWorld(true);const d=m.worldToLocal(fl.getWorldPosition(V)).z-m.worldToLocal(fr.getWorldPosition(V)).z;if(d>best){best=d;RG.tL=wa.time}}wa.stop()}
     /* where the hips land in the sitting clip, so we can put them on the seat */
-    const sa=RG.act.Sitting_Idle_Loop,pel=m.getObjectByName('pelvis');if(sa&&pel){sa.play();RG.mx.update(0);m.updateMatrixWorld(true);RG.pel=m.worldToLocal(pel.getWorldPosition(new THREE.Vector3()));sa.stop()}},undefined,e=>{console.error('rig',e);RG.on=false})}
+    const sa=RG.act.Sitting_Idle_Loop,pel=m.getObjectByName('pelvis')||m.getObjectByName('Bip01_Pelvis');if(sa&&pel){sa.play();RG.mx.update(0);m.updateMatrixWorld(true);RG.pel=m.worldToLocal(pel.getWorldPosition(new THREE.Vector3()));sa.stop()}},undefined,e=>{console.error('rig',e);RG.on=false})}
 /* v133: a softer women's walk: relaxed open hands, hip sway and roll, feet towards one line, arms closer in */
 function rgFem(po){const m=RG.g,B=RG.fb||(RG.fb={});const b=n=>B[n]||(B[n]=m.getObjectByName(n));
   /* the mixer skips bones whose keyed value did not change, so remember the clip pose and put it back before the next update (else this stacks up) */
@@ -16245,10 +16265,10 @@ function rgFem(po){const m=RG.g,B=RG.fb||(RG.fb={});const b=n=>B[n]||(B[n]=m.get
   rot('thigh_l',Z,-.09*s-.07*W);rot('thigh_r',Z,-.09*s+.07*W);rot('upperarm_l',Z,-.08*W);rot('upperarm_r',Z,.08*W);
   const pel=b('pelvis');if(pel){m.updateMatrixWorld(true);const a=pel.parent.worldToLocal(pel.getWorldPosition(new THREE.Vector3())),q=m.localToWorld(m.worldToLocal(pel.getWorldPosition(new THREE.Vector3())).addScaledVector(X,.025*s));pel.position.add(pel.parent.worldToLocal(q).sub(a))}}
 function rgPlay(n,f){const a=RG.act[n];if(!a||RG.cur===a)return;a.reset().setEffectiveWeight(1).fadeIn(f||.25).play();if(RG.cur)RG.cur.fadeOut(f||.25);RG.cur=a}
-{const _f=meFrame;meFrame=function(dt,T,moving){const r=_f.apply(this,arguments);if(!RG.on)return r;rgLoad();const a=ME.av;if(!RG.g||!a)return r;rgLook();
-  const po=V3.pose,lie=po&&po.k!=='sit',show=a.g.visible&&!lie&&!(LOOK&&!['out','in'].includes(LOOK.fit));/* shortcut: the rig has one outfit, so wardrobe outfits show on the old body until LOOK mapping lands */RG.g.visible=show;if(!show)return r;a.g.visible=false;
-  RG.g.position.copy(a.g.position);RG.g.rotation.set(0,a.g.rotation.y,0);if(po&&RG.pel){const s=po.s,k=a.k||1,fy=po.ay-s.sh+.9*k-.04,c=Math.cos(po.ry),n=Math.sin(po.ry),P=RG.pel.clone().multiplyScalar(RG.g.scale.x);/* hips on the seat centre, sit bones ~10 cm under the pelvis joint */const f=s.fw||0;/* v132: deep armchair, hips forward so the calves clear the cushion */RG.g.position.set(po.ax+n*f-(P.x*c+P.z*n),fy+s.sh-P.y+.1+f*.15,po.az+c*f-(-P.x*n+P.z*c))}
-  rgPlay(po?'Sitting_Idle_Loop':moving?(V3.keys.run?'Jog_Fwd_Loop':'Walk_Loop'):'Idle_Loop');if(RG.fu)for(const [o,q,v] of RG.fu){o.quaternion.copy(q);o.position.copy(v)}RG.fu=null;RG.mx.update(dt);if(RG.ld==='f')rgFem(po);
+{const _f=meFrame;meFrame=function(dt,T,moving){const r=_f.apply(this,arguments);if(!RG.on)return r;rgLoad();const a=ME.av;if(a&&!RG.g){a.g.visible=false;return r}/* v134: no old body flash while the human loads */if(!RG.g||!a)return r;rgLook();
+  const po=V3.pose,lie=po&&po.k!=='sit',show=a.g.visible&&!lie;/* v134: always the human character; shortcut: the rig has one outfit (tinted to your outfit colours), real wardrobe meshes on the rig later */RG.g.visible=show;if(!show)return r;a.g.visible=false;
+  RG.g.position.copy(a.g.position);RG.g.rotation.set(0,a.g.rotation.y,0);if(po&&RG.pel){const s=po.s,k=a.k||1,fy=po.ay-s.sh+.9*k-.04,c=Math.cos(po.ry),n=Math.sin(po.ry),P=RG.pel.clone().multiplyScalar(RG.g.scale.x);/* hips on the seat centre, sit bones ~10 cm under the pelvis joint */const f=s.fw||0;/* v132: deep armchair, hips forward so the calves clear the cushion */const fb=f+(RG.rb?(f?.04:-.07):0),dy=RG.rb?(f?-.03:.03):0/* v140: sofa 6 cm higher, thighs on top of the cushion *//* v138: Rocketbox pelvis sits higher above the sit bones and the clip leans forward */;RG.g.position.set(po.ax+n*fb-(P.x*c+P.z*n),fy+s.sh-P.y+.1+f*.15+dy,po.az+c*fb-(-P.x*n+P.z*c))}
+  rgPlay(po?'Sitting_Idle_Loop':moving?(V3.keys.run?'Jog_Fwd_Loop':'Walk_Loop'):'Idle_Loop');if(RG.fu)for(const [o,q,v] of RG.fu){o.quaternion.copy(q);o.position.copy(v)}RG.fu=null;RG.mx.update(dt);if(RG.ld==='f'&&!RG.rb)rgFem(po);
   const h=V3.held;if(h&&RG.hand&&!po){if(h.g.parent!==RG.hand)RG.hand.add(h.g);h.g.position.set(0,.09,.03);h.g.rotation.set(0,0,Math.PI/2);h.g.visible=true}
   return r}}
 
