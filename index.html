@@ -9436,7 +9436,7 @@ function tlGo(){if(!V3.on)return;if(V3.mode!=='walk'||V3.boat||V3.ovl){v3Msg('�
 {const _d=vmDraw;vmDraw=function(){_d.apply(this,arguments);if(!VM.on||!V3.on||!tlSeason())return;const cv=document.querySelector('#vMap canvas');if(!cv)return;const W=cv.clientWidth,H=cv.clientHeight,sc=VM.sc,q=cv.getContext('2d'),u=(14.3-VM.cz)*sc+W/2,v=(VM.cx+12.7)*sc+H/2;
   q.fillStyle='rgba(10,20,35,.45)';q.beginPath();q.ellipse(u+1,v+2,6,3,0,0,7);q.fill();q.fillStyle='#2f6a3e';q.strokeStyle='#f3ead2';q.lineWidth=2;q.beginPath();q.moveTo(u,v);q.bezierCurveTo(u-11,v-14,u-9,v-26,u,v-26);q.bezierCurveTo(u+9,v-26,u+11,v-14,u,v);q.fill();q.stroke();
   q.font='13px system-ui';q.textAlign='center';q.fillText('🌲',u,v-14);if(sc>.6){q.font='600 12px Georgia,serif';q.fillStyle='rgba(10,20,35,.6)';q.fillText('Christmas Tree Lot',u+1,v+15);q.fillStyle='#f3ead2';q.fillText('Christmas Tree Lot',u,v+14)}}}
-/* ===== v132: new rigged character is the default (?rig=0 = old body), armchair sit moved forward · v131: graphics start Low, outfit stays on reload, rounder seat · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
+/* ===== v133: softer women's walk (open hands, hip sway, feet in line) · v132: new rigged character is the default (?rig=0 = old body), armchair sit moved forward · v131: graphics start Low, outfit stays on reload, rounder seat · v127: armchair walkway, forearms on tables · v126: porch steps, sconces, windows · v125: Cozy needs. Three soft meters under the treats strip: ☕ drink, 🍪 food, 🔥 warmth. No penalties, just nudges.
    Drinks and food (market, kitchen, breakfast, the cookie plate) fill them; the cold outside drains warmth, the fire and the sofa bring it back ===== */
 const CZ={t:performance.now(),hid:null,hn:0,cozy:0,chill:0,st:null};
 function czN(){if(typeof prog==='undefined')return{d:70,f:70,w:80};if(!prog.need)prog.need={d:70,f:70,w:80};return prog.need}
@@ -16226,14 +16226,29 @@ function rgLoad(){const sx=LOOK&&LOOK.g==='m'?'m':'f';if(RG.ld===sx)return;RG.ld
   if(RG.g){S3.scene.remove(RG.g);RG.g=null;RG.act={};RG.cur=null;RG.hand=null;RG.key=''}
   new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('rig/'+(sx==='m'?'man':'woman')+'.glb',g=>{if(RG.ld!==sx)return;const m=g.scene;
     m.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.castShadow=true;const M=o.material;M.depthWrite=true;M.transparent=false;if(/eyebrow|eyelash|long01|bob0|ponytail|short02|suit|shoe/i.test(M.name))M.alphaTest=.45;else M.side=THREE.FrontSide;/* shirt in your top colour, trousers in your trouser colour: the grey atlas is split by UV */if(/casualsuit/.test(M.name)){M.customProgramCacheKey=()=>'rg'+sx;M.onBeforeCompile=sh=>{sh.uniforms.uCo=RG.uCo;sh.uniforms.uPa=RG.uPa;sh.fragmentShader='uniform vec3 uCo,uPa;\n'+sh.fragmentShader.replace('#include <map_fragment>','#include <map_fragment>\n{vec2 q=vMapUv;float j='+(sx==='m'?'step(.35,q.x)*step(q.x,.72)':'step(.45,q.y)*step(q.x,.72)')+';diffuseColor.rgb*=mix(uCo,uPa,j);}')}}}if(o.isBone&&o.name==='hand_r')RG.hand=o});
-    RG.g=m;m.userData.hs=1;S3.scene.add(m);RG.mx=new THREE.AnimationMixer(m);for(const c of g.animations)RG.act[c.name]=RG.mx.clipAction(c);
+    RG.g=m;m.userData.hs=1;S3.scene.add(m);m.traverse(o=>{if(o.isBone)o.userData.q0=o.quaternion.clone()});RG.mx=new THREE.AnimationMixer(m);for(const c of g.animations)RG.act[c.name]=RG.mx.clipAction(c);
+    /* v133: when in the walk loop the left foot is furthest forward, to time the hip sway */
+    const wa=RG.act.Walk_Loop,fl=m.getObjectByName('foot_l'),fr=m.getObjectByName('foot_r'),V=new THREE.Vector3();RG.tL=0;if(wa&&fl){wa.play();let best=-1e9;for(let i=0;i<48;i++){wa.time=i/48*wa.getClip().duration;RG.mx.update(0);m.updateMatrixWorld(true);const d=m.worldToLocal(fl.getWorldPosition(V)).z-m.worldToLocal(fr.getWorldPosition(V)).z;if(d>best){best=d;RG.tL=wa.time}}wa.stop()}
     /* where the hips land in the sitting clip, so we can put them on the seat */
     const sa=RG.act.Sitting_Idle_Loop,pel=m.getObjectByName('pelvis');if(sa&&pel){sa.play();RG.mx.update(0);m.updateMatrixWorld(true);RG.pel=m.worldToLocal(pel.getWorldPosition(new THREE.Vector3()));sa.stop()}},undefined,e=>{console.error('rig',e);RG.on=false})}
+/* v133: a softer women's walk: relaxed open hands, hip sway and roll, feet towards one line, arms closer in */
+function rgFem(po){const m=RG.g,B=RG.fb||(RG.fb={});const b=n=>B[n]||(B[n]=m.getObjectByName(n));
+  /* the mixer skips bones whose keyed value did not change, so remember the clip pose and put it back before the next update (else this stacks up) */
+  RG.fu=[];m.traverse(o=>{if(o.isBone&&/^(index|middle|ring|pinky|thumb)_0[123]|^(pelvis|spine_01|thigh_[lr]|upperarm_[lr])$/.test(o.name))RG.fu.push([o,o.quaternion.clone(),o.position.clone()])});
+  for(const [o] of RG.fu)if(/_0[123]/.test(o.name))o.quaternion.slerp(o.userData.q0,po?.45:.65);if(po)return;
+  const wa=RG.act.Walk_Loop,ja=RG.act.Jog_Fwd_Loop,W=(wa?wa.getEffectiveWeight():0)+.5*(ja?ja.getEffectiveWeight():0);if(W<.01||!wa)return;
+  const p=2*Math.PI*(wa.time-RG.tL)/wa.getClip().duration,s=Math.sin(p)*W,c=Math.cos(p)*W,X=new THREE.Vector3(1,0,0),Y=new THREE.Vector3(0,1,0),Z=new THREE.Vector3(0,0,1),mq=new THREE.Quaternion(),pq=new THREE.Quaternion(),R=new THREE.Quaternion();
+  m.getWorldQuaternion(mq).invert();
+  /* rotate a bone about an axis given in the model's frame (+Z forward, +X her left) */
+  const rot=(n,ax,a)=>{const o=b(n);if(!o||!a)return;m.updateMatrixWorld(true);o.parent.getWorldQuaternion(pq).premultiply(mq);R.setFromAxisAngle(ax,a);o.quaternion.premultiply(pq.clone().invert().multiply(R).multiply(pq))};
+  rot('pelvis',Z,.09*s);rot('pelvis',Y,-.11*c);rot('spine_01',Z,-.07*s);rot('spine_01',Y,.09*c);
+  rot('thigh_l',Z,-.09*s-.07*W);rot('thigh_r',Z,-.09*s+.07*W);rot('upperarm_l',Z,-.08*W);rot('upperarm_r',Z,.08*W);
+  const pel=b('pelvis');if(pel){m.updateMatrixWorld(true);const a=pel.parent.worldToLocal(pel.getWorldPosition(new THREE.Vector3())),q=m.localToWorld(m.worldToLocal(pel.getWorldPosition(new THREE.Vector3())).addScaledVector(X,.025*s));pel.position.add(pel.parent.worldToLocal(q).sub(a))}}
 function rgPlay(n,f){const a=RG.act[n];if(!a||RG.cur===a)return;a.reset().setEffectiveWeight(1).fadeIn(f||.25).play();if(RG.cur)RG.cur.fadeOut(f||.25);RG.cur=a}
 {const _f=meFrame;meFrame=function(dt,T,moving){const r=_f.apply(this,arguments);if(!RG.on)return r;rgLoad();const a=ME.av;if(!RG.g||!a)return r;rgLook();
   const po=V3.pose,lie=po&&po.k!=='sit',show=a.g.visible&&!lie&&!(LOOK&&!['out','in'].includes(LOOK.fit));/* shortcut: the rig has one outfit, so wardrobe outfits show on the old body until LOOK mapping lands */RG.g.visible=show;if(!show)return r;a.g.visible=false;
   RG.g.position.copy(a.g.position);RG.g.rotation.set(0,a.g.rotation.y,0);if(po&&RG.pel){const s=po.s,k=a.k||1,fy=po.ay-s.sh+.9*k-.04,c=Math.cos(po.ry),n=Math.sin(po.ry),P=RG.pel.clone().multiplyScalar(RG.g.scale.x);/* hips on the seat centre, sit bones ~10 cm under the pelvis joint */const f=s.fw||0;/* v132: deep armchair, hips forward so the calves clear the cushion */RG.g.position.set(po.ax+n*f-(P.x*c+P.z*n),fy+s.sh-P.y+.1+f*.15,po.az+c*f-(-P.x*n+P.z*c))}
-  rgPlay(po?'Sitting_Idle_Loop':moving?(V3.keys.run?'Jog_Fwd_Loop':'Walk_Loop'):'Idle_Loop');RG.mx.update(dt);
+  rgPlay(po?'Sitting_Idle_Loop':moving?(V3.keys.run?'Jog_Fwd_Loop':'Walk_Loop'):'Idle_Loop');if(RG.fu)for(const [o,q,v] of RG.fu){o.quaternion.copy(q);o.position.copy(v)}RG.fu=null;RG.mx.update(dt);if(RG.ld==='f')rgFem(po);
   const h=V3.held;if(h&&RG.hand&&!po){if(h.g.parent!==RG.hand)RG.hand.add(h.g);h.g.position.set(0,.09,.03);h.g.rotation.set(0,0,Math.PI/2);h.g.visible=true}
   return r}}
 
